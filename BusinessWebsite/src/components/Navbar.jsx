@@ -1,9 +1,21 @@
 import { NavLink } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import './Navbar.css'
 
 export default function Navbar({ transparent = false }) {
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    if (!transparent) return
+    const onScroll = () => setScrolled(window.scrollY > 60)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [transparent])
+
+  const isSolid = !transparent || scrolled
+
   return (
-    <header className={`navbar ${transparent ? 'navbar--transparent' : 'navbar--solid'}`}>
+    <header className={`navbar ${isSolid ? 'navbar--solid' : 'navbar--transparent'}`}>
       <div className="container nav-row">
         <NavLink className="brand" to="/">
           <span>NBO</span> Development

@@ -1,16 +1,18 @@
 .navbar {
-  position: absolute;
   width: 100%;
   z-index: 10;
+  transition: background 0.25s ease, box-shadow 0.25s ease;
 }
 
 .navbar--solid {
   position: sticky;
   top: 0;
   background: #0d1b2a;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.35);
 }
 
 .navbar--transparent {
   position: absolute;
+  background: transparent;
+  box-shadow: none;
 }
