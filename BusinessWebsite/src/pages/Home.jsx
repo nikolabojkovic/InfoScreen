@@ -41,7 +41,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="section feature bg-light" id="about">
+      <section className="section feature" id="about">
         <div className="container split reverse">
           <div className="visual visual-img">
             <img src={specializedTeamImg} alt="Specialized team" className="section-img specialized-team-img" />

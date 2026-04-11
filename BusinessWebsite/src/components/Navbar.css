@@ -1,18 +1,116 @@
+/* ── Base ─────────────────────────────────────────────────────────── */
 .navbar {
+  top: 0;
   width: 100%;
-  z-index: 10;
-  transition: background 0.25s ease, box-shadow 0.25s ease;
+  z-index: 100;
+  transition: background 0.28s ease, box-shadow 0.28s ease;
+  font-family: 'Inter', sans-serif;
 }
 
 .navbar--solid {
   position: sticky;
-  top: 0;
   background: #0d1b2a;
   box-shadow: 0 2px 12px rgba(0,0,0,0.35);
 }
 
 .navbar--transparent {
-  position: absolute;
+  position: fixed;
   background: transparent;
   box-shadow: none;
+}
+
+.navbar--transparent.navbar--scrolled {
+  background: #0d1b2a;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.35);
+}
+
+/* ── Hamburger button (hidden on desktop) ─────────────────────────── */
+.nav-burger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  padding: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 101;
+  flex-shrink: 0;
+}
+
+.nav-burger span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: #40ebf2;
+  border-radius: 2px;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  transform-origin: center;
+}
+
+/* Animate to × when open */
+.nav-burger.is-open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-burger.is-open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.nav-burger.is-open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ── Mobile dropdown menu ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .nav-burger {
+    display: flex;
+  }
+
+  .nav-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: #0d1b2a;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+    padding: 0;
+    overflow: hidden;
+    animation: none;
+  }
+
+  .nav-menu--open {
+    display: block;
+    animation: slideDown 0.22s ease forwards;
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .nav-menu .nav-links {
+    flex-direction: column;
+    gap: 0;
+    padding: 8px 0 16px;
+  }
+
+  .nav-menu .nav-links li {
+    width: 100%;
+  }
+
+  .nav-menu .nav-links a {
+    display: block;
+    padding: 13px 24px;
+    font-size: 13px;
+    border-bottom: none;
+    border-left: 3px solid transparent;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .nav-menu .nav-links a:hover,
+  .nav-menu .nav-links a.active {
+    background: rgba(255,255,255,0.06);
+    border-left-color: #40ebf2;
+  }
+
+  /* Make sure header background shows when menu is open on transparent navbar */
+  .navbar--transparent.navbar--open {
+    background: #0d1b2a;
+  }
 }
