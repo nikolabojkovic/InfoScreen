@@ -9,7 +9,7 @@ import { ToEurPipe } from '../../pipes/to-eur.pipe';
   selector: 'app-categories',
   imports: [FormsModule, DecimalPipe, ToEurPipe],
   templateUrl: './categories.html',
-  styleUrl: './categories.css',
+  styleUrl: './categories.scss',
 })
 export class Categories {
   private finance = inject(FinanceService);

@@ -9,7 +9,7 @@ import { ToEurPipe } from '../../pipes/to-eur.pipe';
   selector: 'app-budget',
   imports: [FormsModule, DecimalPipe, ToEurPipe],
   templateUrl: './budget.html',
-  styleUrl: './budget.css',
+  styleUrl: './budget.scss',
 })
 export class Budget {
   private finance = inject(FinanceService);

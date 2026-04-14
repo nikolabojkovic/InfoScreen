@@ -57,6 +57,13 @@ export class FinanceService {
     this.save(this.STORAGE_TRANSACTIONS, this._transactions());
   }
 
+  updateTransaction(updated: Transaction): void {
+    this._transactions.update(list =>
+      list.map(t => t.id === updated.id ? updated : t)
+    );
+    this.save(this.STORAGE_TRANSACTIONS, this._transactions());
+  }
+
   setIncome(amount: number): void {
     this._income.set(amount);
     this.save(this.STORAGE_INCOME, amount);

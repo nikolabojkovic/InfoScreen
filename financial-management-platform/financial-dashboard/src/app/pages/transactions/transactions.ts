@@ -4,12 +4,14 @@ import { DecimalPipe, DatePipe } from '@angular/common';
 import { FinanceService } from '../../services/finance.service';
 import { TransactionGroup } from '../../models/finance.model';
 import { ToEurPipe } from '../../pipes/to-eur.pipe';
+import { QrScanner } from '../../components/qr-scanner/qr-scanner';
+import { ParsedQrBill } from '../../services/qr-parser.service';
 
 @Component({
   selector: 'app-transactions',
-  imports: [FormsModule, DecimalPipe, DatePipe, ToEurPipe],
+  imports: [FormsModule, DecimalPipe, DatePipe, ToEurPipe, QrScanner],
   templateUrl: './transactions.html',
-  styleUrl: './transactions.css',
+  styleUrl: './transactions.scss',
 })
 export class Transactions {
   private finance = inject(FinanceService);
@@ -19,6 +21,12 @@ export class Transactions {
   description = '';
   categoryId = '';
   amount: number = 0;
+
+  showScanner = signal(false);
+  scannedBill = signal<ParsedQrBill | null>(null);
+  scannedCategoryId = '';
+  scannedAmount: number = 0;
+  scannedDescription = '';
 
   selectedMonth = signal(new Date().getMonth());
   selectedYear = signal(new Date().getFullYear());
@@ -40,6 +48,11 @@ export class Transactions {
       const g = groups.get(tx.date)!;
       g.transactions.push(tx);
       g.total += tx.amount;
+    }
+
+    // Reverse transactions within each group so latest-added appears first
+    for (const g of groups.values()) {
+      g.transactions.reverse();
     }
     return Array.from(groups.values());
   });
@@ -72,6 +85,37 @@ export class Transactions {
     this.finance.deleteTransaction(id);
   }
 
+  // Inline editing
+  editingTxId = '';
+  editDate = '';
+  editDescription = '';
+  editCategoryId = '';
+  editAmount = 0;
+
+  startEdit(tx: { id: string; date: string; description: string; categoryId: string; amount: number }): void {
+    this.editingTxId = tx.id;
+    this.editDate = tx.date;
+    this.editDescription = tx.description;
+    this.editCategoryId = tx.categoryId;
+    this.editAmount = tx.amount;
+  }
+
+  saveEdit(): void {
+    if (!this.editingTxId || !this.editDescription.trim() || !this.editCategoryId || this.editAmount <= 0) return;
+    this.finance.updateTransaction({
+      id: this.editingTxId,
+      date: this.editDate,
+      description: this.editDescription.trim(),
+      categoryId: this.editCategoryId,
+      amount: this.editAmount,
+    });
+    this.cancelEdit();
+  }
+
+  cancelEdit(): void {
+    this.editingTxId = '';
+  }
+
   prevMonth(): void {
     if (this.selectedMonth() === 0) {
       this.selectedMonth.set(11);
@@ -88,5 +132,51 @@ export class Transactions {
     } else {
       this.selectedMonth.update(m => m + 1);
     }
+  }
+
+  // QR Scanner
+  openScanner(): void {
+    this.showScanner.set(true);
+  }
+
+  closeScanner(): void {
+    this.showScanner.set(false);
+    this.scannedBill.set(null);
+    this.scannedCategoryId = '';
+  }
+
+  onQrScanned(bill: ParsedQrBill): void {
+    this.showScanner.set(false);
+    this.scannedBill.set(bill);
+    this.scannedCategoryId = '';
+    this.scannedAmount = 0;
+    this.scannedDescription = bill.recipient || '';
+  }
+
+  confirmScannedBill(): void {
+    const bill = this.scannedBill();
+    if (!bill || !this.scannedCategoryId) return;
+
+    const amount = bill.amount > 0 ? bill.amount : this.scannedAmount;
+    if (!amount || amount <= 0) return;
+
+    this.finance.addTransaction({
+      date: new Date().toISOString().substring(0, 10),
+      description: this.scannedDescription.trim() || bill.description,
+      categoryId: this.scannedCategoryId,
+      amount,
+    });
+
+    this.scannedBill.set(null);
+    this.scannedCategoryId = '';
+    this.scannedAmount = 0;
+    this.scannedDescription = '';
+  }
+
+  cancelScannedBill(): void {
+    this.scannedBill.set(null);
+    this.scannedCategoryId = '';
+    this.scannedAmount = 0;
+    this.scannedDescription = '';
   }
 }

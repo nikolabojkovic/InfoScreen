@@ -1,66 +1,66 @@
-<div class="page">
-  <h1 class="page-title">Categories</h1>
+<div class="categories">
+  <h1 class="categories__title">Categories</h1>
 
-  <div class="card add-form">
-    <h2>Add Category</h2>
-    <form (ngSubmit)="addCategory()" class="form-row">
-      <div class="field">
-        <label>Name</label>
-        <input type="text" [(ngModel)]="name" name="name" placeholder="Category name" required />
+  <div class="categories__card">
+    <h2 class="categories__card-title">Add Category</h2>
+    <form (ngSubmit)="addCategory()" class="categories__form-row">
+      <div class="categories__field">
+        <label class="categories__label">Name</label>
+        <input type="text" [(ngModel)]="name" name="name" placeholder="Category name" required class="categories__input" />
       </div>
-      <div class="field field-color">
-        <label>Color</label>
-        <input type="color" [(ngModel)]="color" name="color" />
+      <div class="categories__field categories__field--color">
+        <label class="categories__label">Color</label>
+        <input type="color" [(ngModel)]="color" name="color" class="categories__input categories__input--color" />
       </div>
-      <div class="field">
-        <label>Monthly Budget</label>
-        <input type="number" [(ngModel)]="budgetAmount" name="budget" min="0" step="0.01" />
+      <div class="categories__field">
+        <label class="categories__label">Monthly Budget</label>
+        <input type="number" [(ngModel)]="budgetAmount" name="budget" min="0" step="0.01" class="categories__input" />
       </div>
-      <button type="submit" class="btn btn-primary">+ Add</button>
+      <button type="submit" class="btn btn--primary">+ Add</button>
     </form>
   </div>
 
-  <div class="card">
+  <div class="categories__card">
     <div class="table-responsive">
     <table class="table">
       <thead>
         <tr>
-          <th style="width: 40px"></th>
-          <th>Category Name</th>
-          <th>Monthly Budget</th>
-          <th style="width: 140px">Actions</th>
+          <th class="table__header" style="width: 40px"></th>
+          <th class="table__header">Category Name</th>
+          <th class="table__header">Monthly Budget</th>
+          <th class="table__header" style="width: 140px">Actions</th>
         </tr>
       </thead>
       <tbody>
         @for (cat of categories(); track cat.id) {
           @if (editingId() === cat.id) {
-            <tr class="editing-row">
-              <td><input type="color" [(ngModel)]="editColor" class="color-input-small" /></td>
-              <td><input type="text" [(ngModel)]="editName" class="inline-input" /></td>
-              <td><input type="number" [(ngModel)]="editBudget" min="0" step="0.01" class="inline-input" /></td>
-              <td class="actions">
-                <button class="btn btn-sm btn-success" (click)="saveEdit(cat)">Save</button>
-                <button class="btn btn-sm btn-secondary" (click)="cancelEdit()">Cancel</button>
+            <tr class="categories__row--editing">
+              <td class="table__cell"><input type="color" [(ngModel)]="editColor" class="categories__input--color-small" /></td>
+              <td class="table__cell"><input type="text" [(ngModel)]="editName" class="categories__input--inline" /></td>
+              <td class="table__cell"><input type="number" [(ngModel)]="editBudget" min="0" step="0.01" class="categories__input--inline" /></td>
+              <td class="table__cell categories__actions">
+                <button class="btn btn--sm btn--success" (click)="saveEdit(cat)">Save</button>
+                <button class="btn btn--sm btn--secondary" (click)="cancelEdit()">Cancel</button>
               </td>
             </tr>
           } @else {
             <tr>
-              <td><span class="color-dot" [style.background]="cat.color"></span></td>
-              <td>{{ cat.name }}</td>
-              <td>
+              <td class="table__cell"><span class="categories__color-dot" [style.background]="cat.color"></span></td>
+              <td class="table__cell">{{ cat.name }}</td>
+              <td class="table__cell">
                 <span class="dual-currency">
-                  <span class="rsd">{{ cat.budgetAmount | number:'1.2-2' }} RSD</span>
-                  <span class="eur-sub">{{ cat.budgetAmount | toEur }} €</span>
+                  <span class="dual-currency__rsd">{{ cat.budgetAmount | number:'1.2-2' }} RSD</span>
+                  <span class="dual-currency__eur">{{ cat.budgetAmount | toEur }} €</span>
                 </span>
               </td>
-              <td class="actions">
-                <button class="btn btn-sm btn-secondary" (click)="startEdit(cat)">Edit</button>
-                <button class="btn btn-sm btn-danger" (click)="deleteCategory(cat.id)">Delete</button>
+              <td class="table__cell categories__actions">
+                <button class="btn btn--sm btn--secondary" (click)="startEdit(cat)">Edit</button>
+                <button class="btn btn--sm btn--danger" (click)="deleteCategory(cat.id)">Delete</button>
               </td>
             </tr>
           }
         } @empty {
-          <tr><td colspan="4" class="empty">No categories defined yet.</td></tr>
+          <tr><td colspan="4" class="table__cell categories__empty">No categories defined yet.</td></tr>
         }
       </tbody>
     </table>
