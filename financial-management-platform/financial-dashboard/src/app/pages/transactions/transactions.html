@@ -1,0 +1,95 @@
+<div class="page">
+  <h1 class="page-title">Transactions</h1>
+
+  <div class="card add-form">
+    <h2>Add Transaction</h2>
+    <form (ngSubmit)="addTransaction()" class="form-row">
+      <div class="field">
+        <label>Date</label>
+        <input type="date" [(ngModel)]="date" name="date" required />
+      </div>
+      <div class="field">
+        <label>Category</label>
+        <select [(ngModel)]="categoryId" name="category" required>
+          <option value="" disabled>Select category</option>
+          @for (cat of categories(); track cat.id) {
+            <option [value]="cat.id">{{ cat.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label>Amount</label>
+        <input type="number" [(ngModel)]="amount" name="amount" min="0.01" step="0.01" required />
+      </div>
+      <div class="field field-desc">
+        <label>Description</label>
+        <input type="text" [(ngModel)]="description" name="desc" placeholder="Transaction description" required />
+      </div>
+      <button type="submit" class="btn btn-primary">+ Add</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="month-nav">
+      <button class="btn btn-icon" (click)="prevMonth()">◀</button>
+      <h2 class="month-label">{{ monthLabel() }}</h2>
+      <button class="btn btn-icon" (click)="nextMonth()">▶</button>
+      <span class="month-total">Total: {{ monthTotal() | number:'1.2-2' }} RSD <span class="eur-sub">{{ monthTotal() | toEur }} €</span></span>
+    </div>
+
+    <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th style="width: 50px">#</th>
+          <th>Date</th>
+          <th>Description</th>
+          <th>Category</th>
+          <th class="text-right">Amount</th>
+          <th style="width: 50px"></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (group of transactionGroups(); track group.date) {
+          <tr class="group-header">
+            <td colspan="4">
+              <strong>{{ group.date | date:'d MMM yyyy' }}</strong>
+            </td>
+            <td class="text-right group-total">
+              <span class="dual-currency">
+                <span class="rsd">{{ group.total | number:'1.2-2' }} RSD</span>
+                <span class="eur-sub">{{ group.total | toEur }} €</span>
+              </span>
+            </td>
+            <td></td>
+          </tr>
+          @for (tx of group.transactions; track tx.id; let i = $index) {
+            <tr class="tx-row">
+              <td class="text-center text-muted">{{ i + 1 }}</td>
+              <td>{{ tx.date | date:'d MMM' }}</td>
+              <td>{{ tx.description }}</td>
+              <td>
+                <span class="cat-badge">
+                  <span class="color-dot" [style.background]="getCategoryColor(tx.categoryId)"></span>
+                  {{ getCategoryName(tx.categoryId) }}
+                </span>
+              </td>
+              <td class="text-right">
+                <span class="dual-currency">
+                  <span class="rsd">{{ tx.amount | number:'1.2-2' }} RSD</span>
+                  <span class="eur-sub">{{ tx.amount | toEur }} €</span>
+                </span>
+              </td>
+              <td>
+                <button class="btn-delete" (click)="deleteTransaction(tx.id)" title="Delete">✕</button>
+              </td>
+            </tr>
+          }
+        } @empty {
+          <tr><td colspan="6" class="empty">No transactions for this month.</td></tr>
+        }
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>

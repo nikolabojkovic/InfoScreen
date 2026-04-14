@@ -1,0 +1,70 @@
+.navbar {
+  background: #1b5e20;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-brand {
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.navbar-tabs {
+  display: flex;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  padding: 4px;
+}
+
+.tab {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.tab:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.tab.active {
+  background: #fff;
+  color: #1b5e20;
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .navbar {
+    flex-direction: column;
+    height: auto;
+    padding: 12px 16px;
+    gap: 8px;
+  }
+
+  .navbar-brand {
+    font-size: 1rem;
+  }
+
+  .navbar-tabs {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .tab {
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    flex: 1;
+    text-align: center;
+  }
+}

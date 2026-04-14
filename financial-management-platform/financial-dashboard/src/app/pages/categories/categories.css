@@ -1,0 +1,153 @@
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.page-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #1b5e20;
+}
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.card h2 {
+  font-size: 1.1rem;
+  margin-bottom: 16px;
+  color: #333;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.field-color {
+  flex: 0 0 70px;
+  min-width: 70px;
+}
+
+.field label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+}
+
+.field input[type="text"],
+.field input[type="number"] {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.field input[type="color"] {
+  width: 48px;
+  height: 36px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 2px;
+}
+
+.color-dot {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.color-input-small {
+  width: 32px;
+  height: 28px;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.inline-input {
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.editing-row {
+  background: #f0fdf4 !important;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+}
+
+.empty {
+  text-align: center;
+  color: #999;
+  padding: 32px !important;
+  font-style: italic;
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 16px 12px;
+  }
+
+  .card {
+    padding: 14px;
+    border-radius: 8px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .field {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .field-color {
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .form-row .btn {
+    width: 100%;
+  }
+
+  .actions {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .actions .btn {
+    width: 100%;
+    text-align: center;
+  }
+}

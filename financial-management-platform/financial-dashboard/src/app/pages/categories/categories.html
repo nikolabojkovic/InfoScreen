@@ -1,0 +1,69 @@
+<div class="page">
+  <h1 class="page-title">Categories</h1>
+
+  <div class="card add-form">
+    <h2>Add Category</h2>
+    <form (ngSubmit)="addCategory()" class="form-row">
+      <div class="field">
+        <label>Name</label>
+        <input type="text" [(ngModel)]="name" name="name" placeholder="Category name" required />
+      </div>
+      <div class="field field-color">
+        <label>Color</label>
+        <input type="color" [(ngModel)]="color" name="color" />
+      </div>
+      <div class="field">
+        <label>Monthly Budget</label>
+        <input type="number" [(ngModel)]="budgetAmount" name="budget" min="0" step="0.01" />
+      </div>
+      <button type="submit" class="btn btn-primary">+ Add</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th style="width: 40px"></th>
+          <th>Category Name</th>
+          <th>Monthly Budget</th>
+          <th style="width: 140px">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (cat of categories(); track cat.id) {
+          @if (editingId() === cat.id) {
+            <tr class="editing-row">
+              <td><input type="color" [(ngModel)]="editColor" class="color-input-small" /></td>
+              <td><input type="text" [(ngModel)]="editName" class="inline-input" /></td>
+              <td><input type="number" [(ngModel)]="editBudget" min="0" step="0.01" class="inline-input" /></td>
+              <td class="actions">
+                <button class="btn btn-sm btn-success" (click)="saveEdit(cat)">Save</button>
+                <button class="btn btn-sm btn-secondary" (click)="cancelEdit()">Cancel</button>
+              </td>
+            </tr>
+          } @else {
+            <tr>
+              <td><span class="color-dot" [style.background]="cat.color"></span></td>
+              <td>{{ cat.name }}</td>
+              <td>
+                <span class="dual-currency">
+                  <span class="rsd">{{ cat.budgetAmount | number:'1.2-2' }} RSD</span>
+                  <span class="eur-sub">{{ cat.budgetAmount | toEur }} €</span>
+                </span>
+              </td>
+              <td class="actions">
+                <button class="btn btn-sm btn-secondary" (click)="startEdit(cat)">Edit</button>
+                <button class="btn btn-sm btn-danger" (click)="deleteCategory(cat.id)">Delete</button>
+              </td>
+            </tr>
+          }
+        } @empty {
+          <tr><td colspan="4" class="empty">No categories defined yet.</td></tr>
+        }
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>

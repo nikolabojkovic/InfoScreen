@@ -1,0 +1,245 @@
+<div class="page">
+  <div class="top-bar">
+    <div class="month-nav">
+      <button class="btn-icon" (click)="prevMonth()">◀</button>
+      <h1 class="month-label">{{ monthLabel() }}</h1>
+      <button class="btn-icon" (click)="nextMonth()">▶</button>
+    </div>
+    <div class="top-fields">
+      <div class="income-field">
+        <label>Monthly Income (RSD)</label>
+        <div class="income-input-wrap">
+          <input type="number" [(ngModel)]="incomeInput" (change)="updateIncome()" min="0" step="1" />
+          <span class="currency">RSD</span>
+        </div>
+      </div>
+      <div class="income-field">
+        <label>EUR Rate (1 EUR =)</label>
+        <div class="income-input-wrap">
+          <input type="number" [(ngModel)]="eurRateInput" (change)="updateEurRate()" min="0.01" step="0.01" />
+          <span class="currency">RSD</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-row">
+    <div class="card chart-card">
+      <h2>Actual Summary</h2>
+      <div class="donut-container">
+        @if (chartSegments().length > 0) {
+          <svg viewBox="0 0 42 42" class="donut-chart">
+            <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#eee" stroke-width="3" />
+            @for (seg of chartSegments(); track seg.category.id) {
+              <circle
+                cx="21" cy="21" r="15.915"
+                fill="transparent"
+                [attr.stroke]="seg.category.color"
+                stroke-width="3"
+                [attr.stroke-dasharray]="seg.dashArray"
+                [attr.stroke-dashoffset]="seg.dashOffset"
+                stroke-linecap="butt"
+              />
+            }
+          </svg>
+          <div class="donut-center">
+            <div class="donut-total">{{ totalActual() | number:'1.0-0' }} RSD</div>
+            <div class="donut-eur">{{ totalActual() | toEur }} €</div>
+            <div class="donut-label">Spent</div>
+          </div>
+        } @else {
+          <div class="no-data">No expenses yet</div>
+        }
+      </div>
+      <div class="chart-legend">
+        @for (seg of chartSegments(); track seg.category.id) {
+          <div class="legend-item">
+            <span class="legend-dot" [style.background]="seg.category.color"></span>
+            <span class="legend-name">{{ seg.category.name }}</span>
+            <span class="legend-pct">{{ seg.percentage | number:'1.1-1' }}%</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="card chart-card">
+      <h2>Budget vs Actual</h2>
+      <div class="bar-chart">
+        @for (s of summaries(); track s.category.id) {
+          @if (s.budgetAmount > 0 || s.actualAmount > 0) {
+            <div class="bar-group">
+              <div class="bar-label">
+                <span class="legend-dot" [style.background]="s.category.color"></span>
+                {{ s.category.name }}
+              </div>
+              <div class="bars">
+                <div class="bar bar-budget" [style.width.%]="barWidth(s.budgetAmount)">
+                  <span class="bar-value">{{ s.budgetAmount | number:'1.0-0' }}</span>
+                </div>
+                <div class="bar bar-actual" [style.width.%]="barWidth(s.actualAmount)" [style.background]="s.category.color">
+                  <span class="bar-value">{{ s.actualAmount | number:'1.0-0' }}</span>
+                </div>
+              </div>
+            </div>
+          }
+        }
+        @if (totalBudget() === 0 && totalActual() === 0) {
+          <div class="no-data">No budget or expenses data</div>
+        }
+      </div>
+      <div class="bar-legend">
+        <span class="legend-item"><span class="legend-dot" style="background: #ccc"></span> Budget</span>
+        <span class="legend-item"><span class="legend-dot" style="background: #666"></span> Actual</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Table -->
+  <div class="card">
+    <h2>Summary by Category</h2>
+    <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Category</th>
+          <th class="text-right">Budget Limit</th>
+          <th class="text-right">Spent</th>
+          <th class="text-right">Remaining</th>
+          <th class="text-right">Spent %</th>
+          <th style="width: 60px"></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (s of summaries(); track s.category.id) {
+          <tr>
+            <td><span class="color-dot" [style.background]="s.category.color"></span></td>
+            <td>{{ s.category.name }}</td>
+            <td class="text-right">
+              @if (editingBudgetId === s.category.id) {
+                <div class="inline-edit">
+                  <input type="number" [(ngModel)]="editingBudgetValue" min="0" step="1" class="budget-input" (keyup.enter)="saveBudgetEdit(s.category.id)" (keyup.escape)="cancelBudgetEdit()" />
+                  <button class="btn-inline-save" (click)="saveBudgetEdit(s.category.id)">✓</button>
+                  <button class="btn-inline-cancel" (click)="cancelBudgetEdit()">✕</button>
+                </div>
+              } @else {
+                <span class="dual-currency">
+                  <span class="rsd">{{ s.budgetAmount | number:'1.2-2' }} RSD</span>
+                  <span class="eur-sub">{{ s.budgetAmount | toEur }} €</span>
+                </span>
+              }
+            </td>
+            <td class="text-right">
+              <span class="dual-currency">
+                <span class="rsd">{{ s.actualAmount | number:'1.2-2' }} RSD</span>
+                <span class="eur-sub">{{ s.actualAmount | toEur }} €</span>
+              </span>
+            </td>
+            <td class="text-right" [class.negative]="s.difference < 0" [class.positive]="s.difference >= 0">
+              <span class="dual-currency">
+                <span class="rsd">{{ s.difference | number:'1.2-2' }} RSD</span>
+                <span class="eur-sub">{{ s.difference | toEur }} €</span>
+              </span>
+            </td>
+            <td class="text-right">
+              @if (s.budgetAmount > 0) {
+                <div class="spent-bar-container">
+                  <div class="spent-bar" [style.width.%]="(s.actualAmount / s.budgetAmount) * 100 > 100 ? 100 : (s.actualAmount / s.budgetAmount) * 100" [class.over-budget]="s.actualAmount > s.budgetAmount" [style.background]="s.category.color"></div>
+                </div>
+                <span [class.negative]="s.actualAmount > s.budgetAmount">{{ (s.actualAmount / s.budgetAmount) * 100 | number:'1.0-0' }}%</span>
+              } @else {
+                —
+              }
+            </td>
+            <td>
+              @if (editingBudgetId !== s.category.id) {
+                <button class="btn-edit" (click)="startEditBudget(s.category.id, s.budgetAmount)" title="Edit budget">✎</button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+      <tfoot>
+        <tr class="total-row">
+          <td></td>
+          <td><strong>TOTAL</strong></td>
+          <td class="text-right">
+            <span class="dual-currency">
+              <strong>{{ totalBudget() | number:'1.2-2' }} RSD</strong>
+              <span class="eur-sub">{{ totalBudget() | toEur }} €</span>
+            </span>
+          </td>
+          <td class="text-right">
+            <span class="dual-currency">
+              <strong>{{ totalActual() | number:'1.2-2' }} RSD</strong>
+              <span class="eur-sub">{{ totalActual() | toEur }} €</span>
+            </span>
+          </td>
+          <td class="text-right" [class.negative]="totalRemaining() < 0" [class.positive]="totalRemaining() >= 0">
+            <span class="dual-currency">
+              <strong>{{ totalRemaining() | number:'1.2-2' }} RSD</strong>
+              <span class="eur-sub">{{ totalRemaining() | toEur }} €</span>
+            </span>
+          </td>
+          <td class="text-right" [class.negative]="totalDiffPercent() < 0">
+            @if (totalBudget() > 0) {
+              <strong>{{ (totalActual() / totalBudget()) * 100 | number:'1.0-0' }}%</strong>
+            }
+          </td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+    </div>
+  </div>
+
+  <!-- Income vs Expenses -->
+  <div class="card summary-card">
+    <h2>Income vs Expenses</h2>
+    <div class="summary-grid">
+      <div class="summary-item">
+        <span class="summary-label">Monthly Income</span>
+        <span class="summary-value income">
+          {{ income() | number:'1.2-2' }} RSD
+          <span class="eur-sub-lg">{{ income() | toEur }} €</span>
+        </span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Total Budget Limits</span>
+        <span class="summary-value">
+          {{ totalBudget() | number:'1.2-2' }} RSD
+          <span class="eur-sub-lg">{{ totalBudget() | toEur }} €</span>
+        </span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Total Spent</span>
+        <span class="summary-value expenses">
+          {{ totalActual() | number:'1.2-2' }} RSD
+          <span class="eur-sub-lg">{{ totalActual() | toEur }} €</span>
+        </span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Left to Spend (Budget - Spent)</span>
+        <span class="summary-value" [class.positive]="totalRemaining() >= 0" [class.negative]="totalRemaining() < 0">
+          {{ totalRemaining() | number:'1.2-2' }} RSD
+          <span class="eur-sub-lg">{{ totalRemaining() | toEur }} €</span>
+        </span>
+      </div>
+      <div class="summary-item highlight">
+        <span class="summary-label">Expected Savings (Income - Budget)</span>
+        <span class="summary-value" [class.positive]="balanceVsBudget() >= 0" [class.negative]="balanceVsBudget() < 0">
+          {{ balanceVsBudget() | number:'1.2-2' }} RSD
+          <span class="eur-sub-lg">{{ balanceVsBudget() | toEur }} €</span>
+        </span>
+      </div>
+      <div class="summary-item highlight">
+        <span class="summary-label">Actual Balance (Income - Spent)</span>
+        <span class="summary-value" [class.positive]="balanceVsActual() >= 0" [class.negative]="balanceVsActual() < 0">
+          {{ balanceVsActual() | number:'1.2-2' }} RSD
+          <span class="eur-sub-lg">{{ balanceVsActual() | toEur }} €</span>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
