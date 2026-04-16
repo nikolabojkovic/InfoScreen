@@ -73,7 +73,7 @@
     <form (ngSubmit)="addTransaction()" class="transactions__form-row">
       <div class="transactions__field">
         <label class="transactions__label">Date</label>
-        <input type="date" [(ngModel)]="date" name="date" required class="transactions__input" />
+        <input type="date" [(ngModel)]="date" name="date" required class="transactions__input transactions__input--date" />
       </div>
       <div class="transactions__field">
         <label class="transactions__label">Category</label>
@@ -133,26 +133,43 @@
           @for (tx of group.transactions; track tx.id; let i = $index) {
             @if (editingTxId === tx.id) {
               <tr class="transactions__row transactions__row--editing">
-                <td class="table__cell transactions__text-center transactions__text-muted">{{ i + 1 }}</td>
-                <td class="table__cell">
-                  <input type="date" [(ngModel)]="editDate" class="transactions__input transactions__input--inline" />
-                </td>
-                <td class="table__cell">
-                  <input type="text" [(ngModel)]="editDescription" class="transactions__input transactions__input--inline" />
-                </td>
-                <td class="table__cell">
-                  <select [(ngModel)]="editCategoryId" class="transactions__select transactions__select--inline">
-                    @for (cat of categories(); track cat.id) {
-                      <option [value]="cat.id">{{ cat.name }}</option>
-                    }
-                  </select>
-                </td>
-                <td class="table__cell transactions__text-right">
-                  <input type="number" [(ngModel)]="editAmount" min="0.01" step="0.01" class="transactions__input transactions__input--inline transactions__input--amount-inline" />
-                </td>
-                <td class="table__cell transactions__actions-cell">
-                  <button class="transactions__btn-save" (click)="saveEdit()" title="Save">✓</button>
-                  <button class="transactions__btn-cancel" (click)="cancelEdit()" title="Cancel">✕</button>
+                <td class="table__cell transactions__edit-cell" colspan="6">
+                  <div class="transactions__edit-form">
+                    <div class="transactions__edit-meta">
+                      <span class="transactions__text-muted">Editing transaction {{ i + 1 }}</span>
+                    </div>
+
+                    <div class="transactions__edit-fields">
+                      <div class="transactions__field transactions__field--edit">
+                        <label class="transactions__label">Date</label>
+                        <input type="date" [(ngModel)]="editDate" class="transactions__input transactions__input--inline" />
+                      </div>
+
+                      <div class="transactions__field transactions__field--edit">
+                        <label class="transactions__label">Description</label>
+                        <input type="text" [(ngModel)]="editDescription" class="transactions__input transactions__input--inline" />
+                      </div>
+
+                      <div class="transactions__field transactions__field--edit">
+                        <label class="transactions__label">Category</label>
+                        <select [(ngModel)]="editCategoryId" class="transactions__select transactions__select--inline">
+                          @for (cat of categories(); track cat.id) {
+                            <option [value]="cat.id">{{ cat.name }}</option>
+                          }
+                        </select>
+                      </div>
+
+                      <div class="transactions__field transactions__field--edit">
+                        <label class="transactions__label">Amount</label>
+                        <input type="number" [(ngModel)]="editAmount" min="0.01" step="0.01" class="transactions__input transactions__input--inline transactions__input--amount-inline" />
+                      </div>
+                    </div>
+
+                    <div class="transactions__edit-actions">
+                      <button class="transactions__btn-save" (click)="saveEdit()" title="Save">✓ Save</button>
+                      <button class="transactions__btn-cancel" (click)="cancelEdit()" title="Cancel">✕ Cancel</button>
+                    </div>
+                  </div>
                 </td>
               </tr>
             } @else {

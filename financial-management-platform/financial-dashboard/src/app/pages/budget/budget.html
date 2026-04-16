@@ -7,11 +7,70 @@
     </div>
     <div class="budget__top-fields">
       <div class="budget__income-field">
-        <label class="budget__income-label">Monthly Income (RSD)</label>
+        <label class="budget__income-label">Income (RSD)</label>
         <div class="budget__income-wrap">
-          <input type="number" [(ngModel)]="incomeInput" (change)="updateIncome()" min="0" step="1" class="budget__income-input" />
+          <input
+            type="number"
+            [(ngModel)]="newIncomeAmount"
+            (keydown.enter)="addIncome()"
+            min="0"
+            step="1"
+            placeholder="Enter amount"
+            class="budget__income-input"
+          />
           <span class="budget__currency">RSD</span>
+          <button class="btn btn--primary budget__income-add-btn" (click)="addIncome()">Add</button>
         </div>
+        @if (incomeRecords().length > 0) {
+          <div class="budget__income-table-wrap">
+            <table class="budget__income-table">
+              <thead>
+                <tr>
+                  <th>Amount (RSD)</th>
+                  <th>Date &amp; Time</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (rec of incomeRecords(); track rec.id) {
+                  <tr>
+                    <td class="budget__income-amount-cell">
+                      @if (editingIncomeId === rec.id) {
+                        <input
+                          type="number"
+                          [(ngModel)]="editingIncomeAmount"
+                          min="0"
+                          step="1"
+                          class="budget__input--inline"
+                          (keydown.enter)="saveIncomeEdit()"
+                          (keydown.escape)="cancelIncomeEdit()"
+                        />
+                      } @else {
+                        {{ rec.amount | number:'1.0-0' }}
+                      }
+                    </td>
+                    <td class="budget__income-date-cell">{{ rec.createdAt | date:'dd.MM.yyyy HH:mm' }}</td>
+                    <td class="budget__income-actions-cell">
+                      @if (editingIncomeId === rec.id) {
+                        <button class="budget__btn-inline budget__btn-inline--save" (click)="saveIncomeEdit()" title="Save">✓</button>
+                        <button class="budget__btn-inline budget__btn-inline--cancel" (click)="cancelIncomeEdit()" title="Cancel">✕</button>
+                      } @else {
+                        <button class="budget__btn-inline" (click)="startEditIncome(rec)" title="Edit">✎</button>
+                        <button class="budget__btn-inline budget__btn-inline--cancel" (click)="deleteIncome(rec.id)" title="Delete">✕</button>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr class="budget__income-total-row">
+                  <td><strong>{{ income() | number:'1.0-0' }} RSD</strong></td>
+                  <td colspan="2" class="budget__income-eur-cell">≈ {{ income() | toEur }} €</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        }
       </div>
       <div class="budget__income-field">
         <label class="budget__income-label">EUR Rate (1 EUR =)</label>
@@ -46,7 +105,7 @@
           <div class="budget__donut-center">
             <div class="budget__donut-total">{{ totalActual() | number:'1.0-0' }} RSD</div>
             <div class="budget__donut-eur">{{ totalActual() | toEur }} €</div>
-            <div class="budget__donut-label">Spent</div>
+            <div class="budget__donut-label">Outcome</div>
           </div>
         } @else {
           <div class="budget__no-data">No expenses yet</div>
@@ -68,12 +127,12 @@
       <div class="budget__bar-chart">
         @for (s of summaries(); track s.category.id) {
           @if (s.budgetAmount > 0 || s.actualAmount > 0) {
-            <div class="budget__bar-group">
-              <div class="budget__bars">
-                <div class="budget__bar budget__bar--budget" [style.height.%]="barWidth(s.budgetAmount)">
+            <div class="budget__bar-group" [attr.title]="s.category.name">
+              <div class="budget__bars" [attr.title]="s.category.name">
+                <div class="budget__bar budget__bar--budget" [style.height.%]="barWidth(s.budgetAmount)" [attr.title]="s.category.name + ': Budget'">
                   <span class="budget__bar-value">{{ s.budgetAmount | number:'1.0-0' }}</span>
                 </div>
-                <div class="budget__bar budget__bar--actual" [style.height.%]="barWidth(s.actualAmount)" [style.background]="s.category.color">
+                <div class="budget__bar budget__bar--actual" [style.height.%]="barWidth(s.actualAmount)" [style.background]="s.category.color" [attr.title]="s.category.name + ': Actual'">
                   <span class="budget__bar-value">{{ s.actualAmount | number:'1.0-0' }}</span>
                 </div>
               </div>
@@ -105,9 +164,9 @@
           <th class="table__header"></th>
           <th class="table__header">Category</th>
           <th class="table__header budget__text-right">Budget Limit</th>
-          <th class="table__header budget__text-right">Spent</th>
+          <th class="table__header budget__text-right">Outcome</th>
           <th class="table__header budget__text-right">Remaining</th>
-          <th class="table__header budget__text-right">Spent %</th>
+          <th class="table__header budget__text-right">Outcome %</th>
           <th class="table__header" style="width: 60px"></th>
         </tr>
       </thead>
@@ -145,7 +204,7 @@
             <td class="table__cell budget__text-right">
               @if (s.budgetAmount > 0) {
                 <div class="budget__spent-bar-container">
-                  <div class="budget__spent-bar" [style.width.%]="(s.actualAmount / s.budgetAmount) * 100 > 100 ? 100 : (s.actualAmount / s.budgetAmount) * 100" [class.budget__spent-bar--over]="s.actualAmount > s.budgetAmount" [style.background]="s.category.color"></div>
+                  <div class="budget__spent-bar" [style.width.%]="(s.actualAmount / s.budgetAmount) * 100 > 100 ? 100 : (s.actualAmount / s.budgetAmount) * 100" [class.budget__spent-bar--over]="s.actualAmount > s.budgetAmount" [style.background]="outcomeBarColor(s.actualAmount, s.budgetAmount)"></div>
                 </div>
                 <span [class.budget__negative]="s.actualAmount > s.budgetAmount">{{ (s.actualAmount / s.budgetAmount) * 100 | number:'1.0-0' }}%</span>
               } @else {
@@ -176,10 +235,10 @@
               <span class="dual-currency__eur">{{ totalActual() | toEur }} €</span>
             </span>
           </td>
-          <td class="table__cell budget__text-right" [class.budget__negative]="totalRemaining() < 0" [class.budget__positive]="totalRemaining() >= 0">
+          <td class="table__cell budget__text-right" [class.budget__negative]="totalDifference() < 0" [class.budget__positive]="totalDifference() >= 0">
             <span class="dual-currency">
-              <strong>{{ totalRemaining() | number:'1.2-2' }} RSD</strong>
-              <span class="dual-currency__eur">{{ totalRemaining() | toEur }} €</span>
+              <strong>{{ totalDifference() | number:'1.2-2' }} RSD</strong>
+              <span class="dual-currency__eur">{{ totalDifference() | toEur }} €</span>
             </span>
           </td>
           <td class="table__cell budget__text-right" [class.budget__negative]="totalDiffPercent() < 0">
@@ -199,45 +258,61 @@
     <h2 class="budget__card-title">Income vs Expenses</h2>
     <div class="budget__summary-grid">
       <div class="budget__summary-item">
-        <span class="budget__summary-label">Monthly Income</span>
+        <span class="budget__summary-label">Total Income</span>
         <span class="budget__summary-value budget__summary-value--income">
-          {{ income() | number:'1.2-2' }} RSD
+          {{ income() | number:'1.2-2' }} <span class="budget__summary-unit">RSD</span>
           <span class="dual-currency__eur--lg">{{ income() | toEur }} €</span>
         </span>
       </div>
       <div class="budget__summary-item">
-        <span class="budget__summary-label">Total Budget Limits</span>
+        <span class="budget__summary-label">Total Outcome</span>
+        <span class="budget__summary-value budget__summary-value--expenses">
+          {{ totalActual() | number:'1.2-2' }} <span class="budget__summary-unit">RSD</span>
+          <span class="dual-currency__eur--lg">{{ totalActual() | toEur }} €</span>
+        </span>
+      </div>
+      <div class="budget__summary-item budget__summary-item--highlight">
+        <span class="budget__summary-label">
+          Actual Balance
+          <span class="budget__summary-label-tip" title="Income - Outcome">(Income - Outcome)</span>
+        </span>
+        <span class="budget__summary-value" [class.budget__positive]="balanceVsActual() >= 0" [class.budget__negative]="balanceVsActual() < 0">
+          {{ balanceVsActual() | number:'1.2-2' }} <span class="budget__summary-unit">RSD</span>
+          <span class="dual-currency__eur--lg">{{ balanceVsActual() | toEur }} €</span>
+        </span>
+      </div>
+      <div class="budget__summary-item">
+        <span class="budget__summary-label">Monthly Budget</span>
         <span class="budget__summary-value">
-          {{ totalBudget() | number:'1.2-2' }} RSD
+          {{ totalBudget() | number:'1.2-2' }} <span class="budget__summary-unit">RSD</span>
           <span class="dual-currency__eur--lg">{{ totalBudget() | toEur }} €</span>
         </span>
       </div>
       <div class="budget__summary-item">
-        <span class="budget__summary-label">Total Spent</span>
-        <span class="budget__summary-value budget__summary-value--expenses">
-          {{ totalActual() | number:'1.2-2' }} RSD
-          <span class="dual-currency__eur--lg">{{ totalActual() | toEur }} €</span>
-        </span>
-      </div>
-      <div class="budget__summary-item">
-        <span class="budget__summary-label">Left to Spend (Budget - Spent)</span>
-        <span class="budget__summary-value" [class.budget__positive]="totalRemaining() >= 0" [class.budget__negative]="totalRemaining() < 0">
-          {{ totalRemaining() | number:'1.2-2' }} RSD
+        <span class="budget__summary-label">Total Remaining Outcome</span>
+        <span class="budget__summary-value budget__positive">
+          {{ totalRemaining() | number:'1.2-2' }} <span class="budget__summary-unit">RSD</span>
           <span class="dual-currency__eur--lg">{{ totalRemaining() | toEur }} €</span>
         </span>
       </div>
       <div class="budget__summary-item budget__summary-item--highlight">
-        <span class="budget__summary-label">Expected Savings (Income - Budget)</span>
+        <span class="budget__summary-label">
+          Expected Savings
+          <span class="budget__summary-label-tip" title="Income - Budget">(Income - Budget)</span>
+        </span>
         <span class="budget__summary-value" [class.budget__positive]="balanceVsBudget() >= 0" [class.budget__negative]="balanceVsBudget() < 0">
-          {{ balanceVsBudget() | number:'1.2-2' }} RSD
+          {{ balanceVsBudget() | number:'1.2-2' }} <span class="budget__summary-unit">RSD</span>
           <span class="dual-currency__eur--lg">{{ balanceVsBudget() | toEur }} €</span>
         </span>
       </div>
-      <div class="budget__summary-item budget__summary-item--highlight">
-        <span class="budget__summary-label">Actual Balance (Income - Spent)</span>
-        <span class="budget__summary-value" [class.budget__positive]="balanceVsActual() >= 0" [class.budget__negative]="balanceVsActual() < 0">
-          {{ balanceVsActual() | number:'1.2-2' }} RSD
-          <span class="dual-currency__eur--lg">{{ balanceVsActual() | toEur }} €</span>
+      <div class="budget__summary-item budget__summary-item--danger budget__summary-item--full">
+        <span class="budget__summary-label">
+          Deficit
+          <span class="budget__summary-label-tip" title="Total Remaining Outcome - Actual Balance">(Total Remaining Outcome - Actual Balance)</span>
+        </span>
+        <span class="budget__summary-value" [class.budget__negative]="predictedDeficit() > 0">
+          {{ predictedDeficit() | number:'1.2-2' }} <span class="budget__summary-unit">RSD</span>
+          <span class="dual-currency__eur--lg">{{ predictedDeficit() | toEur }} €</span>
         </span>
       </div>
     </div>

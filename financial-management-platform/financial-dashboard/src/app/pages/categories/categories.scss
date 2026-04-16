@@ -7,21 +7,21 @@
     font-size: 1.6rem;
     font-weight: 700;
     margin-bottom: 20px;
-    color: #1b5e20;
+    color: var(--color-accent);
   }
 
   &__card {
-    background: #fff;
+    background: var(--color-bg-elevated);
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 8px var(--color-shadow);
   }
 
   &__card-title {
     font-size: 1.1rem;
     margin-bottom: 16px;
-    color: #333;
+    color: var(--color-text);
   }
 
   &__form-row {
@@ -47,20 +47,20 @@
   &__label {
     font-size: 0.8rem;
     font-weight: 600;
-    color: #666;
+    color: var(--color-text-muted);
     text-transform: uppercase;
   }
 
   &__input {
     padding: 8px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--color-border);
     border-radius: 8px;
     font-size: 0.95rem;
 
     &--color {
       width: 48px;
       height: 36px;
-      border: 1px solid #ddd;
+      border: 1px solid var(--color-border);
       border-radius: 8px;
       cursor: pointer;
       padding: 2px;
@@ -76,7 +76,7 @@
 
     &--inline {
       padding: 4px 8px;
-      border: 1px solid #ccc;
+      border: 1px solid var(--color-border);
       border-radius: 6px;
       font-size: 0.9rem;
       width: 100%;
@@ -94,7 +94,7 @@
 
   &__row {
     &--editing {
-      background: #f0fdf4 !important;
+      background: var(--color-bg-soft) !important;
     }
   }
 
@@ -105,7 +105,7 @@
 
   &__empty {
     text-align: center;
-    color: #999;
+    color: var(--color-text-placeholder);
     padding: 32px !important;
     font-style: italic;
   }

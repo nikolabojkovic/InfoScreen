@@ -7,21 +7,21 @@
     font-size: 1.6rem;
     font-weight: 700;
     margin-bottom: 20px;
-    color: #1b5e20;
+    color: var(--color-accent);
   }
 
   &__card {
-    background: #fff;
+    background: var(--color-bg-elevated);
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 8px var(--color-shadow);
   }
 
   &__card-title {
     font-size: 1.1rem;
     margin-bottom: 16px;
-    color: #333;
+    color: var(--color-text);
   }
 
   &__form-row {
@@ -45,16 +45,24 @@
   &__label {
     font-size: 0.8rem;
     font-weight: 600;
-    color: #666;
+    color: var(--color-text-muted);
     text-transform: uppercase;
   }
 
   &__input,
   &__select {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
     padding: 8px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--color-border);
     border-radius: 8px;
     font-size: 0.95rem;
+  }
+
+  &__input--date {
+    min-width: 0;
   }
 
   &__select {
@@ -80,35 +88,35 @@
     margin-left: auto;
     font-weight: 700;
     font-size: 1.05rem;
-    color: #1b5e20;
+    color: var(--color-accent);
   }
 
   &__btn-icon {
     background: none;
-    border: 1px solid #ddd;
+    border: 1px solid var(--color-border);
     border-radius: 8px;
     padding: 6px 12px;
     cursor: pointer;
     font-size: 0.9rem;
 
     &:hover {
-      background: #f5f5f5;
+      background: var(--color-surface-muted);
     }
   }
 
   // Transaction groups
   &__group-header {
-    background: #f0fdf4 !important;
+    background: var(--color-bg-soft) !important;
 
     .table__cell {
       padding: 8px 12px;
-      border-bottom: 2px solid #c8e6c9;
+      border-bottom: 2px solid var(--color-success-border);
     }
   }
 
   &__group-total {
     font-weight: 700;
-    color: #1b5e20;
+    color: var(--color-accent);
   }
 
   &__row .table__cell {
@@ -137,42 +145,42 @@
   }
 
   &__text-muted {
-    color: #999;
+    color: var(--color-text-placeholder);
   }
 
   &__btn-delete {
     background: none;
     border: none;
-    color: #d32f2f;
+    color: var(--color-danger);
     cursor: pointer;
     font-size: 1rem;
     padding: 4px 8px;
     border-radius: 4px;
 
     &:hover {
-      background: #ffebee;
+      background: var(--color-danger-soft);
     }
   }
 
   &__btn-edit {
     background: none;
     border: none;
-    color: #999;
+    color: var(--color-text-placeholder);
     cursor: pointer;
     font-size: 1rem;
     padding: 4px 8px;
     border-radius: 4px;
 
     &:hover {
-      color: #1b5e20;
-      background: #e8f5e9;
+      color: var(--color-accent);
+      background: var(--color-accent-soft);
     }
   }
 
   &__btn-save {
     background: none;
     border: none;
-    color: #2e7d32;
+    color: var(--color-accent-hover);
     cursor: pointer;
     font-size: 1.1rem;
     font-weight: 700;
@@ -180,21 +188,21 @@
     border-radius: 4px;
 
     &:hover {
-      background: #e8f5e9;
+      background: var(--color-accent-soft);
     }
   }
 
   &__btn-cancel {
     background: none;
     border: none;
-    color: #d32f2f;
+    color: var(--color-danger);
     cursor: pointer;
     font-size: 1rem;
     padding: 4px 8px;
     border-radius: 4px;
 
     &:hover {
-      background: #ffebee;
+      background: var(--color-danger-soft);
     }
   }
 
@@ -205,13 +213,53 @@
   }
 
   &__row--editing {
-    background: #f0fdf4;
+    background: var(--color-bg-soft);
+  }
+
+  &__edit-cell {
+    padding: 12px !important;
+  }
+
+  &__edit-form {
+    display: grid;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-bg-elevated);
+  }
+
+  &__edit-meta {
+    font-size: 0.85rem;
+  }
+
+  &__edit-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  &__field--edit {
+    min-width: 0;
+  }
+
+  &__edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+
+    .transactions__btn-save,
+    .transactions__btn-cancel {
+      padding: 8px 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
   }
 
   &__input--inline {
     padding: 4px 6px;
     font-size: 0.85rem;
-    border: 1px solid #ccc;
+    border: 1px solid var(--color-border);
     border-radius: 6px;
     width: 100%;
     min-width: 60px;
@@ -225,7 +273,7 @@
   &__select--inline {
     padding: 4px 6px;
     font-size: 0.85rem;
-    border: 1px solid #ccc;
+    border: 1px solid var(--color-border);
     border-radius: 6px;
     width: 100%;
     min-width: 80px;
@@ -233,7 +281,7 @@
 
   &__empty {
     text-align: center;
-    color: #999;
+    color: var(--color-text-placeholder);
     padding: 32px !important;
     font-style: italic;
   }
@@ -258,8 +306,8 @@
 
   // Scanned bill confirmation
   &__scanned {
-    border: 2px solid #c8e6c9;
-    background: #f0fdf4;
+    border: 2px solid var(--color-success-border);
+    background: var(--color-bg-soft);
   }
 
   &__scanned-details {
@@ -267,7 +315,7 @@
     flex-direction: column;
     gap: 8px;
     padding: 14px 16px;
-    background: #fff;
+    background: var(--color-bg-elevated);
     border-radius: 8px;
     margin-bottom: 16px;
   }
@@ -282,20 +330,20 @@
   &__scanned-label {
     font-size: 0.8rem;
     font-weight: 600;
-    color: #666;
+    color: var(--color-text-muted);
     text-transform: uppercase;
     flex-shrink: 0;
   }
 
   &__scanned-value {
     font-size: 0.95rem;
-    color: #333;
+    color: var(--color-text);
     text-align: right;
 
     &--amount {
       font-size: 1.2rem;
       font-weight: 700;
-      color: #1b5e20;
+      color: var(--color-accent);
     }
   }
 
@@ -304,15 +352,15 @@
     flex-direction: column;
     gap: 14px;
     padding: 16px;
-    background: #fff;
+    background: var(--color-bg-elevated);
     border-radius: 8px;
-    border: 1px solid #e0e0e0;
+    border: 1px solid var(--color-border-strong);
     margin-bottom: 16px;
   }
 
   &__input {
     padding: 8px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--color-border);
     border-radius: 6px;
     font-size: 0.95rem;
     width: 100%;
@@ -320,13 +368,13 @@
 
     &:focus {
       outline: none;
-      border-color: #4caf50;
+      border-color: var(--color-accent);
     }
 
     &--amount {
       font-size: 1.1rem;
       font-weight: 700;
-      color: #1b5e20;
+      color: var(--color-accent);
     }
   }
 
@@ -365,6 +413,12 @@
       }
     }
 
+    &__input,
+    &__select {
+      width: 100%;
+      max-width: 100%;
+    }
+
     &__month-nav {
       flex-wrap: wrap;
       gap: 8px;
@@ -395,6 +449,26 @@
 
     &__scanned-actions {
       flex-direction: column;
+    }
+
+    &__row--editing {
+      .transactions__edit-form {
+        padding: 10px;
+      }
+
+      .transactions__edit-fields {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .transactions__edit-actions {
+        flex-direction: column;
+
+        .transactions__btn-save,
+        .transactions__btn-cancel {
+          width: 100%;
+        }
+      }
     }
   }
 }

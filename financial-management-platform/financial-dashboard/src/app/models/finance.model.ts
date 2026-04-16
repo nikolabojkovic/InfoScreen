@@ -33,3 +33,9 @@ export interface TransactionGroup {
   transactions: Transaction[];
   total: number;
 }
+
+export interface IncomeRecord {
+  id: string;
+  amount: number;
+  createdAt: string; // ISO datetime string
+}

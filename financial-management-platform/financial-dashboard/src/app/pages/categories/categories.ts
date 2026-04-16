@@ -4,6 +4,7 @@ import { DecimalPipe } from '@angular/common';
 import { FinanceService } from '../../services/finance.service';
 import { Category } from '../../models/finance.model';
 import { ToEurPipe } from '../../pipes/to-eur.pipe';
+import { ConfirmationService } from '../../services/confirmation.service';
 
 @Component({
   selector: 'app-categories',
@@ -13,6 +14,7 @@ import { ToEurPipe } from '../../pipes/to-eur.pipe';
 })
 export class Categories {
   private finance = inject(FinanceService);
+  private confirmation = inject(ConfirmationService);
   readonly categories = this.finance.categories;
 
   name = '';
@@ -57,7 +59,16 @@ export class Categories {
     this.editingId.set(null);
   }
 
-  deleteCategory(id: string): void {
+  async deleteCategory(id: string): Promise<void> {
+    const confirmed = await this.confirmation.confirm({
+      title: 'Delete category?',
+      message: 'This will permanently delete the category. Continue?',
+      confirmLabel: 'Delete',
+      cancelLabel: 'Cancel',
+    });
+
+    if (!confirmed) return;
+
     this.finance.deleteCategory(id);
   }
 }

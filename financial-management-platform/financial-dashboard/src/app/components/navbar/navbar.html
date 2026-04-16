@@ -1,8 +1,16 @@
 <nav class="navbar">
   <div class="navbar__brand">💰 Finance Dashboard</div>
-  <div class="navbar__tabs">
-    <a routerLink="/budget" routerLinkActive="navbar__tab--active" class="navbar__tab">Budget</a>
-    <a routerLink="/transactions" routerLinkActive="navbar__tab--active" class="navbar__tab">Transactions</a>
-    <a routerLink="/categories" routerLinkActive="navbar__tab--active" class="navbar__tab">Categories</a>
+  <div class="navbar__actions">
+    <div class="navbar__tabs">
+      <a routerLink="/budget" routerLinkActive="navbar__tab--active" class="navbar__tab">Budget</a>
+      <a routerLink="/transactions" routerLinkActive="navbar__tab--active" class="navbar__tab">Transactions</a>
+      <a routerLink="/categories" routerLinkActive="navbar__tab--active" class="navbar__tab">Categories</a>
+    </div>
+    <button class="navbar__theme-toggle" type="button" [attr.aria-pressed]="isDarkTheme()" (click)="toggleTheme()">
+      <span class="navbar__theme-text">{{ isDarkTheme() ? 'Dark' : 'Light' }}</span>
+      <span class="navbar__theme-track" [class.navbar__theme-track--dark]="isDarkTheme()">
+        <span class="navbar__theme-thumb"></span>
+      </span>
+    </button>
   </div>
 </nav>

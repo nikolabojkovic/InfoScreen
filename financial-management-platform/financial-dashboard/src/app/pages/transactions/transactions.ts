@@ -6,6 +6,7 @@ import { TransactionGroup } from '../../models/finance.model';
 import { ToEurPipe } from '../../pipes/to-eur.pipe';
 import { QrScanner } from '../../components/qr-scanner/qr-scanner';
 import { ParsedQrBill } from '../../services/qr-parser.service';
+import { ConfirmationService } from '../../services/confirmation.service';
 
 @Component({
   selector: 'app-transactions',
@@ -15,6 +16,7 @@ import { ParsedQrBill } from '../../services/qr-parser.service';
 })
 export class Transactions {
   private finance = inject(FinanceService);
+  private confirmation = inject(ConfirmationService);
   readonly categories = this.finance.categories;
 
   date = new Date().toISOString().substring(0, 10);
@@ -81,7 +83,16 @@ export class Transactions {
     this.amount = 0;
   }
 
-  deleteTransaction(id: string): void {
+  async deleteTransaction(id: string): Promise<void> {
+    const confirmed = await this.confirmation.confirm({
+      title: 'Delete transaction?',
+      message: 'This transaction will be permanently removed. Continue?',
+      confirmLabel: 'Delete',
+      cancelLabel: 'Cancel',
+    });
+
+    if (!confirmed) return;
+
     this.finance.deleteTransaction(id);
   }
 

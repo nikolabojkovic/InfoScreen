@@ -1,19 +1,79 @@
-// Variables
-$color-primary: #1b5e20;
-$color-primary-light: #2e7d32;
-$color-primary-lighter: #388e3c;
-$color-danger: #d32f2f;
-$color-danger-light: #e53935;
-$color-text: #333;
-$color-text-muted: #666;
-$color-text-light: #888;
-$color-text-placeholder: #999;
-$color-bg: #f5f5f5;
-$color-bg-hover: #fafafa;
-$color-border: #e0e0e0;
-$color-border-light: #f0f0f0;
-$color-white: #fff;
-$border-radius: 8px;
+:root {
+  --color-accent: #1b5e20;
+  --color-accent-hover: #2e7d32;
+  --color-accent-strong: #388e3c;
+  --color-accent-soft: #e8f5e9;
+  --color-danger: #d32f2f;
+  --color-danger-hover: #e53935;
+  --color-danger-soft: #ffebee;
+  --color-text: #333;
+  --color-text-muted: #666;
+  --color-text-light: #888;
+  --color-text-placeholder: #999;
+  --color-bg: #f5f5f5;
+  --color-bg-elevated: #fff;
+  --color-bg-hover: #fafafa;
+  --color-bg-soft: #f0fdf4;
+  --color-bg-warning: #fff3e0;
+  --color-bg-input: #fff;
+  --color-surface-muted: #f5f5f5;
+  --color-border: #ddd;
+  --color-border-strong: #e0e0e0;
+  --color-border-light: #f0f0f0;
+  --color-success-border: #c8e6c9;
+  --color-shadow: rgba(0, 0, 0, 0.08);
+  --color-shadow-strong: rgba(0, 0, 0, 0.2);
+  --color-overlay: rgba(0, 0, 0, 0.7);
+  --color-navbar-bg: #1b5e20;
+  --color-navbar-pill: rgba(255, 255, 255, 0.15);
+  --color-navbar-pill-hover: rgba(255, 255, 255, 0.15);
+  --color-navbar-text: rgba(255, 255, 255, 0.8);
+  --color-navbar-brand: #fff;
+  --color-navbar-active-bg: #fff;
+  --color-navbar-active-text: #1b5e20;
+  --color-focus-ring: rgba(27, 94, 32, 0.15);
+  --color-text-on-accent: #fff;
+  --border-radius: 8px;
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --color-accent: #27ddf5;
+  --color-accent-hover: #52e5f8;
+  --color-accent-strong: #0fc5dd;
+  --color-accent-soft: rgba(39, 221, 245, 0.14);
+  --color-danger: #ff6b6b;
+  --color-danger-hover: #ff8585;
+  --color-danger-soft: rgba(255, 107, 107, 0.14);
+  --color-text: #ebf3f8;
+  --color-text-muted: #afbec9;
+  --color-text-light: #8ea1ad;
+  --color-text-placeholder: #728693;
+  --color-bg: #0f1418;
+  --color-bg-elevated: #161d24;
+  --color-bg-hover: #1b242d;
+  --color-bg-soft: rgba(39, 221, 245, 0.1);
+  --color-bg-warning: rgba(255, 183, 77, 0.12);
+  --color-bg-input: #121920;
+  --color-surface-muted: #202a33;
+  --color-border: #31404b;
+  --color-border-strong: #3b4a56;
+  --color-border-light: #243039;
+  --color-success-border: rgba(39, 221, 245, 0.24);
+  --color-shadow: rgba(0, 0, 0, 0.35);
+  --color-shadow-strong: rgba(0, 0, 0, 0.45);
+  --color-overlay: rgba(2, 8, 12, 0.78);
+  --color-navbar-bg: #02525b;
+  --color-navbar-pill: rgba(39, 221, 245, 0.12);
+  --color-navbar-pill-hover: rgba(39, 221, 245, 0.16);
+  --color-navbar-text: rgba(235, 243, 248, 0.84);
+  --color-navbar-brand: #f6fbff;
+  --color-navbar-active-bg: #27ddf5;
+  --color-navbar-active-text: #071318;
+  --color-focus-ring: rgba(39, 221, 245, 0.25);
+  --color-text-on-accent: #071318;
+  color-scheme: dark;
+}
 
 // Reset
 *,
@@ -26,11 +86,12 @@ $border-radius: 8px;
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-  background: $color-bg;
-  color: $color-text;
+  background: var(--color-bg);
+  color: var(--color-text);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -webkit-text-size-adjust: 100%;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 // Table block
@@ -40,23 +101,23 @@ body {
   font-size: 0.9rem;
 
   &__header {
-    background: $color-bg;
+    background: var(--color-surface-muted);
     padding: 10px 12px;
     text-align: left;
     font-weight: 600;
     font-size: 0.8rem;
     text-transform: uppercase;
-    color: $color-text-muted;
-    border-bottom: 2px solid $color-border;
+    color: var(--color-text-muted);
+    border-bottom: 2px solid var(--color-border-strong);
   }
 
   &__cell {
     padding: 8px 12px;
-    border-bottom: 1px solid $color-border-light;
+    border-bottom: 1px solid var(--color-border-light);
   }
 
   tbody tr:hover {
-    background: $color-bg-hover;
+    background: var(--color-bg-hover);
   }
 }
 
@@ -71,7 +132,7 @@ body {
 .btn {
   padding: 8px 20px;
   border: none;
-  border-radius: $border-radius;
+  border-radius: var(--border-radius);
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
@@ -79,38 +140,39 @@ body {
   white-space: nowrap;
 
   &--primary {
-    background: $color-primary;
-    color: $color-white;
+    background: var(--color-accent);
+    color: #fff;
 
     &:hover {
-      background: $color-primary-light;
+      background: var(--color-accent-hover);
     }
   }
 
   &--secondary {
-    background: $color-border;
-    color: $color-text;
+    background: var(--color-surface-muted);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
 
     &:hover {
-      background: #d0d0d0;
+      background: var(--color-bg-hover);
     }
   }
 
   &--success {
-    background: $color-primary-light;
-    color: $color-white;
+    background: var(--color-accent-hover);
+    color: #fff;
 
     &:hover {
-      background: $color-primary-lighter;
+      background: var(--color-accent-strong);
     }
   }
 
   &--danger {
-    background: $color-danger;
-    color: $color-white;
+    background: var(--color-danger);
+    color: #fff;
 
     &:hover {
-      background: $color-danger-light;
+      background: var(--color-danger-hover);
     }
   }
 
@@ -124,8 +186,15 @@ body {
 input:focus,
 select:focus {
   outline: none;
-  border-color: $color-primary;
-  box-shadow: 0 0 0 2px rgba($color-primary, 0.15);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-focus-ring);
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
 }
 
 // Mobile
@@ -161,13 +230,13 @@ select:focus {
 
   &__eur {
     font-size: 0.75em;
-    color: $color-text-light;
+    color: var(--color-text-light);
     white-space: nowrap;
 
     &--lg {
       display: block;
       font-size: 0.7em;
-      color: $color-text-light;
+      color: var(--color-text-light);
       font-weight: 400;
       white-space: nowrap;
     }

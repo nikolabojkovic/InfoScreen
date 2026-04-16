@@ -6,8 +6,26 @@
     </div>
 
     <div class="qr-scanner__body">
+      <input
+        type="file"
+        accept="image/*"
+        #fileInput
+        hidden
+        (change)="onFileSelected($event)"
+      />
+
       @if (!parsedBill()) {
-        <div id="qr-reader" #readerEl class="qr-scanner__reader"></div>
+        @if (nativeMode()) {
+          <video
+            #cameraVideo
+            class="qr-scanner__camera"
+            autoplay
+            muted
+            playsinline
+          ></video>
+        } @else {
+          <div id="qr-reader" #readerEl class="qr-scanner__reader"></div>
+        }
 
         @if (error()) {
           <div class="qr-scanner__error">
@@ -19,6 +37,29 @@
         @if (scanning()) {
           <p class="qr-scanner__hint">Point the camera at the QR code on your bill</p>
         }
+
+        <div class="qr-scanner__upload-divider">
+          <span>or</span>
+        </div>
+
+        @if (uploadDecoding()) {
+          <div class="qr-scanner__upload-status">
+            <span class="qr-scanner__spinner" aria-hidden="true"></span>
+            <span>Decoding uploaded image...</span>
+          </div>
+        }
+
+        <button
+          class="btn btn--secondary qr-scanner__upload-btn"
+          [disabled]="uploadDecoding()"
+          (click)="fileInput.click()"
+        >
+          @if (uploadDecoding()) {
+            Decoding...
+          } @else {
+            📁 Upload QR Image
+          }
+        </button>
       } @else {
         <div class="qr-scanner__result">
           <h3 class="qr-scanner__result-title">✅ Bill Scanned Successfully</h3>

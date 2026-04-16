@@ -1,0 +1,22 @@
+@if (confirmation.state().open) {
+  <div class="confirm-modal__overlay" role="presentation">
+    <div class="confirm-modal" role="dialog" aria-modal="true">
+      <div class="confirm-modal__header">
+        <h2 class="confirm-modal__title">{{ confirmation.state().title }}</h2>
+      </div>
+
+      <div class="confirm-modal__body">
+        <p class="confirm-modal__message">{{ confirmation.state().message }}</p>
+      </div>
+
+      <div class="confirm-modal__actions">
+        <button class="btn btn--secondary" (click)="confirmation.cancel()">
+          {{ confirmation.state().cancelLabel }}
+        </button>
+        <button class="btn btn--primary" (click)="confirmation.accept()">
+          {{ confirmation.state().confirmLabel }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

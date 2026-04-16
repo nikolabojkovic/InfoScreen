@@ -1,22 +1,27 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { Category, Transaction, CategorySummary } from '../models/finance.model';
+import { Category, Transaction, CategorySummary, IncomeRecord } from '../models/finance.model';
 
 @Injectable({ providedIn: 'root' })
 export class FinanceService {
   private readonly STORAGE_CATEGORIES = 'fin_categories';
   private readonly STORAGE_TRANSACTIONS = 'fin_transactions';
   private readonly STORAGE_INCOME = 'fin_income';
+  private readonly STORAGE_INCOME_RECORDS = 'fin_income_records';
   private readonly STORAGE_EUR_RATE = 'fin_eur_rate';
 
   private _categories = signal<Category[]>(this.load(this.STORAGE_CATEGORIES, this.defaultCategories()));
   private _transactions = signal<Transaction[]>(this.load(this.STORAGE_TRANSACTIONS, []));
-  private _income = signal<number>(this.load(this.STORAGE_INCOME, 0));
+  private _incomeRecords = signal<IncomeRecord[]>(this.migrateIncomeRecords());
   private _eurRate = signal<number>(this.load(this.STORAGE_EUR_RATE, 117.0));
 
   readonly categories = this._categories.asReadonly();
   readonly transactions = this._transactions.asReadonly();
-  readonly income = this._income.asReadonly();
+  readonly incomeRecords = this._incomeRecords.asReadonly();
   readonly eurRate = this._eurRate.asReadonly();
+
+  readonly income = computed(() =>
+    this._incomeRecords().reduce((sum, r) => sum + r.amount, 0)
+  );
 
   readonly totalExpenses = computed(() =>
     this._transactions().reduce((sum, t) => sum + t.amount, 0)
@@ -26,7 +31,7 @@ export class FinanceService {
     this._categories().reduce((sum, c) => sum + c.budgetAmount, 0)
   );
 
-  readonly balance = computed(() => this._income() - this.totalExpenses());
+  readonly balance = computed(() => this.income() - this.totalExpenses());
 
   // Category CRUD
   addCategory(cat: Omit<Category, 'id'>): void {
@@ -64,14 +69,32 @@ export class FinanceService {
     this.save(this.STORAGE_TRANSACTIONS, this._transactions());
   }
 
-  setIncome(amount: number): void {
-    this._income.set(amount);
-    this.save(this.STORAGE_INCOME, amount);
-  }
-
   setEurRate(rate: number): void {
     this._eurRate.set(rate);
     this.save(this.STORAGE_EUR_RATE, rate);
+  }
+
+  // Income records CRUD
+  addIncomeRecord(amount: number): void {
+    const record: IncomeRecord = {
+      id: this.genId(),
+      amount,
+      createdAt: new Date().toISOString(),
+    };
+    this._incomeRecords.update(list => [...list, record]);
+    this.save(this.STORAGE_INCOME_RECORDS, this._incomeRecords());
+  }
+
+  updateIncomeRecord(updated: IncomeRecord): void {
+    this._incomeRecords.update(list =>
+      list.map(r => r.id === updated.id ? updated : r)
+    );
+    this.save(this.STORAGE_INCOME_RECORDS, this._incomeRecords());
+  }
+
+  deleteIncomeRecord(id: string): void {
+    this._incomeRecords.update(list => list.filter(r => r.id !== id));
+    this.save(this.STORAGE_INCOME_RECORDS, this._incomeRecords());
   }
 
   getCategorySummaries(month: number, year: number): CategorySummary[] {
@@ -119,6 +142,19 @@ export class FinanceService {
 
   private genId(): string {
     return Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
+  }
+
+  private migrateIncomeRecords(): IncomeRecord[] {
+    const records = this.load<IncomeRecord[]>(this.STORAGE_INCOME_RECORDS, []);
+    if (records.length > 0) return records;
+    // Migrate old single-income value if present
+    const oldIncome = this.load<number>(this.STORAGE_INCOME, 0);
+    if (oldIncome > 0) {
+      const migrated: IncomeRecord[] = [{ id: this.genId(), amount: oldIncome, createdAt: new Date().toISOString() }];
+      this.save(this.STORAGE_INCOME_RECORDS, migrated);
+      return migrated;
+    }
+    return [];
   }
 
   private defaultCategories(): Category[] {

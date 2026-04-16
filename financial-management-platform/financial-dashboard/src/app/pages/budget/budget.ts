@@ -1,23 +1,32 @@
 import { Component, inject, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { FinanceService } from '../../services/finance.service';
-import { CategorySummary, ChartSegment } from '../../models/finance.model';
+import { CategorySummary, ChartSegment, IncomeRecord } from '../../models/finance.model';
 import { ToEurPipe } from '../../pipes/to-eur.pipe';
+import { ConfirmationService } from '../../services/confirmation.service';
 
 @Component({
   selector: 'app-budget',
-  imports: [FormsModule, DecimalPipe, ToEurPipe],
+  imports: [FormsModule, DecimalPipe, DatePipe, ToEurPipe],
   templateUrl: './budget.html',
   styleUrl: './budget.scss',
 })
 export class Budget {
   private finance = inject(FinanceService);
+  private confirmation = inject(ConfirmationService);
 
-  incomeInput = this.finance.income();
+  newIncomeAmount = 0;
   eurRateInput = this.finance.eurRate();
   selectedMonth = signal(new Date().getMonth());
   selectedYear = signal(new Date().getFullYear());
+
+  // Income records
+  readonly incomeRecords = this.finance.incomeRecords;
+  readonly income = this.finance.income;
+
+  editingIncomeId: string | null = null;
+  editingIncomeAmount = 0;
 
   readonly monthLabel = computed(() => {
     const d = new Date(this.selectedYear(), this.selectedMonth());
@@ -42,10 +51,9 @@ export class Budget {
     this.totalBudget() > 0 ? (this.totalDifference() / this.totalBudget()) * 100 : 0
   );
 
-  readonly income = this.finance.income;
-
   readonly balanceVsBudget = computed(() => this.income() - this.totalBudget());
   readonly balanceVsActual = computed(() => this.income() - this.totalActual());
+  readonly predictedDeficit = computed(() => Math.max(this.totalRemaining() - this.balanceVsActual(), 0));
 
   // Donut chart segments
   readonly chartSegments = computed<ChartSegment[]>(() => {
@@ -79,14 +87,58 @@ export class Budget {
     return max || 1;
   });
 
-  readonly totalRemaining = computed(() => this.totalBudget() - this.totalActual());
+  readonly totalRemaining = computed(() =>
+    this.summaries().reduce((sum, category) => sum + Math.max(category.budgetAmount - category.actualAmount, 0), 0)
+  );
 
   barWidth(value: number): number {
     return (value / this.barMax()) * 100;
   }
+  
+  outcomeBarColor(actualAmount: number, budgetAmount: number): string {
+    if (budgetAmount <= 0) return '#2196f3';
 
-  updateIncome(): void {
-    this.finance.setIncome(this.incomeInput);
+    const percent = (actualAmount / budgetAmount) * 100;
+    if (percent > 100) return '#f44336';
+    if (percent === 100) return '#4caf50';
+    if (percent >= 80) return '#ff9800';
+    return '#2196f3';
+  }
+
+  addIncome(): void {
+    if (!this.newIncomeAmount || this.newIncomeAmount <= 0) return;
+    this.finance.addIncomeRecord(this.newIncomeAmount);
+    this.newIncomeAmount = 0;
+  }
+
+  startEditIncome(record: IncomeRecord): void {
+    this.editingIncomeId = record.id;
+    this.editingIncomeAmount = record.amount;
+  }
+
+  saveIncomeEdit(): void {
+    const rec = this.finance.incomeRecords().find(r => r.id === this.editingIncomeId);
+    if (rec && this.editingIncomeAmount > 0) {
+      this.finance.updateIncomeRecord({ ...rec, amount: this.editingIncomeAmount });
+    }
+    this.editingIncomeId = null;
+  }
+
+  cancelIncomeEdit(): void {
+    this.editingIncomeId = null;
+  }
+
+  async deleteIncome(id: string): Promise<void> {
+    const confirmed = await this.confirmation.confirm({
+      title: 'Delete income record?',
+      message: 'This income record will be permanently deleted. Continue?',
+      confirmLabel: 'Delete',
+      cancelLabel: 'Cancel',
+    });
+
+    if (!confirmed) return;
+
+    this.finance.deleteIncomeRecord(id);
   }
 
   updateEurRate(): void {
