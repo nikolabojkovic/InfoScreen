@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, ViewChild, inject, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { FinanceService } from '../../services/finance.service';
@@ -12,21 +12,32 @@ import { ConfirmationService } from '../../services/confirmation.service';
   templateUrl: './budget.html',
   styleUrl: './budget.scss',
 })
-export class Budget {
+export class Budget implements AfterViewInit {
   private finance = inject(FinanceService);
   private confirmation = inject(ConfirmationService);
 
+  @ViewChild('incomeTableWrap') incomeTableWrap?: ElementRef<HTMLDivElement>;
+
   newIncomeAmount = 0;
+  newIncomeDescription = '';
+  newIncomeMethod: 'cash' | 'bank' | 'withdrawal' = 'bank';
   eurRateInput = this.finance.eurRate();
   selectedMonth = signal(new Date().getMonth());
   selectedYear = signal(new Date().getFullYear());
 
-  // Income records
   readonly incomeRecords = this.finance.incomeRecords;
   readonly income = this.finance.income;
 
   editingIncomeId: string | null = null;
   editingIncomeAmount = 0;
+  editingIncomeDescription = '';
+  editingIncomeMethod: 'cash' | 'bank' | 'withdrawal' = 'bank';
+
+  incomeScrollState = {
+    left: 0,
+    viewport: 0,
+    scrollWidth: 0,
+  };
 
   readonly monthLabel = computed(() => {
     const d = new Date(this.selectedYear(), this.selectedMonth());
@@ -37,13 +48,48 @@ export class Budget {
     this.finance.getCategorySummaries(this.selectedMonth(), this.selectedYear())
   );
 
+  readonly monthTransactions = computed(() =>
+    this.finance.getFilteredTransactions(this.selectedMonth(), this.selectedYear())
+  );
+
+  readonly bankIncome = computed(() =>
+    this.incomeRecords().filter(record => record.paymentMethod === 'bank').reduce((sum, record) => sum + record.amount, 0)
+  );
+
+  readonly cashIncome = computed(() =>
+    this.incomeRecords().filter(record => record.paymentMethod === 'cash').reduce((sum, record) => sum + record.amount, 0)
+  );
+
+  readonly withdrawalAmount = computed(() =>
+    this.incomeRecords().filter(record => record.paymentMethod === 'withdrawal').reduce((sum, record) => sum + record.amount, 0)
+  );
+
+  readonly totalIncomeAmount = computed(() => this.bankIncome() + this.cashIncome());
+
   readonly totalBudget = computed(() =>
-    this.summaries().reduce((s, c) => s + c.budgetAmount, 0)
+    this.summaries().reduce((sum, category) => sum + category.budgetAmount, 0)
   );
 
   readonly totalActual = computed(() =>
-    this.summaries().reduce((s, c) => s + c.actualAmount, 0)
+    this.summaries().reduce((sum, category) => sum + category.actualAmount, 0)
   );
+
+  readonly bankOutcome = computed(() =>
+    this.monthTransactions()
+      .filter(tx => tx.paymentMethod === 'bank')
+      .reduce((sum, tx) => sum + tx.amount, 0)
+  );
+
+  readonly cashOutcome = computed(() =>
+    this.monthTransactions()
+      .filter(tx => tx.paymentMethod === 'cash')
+      .reduce((sum, tx) => sum + tx.amount, 0)
+  );
+
+  readonly bankBalance = computed(() => this.bankIncome() - this.withdrawalAmount() - this.bankOutcome());
+  readonly cashBalance = computed(() => this.cashIncome() + this.withdrawalAmount() - this.cashOutcome());
+
+  readonly availableIncome = computed(() => this.totalIncomeAmount());
 
   readonly totalDifference = computed(() => this.totalBudget() - this.totalActual());
 
@@ -51,38 +97,46 @@ export class Budget {
     this.totalBudget() > 0 ? (this.totalDifference() / this.totalBudget()) * 100 : 0
   );
 
-  readonly balanceVsBudget = computed(() => this.income() - this.totalBudget());
-  readonly balanceVsActual = computed(() => this.income() - this.totalActual());
-  readonly predictedDeficit = computed(() => Math.max(this.totalRemaining() - this.balanceVsActual(), 0));
+  readonly balanceVsBudget = computed(() => this.availableIncome() - this.totalBudget());
+  readonly balanceVsActual = computed(() => this.availableIncome() - this.totalActual());
+  readonly predictedDeficit = computed(() => Math.max(this.totalBudget() - this.availableIncome(), 0));
+  readonly totalRemainingOutcomeCard = computed(() => this.totalRemaining());
+  readonly negativeRemainingTotal = computed(() =>
+    this.summaries()
+      .filter(summary => summary.difference < 0)
+      .reduce((sum, summary) => sum + summary.difference, 0)
+  );
+  readonly projectedOverspendRaw = computed(() => this.negativeRemainingTotal());
+  readonly projectedOverspend = computed(() => this.projectedOverspendRaw() < 0 ? Math.abs(this.projectedOverspendRaw()) : 0);
+  readonly projectedOverBudget = computed(() => this.projectedOverspend() > 0);
 
-  // Donut chart segments
   readonly chartSegments = computed<ChartSegment[]>(() => {
-    const sums = this.summaries().filter(s => s.actualAmount > 0);
-    const total = sums.reduce((s, c) => s + c.actualAmount, 0);
+    const sums = this.summaries().filter(summary => summary.actualAmount > 0);
+    const total = sums.reduce((sum, category) => sum + category.actualAmount, 0);
     if (total === 0) return [];
 
     const segments: ChartSegment[] = [];
-    let offset = 25; // start from top (12 o'clock)
+    let offset = 25;
 
-    for (const s of sums) {
-      const pct = (s.actualAmount / total) * 100;
+    for (const summary of sums) {
+      const percentage = (summary.actualAmount / total) * 100;
       segments.push({
-        category: s.category,
-        percentage: pct,
-        dashArray: `${pct} ${100 - pct}`,
+        category: summary.category,
+        percentage,
+        dashArray: `${percentage} ${100 - percentage}`,
         dashOffset: offset,
       });
-      offset -= pct;
+      offset -= percentage;
     }
+
     return segments;
   });
 
-  // Bar chart max value
   readonly barMax = computed(() => {
     const sums = this.summaries();
     let max = 0;
-    for (const s of sums) {
-      max = Math.max(max, s.budgetAmount, s.actualAmount);
+    for (const summary of sums) {
+      max = Math.max(max, summary.budgetAmount, summary.actualAmount);
     }
     return max || 1;
   });
@@ -91,10 +145,46 @@ export class Budget {
     this.summaries().reduce((sum, category) => sum + Math.max(category.budgetAmount - category.actualAmount, 0), 0)
   );
 
+  ngAfterViewInit(): void {
+    queueMicrotask(() => this.updateIncomeScrollState());
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.updateIncomeScrollState();
+  }
+
+  updateIncomeScrollState(): void {
+    const element = this.incomeTableWrap?.nativeElement;
+    if (!element) return;
+
+    this.incomeScrollState = {
+      left: element.scrollLeft,
+      viewport: element.clientWidth,
+      scrollWidth: element.scrollWidth,
+    };
+  }
+
+  get incomeScrollbarVisible(): boolean {
+    return this.incomeScrollState.scrollWidth > this.incomeScrollState.viewport + 1;
+  }
+
+  get incomeScrollbarThumbWidth(): number {
+    if (!this.incomeScrollbarVisible) return 100;
+    return Math.max((this.incomeScrollState.viewport / this.incomeScrollState.scrollWidth) * 100, 20);
+  }
+
+  get incomeScrollbarThumbLeft(): number {
+    if (!this.incomeScrollbarVisible) return 0;
+    const maxLeft = this.incomeScrollState.scrollWidth - this.incomeScrollState.viewport;
+    if (maxLeft <= 0) return 0;
+    return (this.incomeScrollState.left / maxLeft) * (100 - this.incomeScrollbarThumbWidth);
+  }
+
   barWidth(value: number): number {
     return (value / this.barMax()) * 100;
   }
-  
+
   outcomeBarColor(actualAmount: number, budgetAmount: number): string {
     if (budgetAmount <= 0) return '#2196f3';
 
@@ -107,25 +197,36 @@ export class Budget {
 
   addIncome(): void {
     if (!this.newIncomeAmount || this.newIncomeAmount <= 0) return;
-    this.finance.addIncomeRecord(this.newIncomeAmount);
+    this.finance.addIncomeRecord(this.newIncomeAmount, this.newIncomeDescription.trim(), this.newIncomeMethod);
     this.newIncomeAmount = 0;
+    this.newIncomeDescription = '';
+    this.newIncomeMethod = 'bank';
   }
 
   startEditIncome(record: IncomeRecord): void {
     this.editingIncomeId = record.id;
     this.editingIncomeAmount = record.amount;
+    this.editingIncomeDescription = record.description ?? '';
+    this.editingIncomeMethod = record.paymentMethod ?? 'bank';
   }
 
   saveIncomeEdit(): void {
-    const rec = this.finance.incomeRecords().find(r => r.id === this.editingIncomeId);
-    if (rec && this.editingIncomeAmount > 0) {
-      this.finance.updateIncomeRecord({ ...rec, amount: this.editingIncomeAmount });
+    const record = this.finance.incomeRecords().find(item => item.id === this.editingIncomeId);
+    if (record && this.editingIncomeAmount > 0) {
+      this.finance.updateIncomeRecord({
+        ...record,
+        amount: this.editingIncomeAmount,
+        description: this.editingIncomeDescription.trim(),
+        paymentMethod: this.editingIncomeMethod,
+      });
     }
     this.editingIncomeId = null;
   }
 
   cancelIncomeEdit(): void {
     this.editingIncomeId = null;
+    this.editingIncomeDescription = '';
+    this.editingIncomeMethod = 'bank';
   }
 
   async deleteIncome(id: string): Promise<void> {
@@ -146,9 +247,9 @@ export class Budget {
   }
 
   updateCategoryBudget(categoryId: string, newBudget: number): void {
-    const cat = this.finance.getCategoryById(categoryId);
-    if (cat) {
-      this.finance.updateCategory({ ...cat, budgetAmount: newBudget });
+    const category = this.finance.getCategoryById(categoryId);
+    if (category) {
+      this.finance.updateCategory({ ...category, budgetAmount: newBudget });
     }
   }
 
@@ -172,18 +273,18 @@ export class Budget {
   prevMonth(): void {
     if (this.selectedMonth() === 0) {
       this.selectedMonth.set(11);
-      this.selectedYear.update(y => y - 1);
+      this.selectedYear.update(year => year - 1);
     } else {
-      this.selectedMonth.update(m => m - 1);
+      this.selectedMonth.update(month => month - 1);
     }
   }
 
   nextMonth(): void {
     if (this.selectedMonth() === 11) {
       this.selectedMonth.set(0);
-      this.selectedYear.update(y => y + 1);
+      this.selectedYear.update(year => year + 1);
     } else {
-      this.selectedMonth.update(m => m + 1);
+      this.selectedMonth.update(month => month + 1);
     }
   }
 }

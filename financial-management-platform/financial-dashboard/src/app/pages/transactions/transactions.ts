@@ -2,7 +2,7 @@ import { Component, inject, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { FinanceService } from '../../services/finance.service';
-import { TransactionGroup } from '../../models/finance.model';
+import { Transaction, TransactionGroup } from '../../models/finance.model';
 import { ToEurPipe } from '../../pipes/to-eur.pipe';
 import { QrScanner } from '../../components/qr-scanner/qr-scanner';
 import { ParsedQrBill } from '../../services/qr-parser.service';
@@ -23,12 +23,14 @@ export class Transactions {
   description = '';
   categoryId = '';
   amount: number = 0;
+  paymentMethod: 'cash' | 'bank' = 'bank';
 
   showScanner = signal(false);
   scannedBill = signal<ParsedQrBill | null>(null);
   scannedCategoryId = '';
   scannedAmount: number = 0;
   scannedDescription = '';
+  scannedPaymentMethod: 'cash' | 'bank' = 'bank';
 
   selectedMonth = signal(new Date().getMonth());
   selectedYear = signal(new Date().getFullYear());
@@ -78,9 +80,11 @@ export class Transactions {
       description: this.description.trim(),
       categoryId: this.categoryId,
       amount: this.amount,
+      paymentMethod: this.paymentMethod,
     });
     this.description = '';
     this.amount = 0;
+    this.paymentMethod = 'bank';
   }
 
   async deleteTransaction(id: string): Promise<void> {
@@ -102,13 +106,15 @@ export class Transactions {
   editDescription = '';
   editCategoryId = '';
   editAmount = 0;
+  editPaymentMethod: 'cash' | 'bank' = 'bank';
 
-  startEdit(tx: { id: string; date: string; description: string; categoryId: string; amount: number }): void {
+  startEdit(tx: Transaction): void {
     this.editingTxId = tx.id;
     this.editDate = tx.date;
     this.editDescription = tx.description;
     this.editCategoryId = tx.categoryId;
     this.editAmount = tx.amount;
+    this.editPaymentMethod = tx.paymentMethod ?? 'bank';
   }
 
   saveEdit(): void {
@@ -119,12 +125,14 @@ export class Transactions {
       description: this.editDescription.trim(),
       categoryId: this.editCategoryId,
       amount: this.editAmount,
+      paymentMethod: this.editPaymentMethod,
     });
     this.cancelEdit();
   }
 
   cancelEdit(): void {
     this.editingTxId = '';
+    this.editPaymentMethod = 'bank';
   }
 
   prevMonth(): void {
@@ -154,6 +162,7 @@ export class Transactions {
     this.showScanner.set(false);
     this.scannedBill.set(null);
     this.scannedCategoryId = '';
+    this.scannedPaymentMethod = 'bank';
   }
 
   onQrScanned(bill: ParsedQrBill): void {
@@ -162,6 +171,7 @@ export class Transactions {
     this.scannedCategoryId = '';
     this.scannedAmount = 0;
     this.scannedDescription = bill.recipient || '';
+    this.scannedPaymentMethod = 'bank';
   }
 
   confirmScannedBill(): void {
@@ -176,12 +186,14 @@ export class Transactions {
       description: this.scannedDescription.trim() || bill.description,
       categoryId: this.scannedCategoryId,
       amount,
+      paymentMethod: this.scannedPaymentMethod,
     });
 
     this.scannedBill.set(null);
     this.scannedCategoryId = '';
     this.scannedAmount = 0;
     this.scannedDescription = '';
+    this.scannedPaymentMethod = 'bank';
   }
 
   cancelScannedBill(): void {
@@ -189,5 +201,6 @@ export class Transactions {
     this.scannedCategoryId = '';
     this.scannedAmount = 0;
     this.scannedDescription = '';
+    this.scannedPaymentMethod = 'bank';
   }
 }

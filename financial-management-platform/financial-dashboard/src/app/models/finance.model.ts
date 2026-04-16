@@ -5,12 +5,17 @@ export interface Category {
   budgetAmount: number;
 }
 
+export type TransactionPaymentMethod = 'cash' | 'bank';
+export type IncomePaymentMethod = TransactionPaymentMethod | 'withdrawal';
+export type PaymentMethod = TransactionPaymentMethod;
+
 export interface Transaction {
   id: string;
   date: string;
   description: string;
   categoryId: string;
   amount: number;
+  paymentMethod: TransactionPaymentMethod;
 }
 
 export interface CategorySummary {
@@ -37,5 +42,7 @@ export interface TransactionGroup {
 export interface IncomeRecord {
   id: string;
   amount: number;
+  description: string;
+  paymentMethod: IncomePaymentMethod;
   createdAt: string; // ISO datetime string
 }

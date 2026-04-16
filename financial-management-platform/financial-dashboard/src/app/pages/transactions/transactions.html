@@ -61,6 +61,14 @@
               }
             </select>
           </div>
+
+          <div class="transactions__field">
+            <label class="transactions__label">Paid With</label>
+            <select [(ngModel)]="scannedPaymentMethod" class="transactions__select">
+              <option value="bank">Bank Account</option>
+              <option value="cash">Cash</option>
+            </select>
+          </div>
         </div>
 
         <div class="transactions__scanned-actions">
@@ -82,6 +90,13 @@
           @for (cat of categories(); track cat.id) {
             <option [value]="cat.id">{{ cat.name }}</option>
           }
+        </select>
+      </div>
+      <div class="transactions__field">
+        <label class="transactions__label">Paid With</label>
+        <select [(ngModel)]="paymentMethod" name="paymentMethod" class="transactions__select">
+          <option value="bank">Bank Account</option>
+          <option value="cash">Cash</option>
         </select>
       </div>
       <div class="transactions__field">
@@ -112,6 +127,7 @@
           <th class="table__header">Date</th>
           <th class="table__header">Description</th>
           <th class="table__header">Category</th>
+          <th class="table__header">Paid With</th>
           <th class="table__header transactions__text-right">Amount</th>
           <th class="table__header" style="width: 80px"></th>
         </tr>
@@ -119,7 +135,7 @@
       <tbody>
         @for (group of transactionGroups(); track group.date) {
           <tr class="transactions__group-header">
-            <td class="table__cell" colspan="4">
+            <td class="table__cell" colspan="5">
               <strong>{{ group.date | date:'d MMM yyyy' }}</strong>
             </td>
             <td class="table__cell transactions__text-right transactions__group-total">
@@ -133,7 +149,7 @@
           @for (tx of group.transactions; track tx.id; let i = $index) {
             @if (editingTxId === tx.id) {
               <tr class="transactions__row transactions__row--editing">
-                <td class="table__cell transactions__edit-cell" colspan="6">
+                <td class="table__cell transactions__edit-cell" colspan="7">
                   <div class="transactions__edit-form">
                     <div class="transactions__edit-meta">
                       <span class="transactions__text-muted">Editing transaction {{ i + 1 }}</span>
@@ -156,6 +172,14 @@
                           @for (cat of categories(); track cat.id) {
                             <option [value]="cat.id">{{ cat.name }}</option>
                           }
+                        </select>
+                      </div>
+
+                      <div class="transactions__field transactions__field--edit">
+                        <label class="transactions__label">Paid With</label>
+                        <select [(ngModel)]="editPaymentMethod" class="transactions__select transactions__select--inline">
+                          <option value="bank">Bank Account</option>
+                          <option value="cash">Cash</option>
                         </select>
                       </div>
 
@@ -183,6 +207,11 @@
                   {{ getCategoryName(tx.categoryId) }}
                 </span>
               </td>
+              <td class="table__cell">
+                <span class="transactions__payment-badge" [class.transactions__payment-badge--cash]="tx.paymentMethod === 'cash'" [class.transactions__payment-badge--bank]="tx.paymentMethod === 'bank'">
+                  {{ tx.paymentMethod === 'cash' ? 'Cash' : 'Bank Account' }}
+                </span>
+              </td>
               <td class="table__cell transactions__text-right">
                 <span class="dual-currency">
                   <span class="dual-currency__rsd">{{ tx.amount | number:'1.2-2' }} RSD</span>
@@ -197,7 +226,7 @@
             }
           }
         } @empty {
-          <tr><td colspan="6" class="table__cell transactions__empty">No transactions for this month.</td></tr>
+          <tr><td colspan="7" class="table__cell transactions__empty">No transactions for this month.</td></tr>
         }
       </tbody>
     </table>

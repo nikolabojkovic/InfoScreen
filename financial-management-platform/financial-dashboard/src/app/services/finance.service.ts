@@ -10,7 +10,7 @@ export class FinanceService {
   private readonly STORAGE_EUR_RATE = 'fin_eur_rate';
 
   private _categories = signal<Category[]>(this.load(this.STORAGE_CATEGORIES, this.defaultCategories()));
-  private _transactions = signal<Transaction[]>(this.load(this.STORAGE_TRANSACTIONS, []));
+  private _transactions = signal<Transaction[]>(this.migrateTransactions());
   private _incomeRecords = signal<IncomeRecord[]>(this.migrateIncomeRecords());
   private _eurRate = signal<number>(this.load(this.STORAGE_EUR_RATE, 117.0));
 
@@ -20,7 +20,9 @@ export class FinanceService {
   readonly eurRate = this._eurRate.asReadonly();
 
   readonly income = computed(() =>
-    this._incomeRecords().reduce((sum, r) => sum + r.amount, 0)
+    this._incomeRecords()
+      .filter(r => r.paymentMethod !== 'withdrawal')
+      .reduce((sum, r) => sum + r.amount, 0)
   );
 
   readonly totalExpenses = computed(() =>
@@ -75,10 +77,12 @@ export class FinanceService {
   }
 
   // Income records CRUD
-  addIncomeRecord(amount: number): void {
+  addIncomeRecord(amount: number, description = '', paymentMethod: 'cash' | 'bank' | 'withdrawal' = 'bank'): void {
     const record: IncomeRecord = {
       id: this.genId(),
       amount,
+      description,
+      paymentMethod,
       createdAt: new Date().toISOString(),
     };
     this._incomeRecords.update(list => [...list, record]);
@@ -146,15 +150,35 @@ export class FinanceService {
 
   private migrateIncomeRecords(): IncomeRecord[] {
     const records = this.load<IncomeRecord[]>(this.STORAGE_INCOME_RECORDS, []);
-    if (records.length > 0) return records;
+    if (records.length > 0) {
+      return records.map(record => ({
+        ...record,
+        description: record.description ?? '',
+        paymentMethod: record.paymentMethod ?? 'bank',
+      }));
+    }
     // Migrate old single-income value if present
     const oldIncome = this.load<number>(this.STORAGE_INCOME, 0);
     if (oldIncome > 0) {
-      const migrated: IncomeRecord[] = [{ id: this.genId(), amount: oldIncome, createdAt: new Date().toISOString() }];
+      const migrated: IncomeRecord[] = [{ id: this.genId(), amount: oldIncome, description: '', paymentMethod: 'bank', createdAt: new Date().toISOString() }];
       this.save(this.STORAGE_INCOME_RECORDS, migrated);
       return migrated;
     }
     return [];
+  }
+
+  private migrateTransactions(): Transaction[] {
+    const transactions = this.load<Array<Partial<Transaction>>>(this.STORAGE_TRANSACTIONS, []);
+    return transactions
+      .filter(transaction => !!transaction.id && !!transaction.date && !!transaction.description && !!transaction.categoryId)
+      .map(transaction => ({
+        id: transaction.id as string,
+        date: transaction.date as string,
+        description: transaction.description as string,
+        categoryId: transaction.categoryId as string,
+        amount: Number(transaction.amount ?? 0),
+        paymentMethod: transaction.paymentMethod ?? 'bank',
+      }));
   }
 
   private defaultCategories(): Category[] {

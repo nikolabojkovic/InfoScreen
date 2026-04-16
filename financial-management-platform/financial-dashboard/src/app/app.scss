@@ -3,5 +3,12 @@
     min-height: calc(100vh - 56px);
     background: var(--color-bg);
     transition: background-color 0.2s ease;
+    padding-top: 56px;
+  }
+
+  @media (max-width: 600px) {
+    &__content {
+      padding-top: 120px;
+    }
   }
 }

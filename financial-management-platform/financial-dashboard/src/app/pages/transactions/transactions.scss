@@ -235,7 +235,7 @@
 
   &__edit-fields {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
   }
 
@@ -277,6 +277,29 @@
     border-radius: 6px;
     width: 100%;
     min-width: 80px;
+  }
+
+  &__payment-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-width: 106px;
+
+    &--bank {
+      color: var(--color-accent);
+      background: var(--color-accent-soft);
+    }
+
+    &--cash {
+      color: var(--color-danger);
+      background: var(--color-danger-soft);
+    }
   }
 
   &__empty {
