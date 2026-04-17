@@ -1,3 +1,183 @@
+                @media (min-width: 601px) {
+                  .categories__item-row,
+                  .categories__item-add-row {
+                    display: flex;
+                    flex-direction: row;
+                    gap: 12px;
+                    margin-bottom: 12px;
+                    width: 100%;
+                    box-sizing: border-box;
+                  }
+                  .categories__item-row .categories__input--item,
+                  .categories__item-add-row .categories__input--item {
+                    box-sizing: border-box;
+                  }
+                    .categories__item-row .categories__input--item[name^="item-desc-"],
+                    .categories__item-add-row .categories__input--item[name^="item-desc-"],
+                    .categories__item-add-row .categories__input--item[name="new-item-desc"] {
+                      flex: 10 1 0%;
+                      min-width: 0;
+                      box-sizing: border-box;
+                    }
+                    .categories__item-row .categories__input--item[name^="item-amount-"],
+                    .categories__item-add-row .categories__input--item[name^="item-amount-"],
+                    .categories__item-add-row .categories__input--item[name="new-item-amount"] {
+                      flex: 0 0 90px;
+                      width: 90px;
+                      min-width: 0;
+                      box-sizing: border-box;
+                    }
+                    .categories__item-row .btn,
+                    .categories__item-add-row .btn {
+                      flex: 0 0 auto;
+                      min-width: 0;
+                      box-sizing: border-box;
+                    }
+                }
+
+                @media (max-width: 600px) {
+                  .categories__item-row,
+                  .categories__item-add-row {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                    margin-bottom: 12px;
+                  }
+                  .categories__item-row .categories__input--item,
+                  .categories__item-add-row .categories__input--item,
+                  .categories__item-row .btn,
+                  .categories__item-add-row .btn {
+                    width: 100% !important;
+                    min-width: 0;
+                    box-sizing: border-box;
+                  }
+                }
+      .categories__submit-row {
+        display: flex;
+        justify-content: flex-end;
+        width: 100%;
+      }
+
+      .categories__submit-row .btn {
+        min-width: 120px;
+        width: auto;
+        display: inline-block;
+      }
+
+      @media (max-width: 600px) {
+        .categories__submit-row {
+          justify-content: stretch;
+        }
+        .categories__submit-row .btn {
+          width: 100% !important;
+          display: block;
+          font-size: 1rem;
+          padding: 8px 0;
+          border-radius: 8px;
+          font-weight: 600;
+          letter-spacing: 0.01em;
+          box-shadow: none;
+          margin: 0;
+          min-width: 0;
+        }
+      }
+    /* Desktop: align + Add button to right in add category form */
+    form.categories__form-col > button[type="submit"].btn {
+      align-self: flex-end;
+      margin-left: auto;
+      margin-right: 0;
+      width: auto;
+      min-width: 120px;
+      display: inline-block;
+    }
+  @media (max-width: 600px) {
+    form.categories__form-col > button[type="submit"].btn {
+      width: 100% !important;
+      display: block;
+      font-size: 1rem;
+      padding: 8px 0;
+      border-radius: 8px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      box-shadow: none;
+      margin: 0;
+      align-self: stretch;
+    }
+  }
+
+  /* Laptop / desktop improvements for Add Category form */
+  @media (min-width: 601px) {
+    form.categories__form-col {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* Name field stretches, Color field stays compact */
+    form.categories__form-col .categories__form-row {
+      align-items: flex-end;
+      gap: 16px;
+    }
+    form.categories__form-col .categories__form-row .categories__field:not(.categories__field--color) {
+      flex: 1 1 0%;
+    }
+    form.categories__form-col .categories__form-row .categories__field--color {
+      flex: 0 0 70px;
+    }
+
+    /* Items section: subtle card look */
+    .categories__items-section {
+      background: var(--color-bg-soft, rgba(0,0,0,0.03));
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .categories__items-section > .categories__label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--color-text-muted);
+      margin-bottom: 4px;
+    }
+    .categories__items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Tighten the add-new-item row inputs */
+    .categories__item-add-row,
+    .categories__item-row {
+      align-items: center;
+    }
+    .categories__item-add-row .categories__input--item,
+    .categories__item-row .categories__input--item {
+      height: 38px;
+      padding: 6px 10px;
+      font-size: 0.92rem;
+    }
+    .categories__item-add-row .btn,
+    .categories__item-row .btn {
+      height: 38px;
+      padding: 0 14px;
+      font-size: 0.88rem;
+      white-space: nowrap;
+    }
+
+    /* Submit row */
+    .categories__submit-row {
+      padding-top: 4px;
+    }
+    .categories__submit-row .btn {
+      padding: 9px 32px;
+      font-size: 0.97rem;
+      font-weight: 700;
+      border-radius: 8px;
+    }
+  }
 .categories {
   max-width: 900px;
   margin: 0 auto;

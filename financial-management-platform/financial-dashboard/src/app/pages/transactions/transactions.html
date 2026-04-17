@@ -108,7 +108,7 @@
         <input type="text" [(ngModel)]="description" name="desc" placeholder="Transaction description" required class="transactions__input" />
       </div>
       <div class="transactions__form-actions">
-        <button type="submit" class="btn btn--primary">+ Add</button>
+        <button type="submit" class="btn btn--primary" [disabled]="!date || !categoryId || amount <= 0 || !description.trim()">+ Add</button>
       </div>
     </form>
   </div>

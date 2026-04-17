@@ -1,3 +1,12 @@
+// Disabled button global style
+.btn[disabled], .btn:disabled {
+  background: #ccc !important;
+  color: #888 !important;
+  cursor: not-allowed !important;
+  border: none !important;
+  opacity: 1 !important;
+  box-shadow: none !important;
+}
 :root {
   --color-accent: #1b5e20;
   --color-accent-hover: #2e7d32;

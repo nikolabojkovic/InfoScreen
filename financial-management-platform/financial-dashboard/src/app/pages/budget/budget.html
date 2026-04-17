@@ -223,32 +223,39 @@
   <!-- Income form and table Table -->
   <div class="budget__top-grid">
     <div class="budget__card budget__card--controls">
-      <div style="font-weight: 600; font-size: 1.1rem; margin-bottom: 8px;">Add income</div>
-      <div class="budget__top-fields">
-        <div style="height: 16px;"></div>
-        <div class="budget__income-field">
-          <label class="budget__income-label">Income (RSD)</label>
-          <div class="budget__income-wrap">
-            <input
-              type="number"
-              [(ngModel)]="newIncomeAmount"
-              (keydown.enter)="addIncome()"
-              min="0"
-              step="1"
-              placeholder="Enter amount"
-              class="budget__income-input"
-            />
-            <span class="budget__currency">RSD</span>
-            <select [(ngModel)]="newIncomeMethod" class="budget__income-select">
+      <div class="budget__add-income-form">
+        <div class="budget__add-income-title">Add Income</div>
+        <div class="budget__add-income-row">
+          <div class="budget__add-income-col">
+            <label class="budget__income-label" for="income-amount">Amount</label>
+            <div class="budget__add-income-input-group">
+              <input
+                id="income-amount"
+                type="number"
+                [(ngModel)]="newIncomeAmount"
+                (keydown.enter)="addIncome()"
+                min="0"
+                step="1"
+                placeholder="Amount"
+                class="budget__income-input"
+              />
+              <span class="budget__currency">RSD</span>
+            </div>
+          </div>
+          <div class="budget__add-income-col">
+            <label class="budget__income-label" for="income-method">Type</label>
+            <select id="income-method" [(ngModel)]="newIncomeMethod" class="budget__income-select">
               <option value="bank">Bank Account</option>
               <option value="cash">Cash</option>
               <option value="withdrawal">Withdrawal</option>
             </select>
-            <button class="btn btn--primary budget__income-add-btn" (click)="addIncome()">Add</button>
           </div>
-          <div class="budget__income-wrap budget__income-wrap--description">
-            <input type="text" [(ngModel)]="newIncomeDescription" placeholder="Income description" class="budget__income-input budget__income-input--description" />
-          </div>
+        </div>
+        <div class="budget__add-income-desc">
+          <input type="text" [(ngModel)]="newIncomeDescription" placeholder="Income description" class="budget__income-input budget__income-input--description" />
+        </div>
+        <div class="budget__add-income-actions">
+          <button class="btn btn--primary budget__income-add-btn-small budget__add-income-btn-full" (click)="addIncome()">+ Add</button>
         </div>
       </div>
     </div>
