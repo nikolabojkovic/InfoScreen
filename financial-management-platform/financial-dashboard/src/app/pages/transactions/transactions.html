@@ -113,9 +113,6 @@
 
   <div class="transactions__card">
     <div class="transactions__month-nav">
-      <button class="transactions__btn-icon" (click)="prevMonth()">◀</button>
-      <h2 class="transactions__month-label">{{ monthLabel() }}</h2>
-      <button class="transactions__btn-icon" (click)="nextMonth()">▶</button>
       <span class="transactions__month-total">Total: {{ monthTotal() | number:'1.2-2' }} RSD <span class="dual-currency__eur">{{ monthTotal() | toEur }} €</span></span>
     </div>
 

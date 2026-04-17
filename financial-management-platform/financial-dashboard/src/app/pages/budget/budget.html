@@ -1,149 +1,4 @@
 <div class="budget">
-  <div class="budget">
-    <div class="budget__top-bar">
-      <div class="budget__month-nav">
-        <button class="budget__btn-icon" (click)="prevMonth()">◀</button>
-        <h1 class="budget__month-label">{{ monthLabel() }}</h1>
-        <button class="budget__btn-icon" (click)="nextMonth()">▶</button>
-      </div>
-    </div>
-
-    <div class="budget__top-grid">
-      <div class="budget__card budget__card--controls">
-        <div class="budget__top-fields">
-          <div class="budget__income-field">
-            <label class="budget__income-label">EUR Rate (1 EUR =)</label>
-            <div class="budget__income-wrap">
-              <input type="number" [(ngModel)]="eurRateInput" (change)="updateEurRate()" min="0.01" step="0.01" class="budget__income-input" />
-              <span class="budget__currency">RSD</span>
-            </div>
-          </div>
-          <div class="budget__income-field">
-            <label class="budget__income-label">Income (RSD)</label>
-            <div class="budget__income-wrap">
-              <input
-                type="number"
-                [(ngModel)]="newIncomeAmount"
-                (keydown.enter)="addIncome()"
-                min="0"
-                step="1"
-                placeholder="Enter amount"
-                class="budget__income-input"
-              />
-              <span class="budget__currency">RSD</span>
-              <select [(ngModel)]="newIncomeMethod" class="budget__income-select">
-                <option value="bank">Bank Account</option>
-                <option value="cash">Cash</option>
-                <option value="withdrawal">Withdrawal</option>
-              </select>
-              <button class="btn btn--primary budget__income-add-btn" (click)="addIncome()">Add</button>
-            </div>
-            <div class="budget__income-wrap budget__income-wrap--description">
-              <input type="text" [(ngModel)]="newIncomeDescription" placeholder="Income description" class="budget__income-input budget__income-input--description" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="budget__card budget__card--income-table">
-        <h2 class="budget__card-title">Income Table</h2>
-        @if (incomeRecords().length > 0) {
-          <div #incomeTableWrap class="table-responsive budget__income-table-wrap" (scroll)="updateIncomeScrollState()">
-            <table class="table budget__income-table">
-              <thead>
-                <tr>
-                  <th class="table__header">Description</th>
-                  <th class="table__header">Type</th>
-                  <th class="table__header">Amount (RSD)</th>
-                  <th class="table__header">Date &amp; Time</th>
-                  <th class="table__header"></th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (rec of incomeRecords(); track rec.id) {
-                  <tr>
-                    <td class="table__cell budget__income-description-cell">
-                      @if (editingIncomeId === rec.id) {
-                        <input type="text" [(ngModel)]="editingIncomeDescription" class="budget__input--inline budget__input--inline-description" (keydown.enter)="saveIncomeEdit()" (keydown.escape)="cancelIncomeEdit()" />
-                      } @else {
-                        {{ rec.description || 'Income' }}
-                      }
-                    </td>
-                    <td class="table__cell budget__income-type-cell">
-                      @if (editingIncomeId === rec.id) {
-                        <select [(ngModel)]="editingIncomeMethod" class="budget__select--inline">
-                          <option value="bank">Bank Account</option>
-                          <option value="cash">Cash</option>
-                          <option value="withdrawal">Withdrawal</option>
-                        </select>
-                      } @else {
-                        <span class="budget__income-type-badge"
-                          [class.budget__income-type-badge--bank]="rec.paymentMethod === 'bank'"
-                          [class.budget__income-type-badge--cash]="rec.paymentMethod === 'cash'"
-                          [class.budget__income-type-badge--withdrawal]="rec.paymentMethod === 'withdrawal'">
-                          {{ rec.paymentMethod === 'cash' ? 'Cash' : rec.paymentMethod === 'withdrawal' ? 'Withdrawal' : 'Bank Account' }}
-                        </span>
-                      }
-                    </td>
-                    <td class="table__cell budget__income-amount-cell">
-                      @if (editingIncomeId === rec.id) {
-                        <input
-                          type="number"
-                          [(ngModel)]="editingIncomeAmount"
-                          min="0"
-                          step="1"
-                          class="budget__input--inline"
-                          (keydown.enter)="saveIncomeEdit()"
-                          (keydown.escape)="cancelIncomeEdit()"
-                        />
-                      } @else {
-                        {{ rec.amount | number:'1.0-0' }}
-                      }
-                    </td>
-                    <td class="table__cell budget__income-date-cell">{{ rec.createdAt | date:'dd.MM.yyyy HH:mm' }}</td>
-                    <td class="table__cell budget__income-actions-cell">
-                      @if (editingIncomeId === rec.id) {
-                        <button class="budget__btn-inline budget__btn-inline--save" (click)="saveIncomeEdit()" title="Save">✓</button>
-                        <button class="budget__btn-inline budget__btn-inline--cancel" (click)="cancelIncomeEdit()" title="Cancel">✕</button>
-                      } @else {
-                        <button class="budget__btn-inline" (click)="startEditIncome(rec)" title="Edit">✎</button>
-                        <button class="budget__btn-inline budget__btn-inline--cancel" (click)="deleteIncome(rec.id)" title="Delete">✕</button>
-                      }
-                    </td>
-                  </tr>
-                }
-              </tbody>
-              <tfoot>
-                <tr class="budget__total-row budget__income-total-row">
-                  <td class="table__cell" colspan="2"><strong>Total Income</strong></td>
-                  <td class="table__cell"><strong>{{ income() | number:'1.0-0' }} RSD</strong></td>
-                  <td class="table__cell budget__income-eur-cell" colspan="2">≈ {{ income() | toEur }} €</td>
-                </tr>
-                <tr class="budget__total-row budget__income-total-row budget__income-total-row--bank">
-                  <td class="table__cell" colspan="2"><strong>Bank Account Balance</strong></td>
-                  <td class="table__cell"><strong>{{ bankBalance() | number:'1.0-0' }} RSD</strong></td>
-                  <td class="table__cell budget__income-eur-cell" colspan="2">≈ {{ bankBalance() | toEur }} €</td>
-                </tr>
-                <tr class="budget__total-row budget__income-total-row budget__income-total-row--cash">
-                  <td class="table__cell" colspan="2"><strong>Cash Balance</strong></td>
-                  <td class="table__cell"><strong>{{ cashBalance() | number:'1.0-0' }} RSD</strong></td>
-                  <td class="table__cell budget__income-eur-cell" colspan="2">≈ {{ cashBalance() | toEur }} €</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-          @if (incomeScrollbarVisible) {
-            <div class="budget__income-scrollbar" aria-hidden="true">
-              <div
-                class="budget__income-scrollbar-thumb"
-                [style.width.%]="incomeScrollbarThumbWidth"
-                [style.left.%]="incomeScrollbarThumbLeft"
-              ></div>
-            </div>
-          }
-        }
-      </div>
-    </div>
   <!-- Charts -->
   <div class="budget__charts-row">
     <div class="budget__card budget__card--chart">
@@ -212,6 +67,54 @@
       <div class="budget__bar-legend">
         <span class="budget__legend-item"><span class="budget__legend-dot" style="background: #ccc"></span> Budget</span>
         <span class="budget__legend-item"><span class="budget__legend-dot" style="background: #666"></span> Actual</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Income vs Expenses -->
+  <div class="budget__card budget__card--summary">
+    <div class="budget__summary-grid">
+      <div class="budget__summary-item budget__summary-item--highlight" data-tooltip="Income - Total Outcome">
+        <span class="budget__summary-label">
+          Actual Balance
+        </span>
+        <div class="budget__summary-balance-stack">
+          <span class="budget__summary-value" [class.budget__positive]="balanceVsActual() >= 0" [class.budget__negative]="balanceVsActual() < 0">
+            {{ balanceVsActual() | number:'1.2-2' }} <span class="budget__summary-unit">RSD</span>
+            <span class="dual-currency__eur--lg">{{ balanceVsActual() | toEur }} €</span>
+          </span>
+          <span class="budget__summary-breakdown budget__summary-breakdown--bank">
+            Bank Account: {{ bankBalance() | number:'1.2-2' }} RSD ({{ bankBalance() | toEur }} €)
+          </span>
+          <span class="budget__summary-breakdown budget__summary-breakdown--cash">
+            Cash: {{ cashBalance() | number:'1.2-2' }} RSD ({{ cashBalance() | toEur }} €)
+          </span>
+        </div>
+      </div>
+      <div class="budget__summary-item budget__summary-item--warning">
+        <span class="budget__summary-label">Total Remaining Outcome</span>
+        <span class="budget__summary-value budget__positive">
+          {{ totalRemainingOutcomeCard() | number:'1.2-2' }} <span class="budget__summary-unit">RSD</span>
+          <span class="dual-currency__eur--lg">{{ totalRemainingOutcomeCard() | toEur }} €</span>
+        </span>
+      </div>
+      <div class="budget__summary-item budget__summary-item--highlight" data-tooltip="Income - Budget">
+        <span class="budget__summary-label">
+          Expected Savings
+        </span>
+        <span class="budget__summary-value" [class.budget__positive]="balanceVsBudget() >= 0" [class.budget__negative]="balanceVsBudget() < 0">
+          {{ balanceVsBudget() | number:'1.2-2' }} <span class="budget__summary-unit">RSD</span>
+          <span class="dual-currency__eur--lg">{{ balanceVsBudget() | toEur }} €</span>
+        </span>
+      </div>      
+      <div class="budget__summary-item" [class.budget__summary-item--highlight]="projectedOverspend() === 0" [class.budget__summary-item--danger]="projectedOverspend() > 0" [attr.data-tooltip]="'Projected formula: negative Remaining values + Total Remaining Outcome card - Total Budget'">
+        <span class="budget__summary-label">
+          Projected Overspend
+        </span>
+        <span class="budget__summary-value" [class.budget__negative]="projectedOverspend() > 0" [class.budget__positive]="projectedOverspend() === 0">
+          {{ projectedOverspend() | number:'1.2-2' }} <span class="budget__summary-unit">RSD</span>
+          <span class="dual-currency__eur--lg">{{ projectedOverspend() | toEur }} €</span>
+        </span>
       </div>
     </div>
   </div>
@@ -315,69 +218,141 @@
     </div>
   </div>
 
-  <!-- Income vs Expenses -->
-  <div class="budget__card budget__card--summary">
-    <h2 class="budget__card-title">Income vs Expenses</h2>
-    <div class="budget__summary-grid">
-      <div class="budget__summary-item">
-        <span class="budget__summary-label">
-          Total Income
-        </span>
-        <span class="budget__summary-value budget__summary-value--income">
-          {{ availableIncome() | number:'1.2-2' }} <span class="budget__summary-unit">RSD</span>
-          <span class="dual-currency__eur--lg">{{ availableIncome() | toEur }} €</span>
-        </span>
+  <!-- Income form and table Table -->
+  <div class="budget__top-grid">
+    <div class="budget__card budget__card--controls">
+      <div class="budget__top-fields">
+        <div class="budget__income-field">
+          <label class="budget__income-label">EUR Rate (1 EUR =)</label>
+          <div class="budget__income-wrap">
+            <input type="number" [(ngModel)]="eurRateInput" (change)="updateEurRate()" min="0.01" step="0.01" class="budget__income-input" />
+            <span class="budget__currency">RSD</span>
+          </div>
+        </div>
+        <div class="budget__income-field">
+          <label class="budget__income-label">Income (RSD)</label>
+          <div class="budget__income-wrap">
+            <input
+              type="number"
+              [(ngModel)]="newIncomeAmount"
+              (keydown.enter)="addIncome()"
+              min="0"
+              step="1"
+              placeholder="Enter amount"
+              class="budget__income-input"
+            />
+            <span class="budget__currency">RSD</span>
+            <select [(ngModel)]="newIncomeMethod" class="budget__income-select">
+              <option value="bank">Bank Account</option>
+              <option value="cash">Cash</option>
+              <option value="withdrawal">Withdrawal</option>
+            </select>
+            <button class="btn btn--primary budget__income-add-btn" (click)="addIncome()">Add</button>
+          </div>
+          <div class="budget__income-wrap budget__income-wrap--description">
+            <input type="text" [(ngModel)]="newIncomeDescription" placeholder="Income description" class="budget__income-input budget__income-input--description" />
+          </div>
+        </div>
       </div>
-      <div class="budget__summary-item">
-        <span class="budget__summary-label">Total Outcome</span>
-        <span class="budget__summary-value budget__summary-value--expenses">
-          {{ totalActual() | number:'1.2-2' }} <span class="budget__summary-unit">RSD</span>
-          <span class="dual-currency__eur--lg">{{ totalActual() | toEur }} €</span>
-        </span>
-      </div>
-      <div class="budget__summary-item budget__summary-item--highlight" data-tooltip="Income - Total Outcome">
-        <span class="budget__summary-label">
-          Actual Balance
-        </span>
-        <span class="budget__summary-value" [class.budget__positive]="balanceVsActual() >= 0" [class.budget__negative]="balanceVsActual() < 0">
-          {{ balanceVsActual() | number:'1.2-2' }} <span class="budget__summary-unit">RSD</span>
-          <span class="dual-currency__eur--lg">{{ balanceVsActual() | toEur }} €</span>
-        </span>
-      </div>
-      <div class="budget__summary-item budget__summary-item--warning">
-        <span class="budget__summary-label">Total Remaining Outcome</span>
-        <span class="budget__summary-value budget__positive">
-          {{ totalRemainingOutcomeCard() | number:'1.2-2' }} <span class="budget__summary-unit">RSD</span>
-          <span class="dual-currency__eur--lg">{{ totalRemainingOutcomeCard() | toEur }} €</span>
-        </span>
-      </div>
-      <div class="budget__summary-item budget__summary-item--highlight" data-tooltip="Income - Budget">
-        <span class="budget__summary-label">
-          Expected Savings
-        </span>
-        <span class="budget__summary-value" [class.budget__positive]="balanceVsBudget() >= 0" [class.budget__negative]="balanceVsBudget() < 0">
-          {{ balanceVsBudget() | number:'1.2-2' }} <span class="budget__summary-unit">RSD</span>
-          <span class="dual-currency__eur--lg">{{ balanceVsBudget() | toEur }} €</span>
-        </span>
-      </div>      
-      <div class="budget__summary-item" [class.budget__summary-item--highlight]="projectedOverspend() === 0" [class.budget__summary-item--warning]="projectedOverspend() > 0" [attr.data-tooltip]="'Projected formula: negative Remaining values + Total Remaining Outcome card - Total Budget'">
-        <span class="budget__summary-label">
-          Projected Overspend
-        </span>
-        <span class="budget__summary-value" [class.budget__negative]="projectedOverspend() > 0" [class.budget__positive]="projectedOverspend() === 0">
-          {{ projectedOverspend() | number:'1.2-2' }} <span class="budget__summary-unit">RSD</span>
-          <span class="dual-currency__eur--lg">{{ projectedOverspend() | toEur }} €</span>
-        </span>
-      </div>
-      <div class="budget__summary-item budget__summary-item--danger" data-tooltip="Budget - Total Income">
-        <span class="budget__summary-label">
-          Deficit
-        </span>
-        <span class="budget__summary-value" [class.budget__negative]="predictedDeficit() > 0">
-          {{ predictedDeficit() | number:'1.2-2' }} <span class="budget__summary-unit">RSD</span>
-          <span class="dual-currency__eur--lg">{{ predictedDeficit() | toEur }} €</span>
-        </span>
-      </div>
+    </div>
+
+    <div class="budget__card budget__card--income-table">
+      <h2 class="budget__card-title">Income Table</h2>
+      @if (incomeRecords().length > 0) {
+        <div #incomeTableWrap class="table-responsive budget__income-table-wrap" (scroll)="updateIncomeScrollState()">
+          <table class="table budget__income-table">
+            <thead>
+              <tr>
+                <th class="table__header">Description</th>
+                <th class="table__header">Type</th>
+                <th class="table__header">Amount (RSD)</th>
+                <th class="table__header">Date &amp; Time</th>
+                <th class="table__header"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (rec of incomeRecords(); track rec.id) {
+                <tr>
+                  <td class="table__cell budget__income-description-cell">
+                    @if (editingIncomeId === rec.id) {
+                      <input type="text" [(ngModel)]="editingIncomeDescription" class="budget__input--inline budget__input--inline-description" (keydown.enter)="saveIncomeEdit()" (keydown.escape)="cancelIncomeEdit()" />
+                    } @else {
+                      {{ rec.description || 'Income' }}
+                    }
+                  </td>
+                  <td class="table__cell budget__income-type-cell">
+                    @if (editingIncomeId === rec.id) {
+                      <select [(ngModel)]="editingIncomeMethod" class="budget__select--inline">
+                        <option value="bank">Bank Account</option>
+                        <option value="cash">Cash</option>
+                        <option value="withdrawal">Withdrawal</option>
+                      </select>
+                    } @else {
+                      <span class="budget__income-type-badge"
+                        [class.budget__income-type-badge--bank]="rec.paymentMethod === 'bank'"
+                        [class.budget__income-type-badge--cash]="rec.paymentMethod === 'cash'"
+                        [class.budget__income-type-badge--withdrawal]="rec.paymentMethod === 'withdrawal'">
+                        {{ rec.paymentMethod === 'cash' ? 'Cash' : rec.paymentMethod === 'withdrawal' ? 'Withdrawal' : 'Bank Account' }}
+                      </span>
+                    }
+                  </td>
+                  <td class="table__cell budget__income-amount-cell">
+                    @if (editingIncomeId === rec.id) {
+                      <input
+                        type="number"
+                        [(ngModel)]="editingIncomeAmount"
+                        min="0"
+                        step="1"
+                        class="budget__input--inline"
+                        (keydown.enter)="saveIncomeEdit()"
+                        (keydown.escape)="cancelIncomeEdit()"
+                      />
+                    } @else {
+                      {{ rec.amount | number:'1.0-0' }}
+                    }
+                  </td>
+                  <td class="table__cell budget__income-date-cell">{{ rec.createdAt | date:'dd.MM.yyyy HH:mm' }}</td>
+                  <td class="table__cell budget__income-actions-cell">
+                    @if (editingIncomeId === rec.id) {
+                      <button class="budget__btn-inline budget__btn-inline--save" (click)="saveIncomeEdit()" title="Save">✓</button>
+                      <button class="budget__btn-inline budget__btn-inline--cancel" (click)="cancelIncomeEdit()" title="Cancel">✕</button>
+                    } @else {
+                      <button class="budget__btn-inline" (click)="startEditIncome(rec)" title="Edit">✎</button>
+                      <button class="budget__btn-inline budget__btn-inline--cancel" (click)="deleteIncome(rec.id)" title="Delete">✕</button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr class="budget__total-row budget__income-total-row">
+                <td class="table__cell" colspan="2"><strong>Total Income</strong></td>
+                <td class="table__cell"><strong>{{ income() | number:'1.0-0' }} RSD</strong></td>
+                <td class="table__cell budget__income-eur-cell" colspan="2">≈ {{ income() | toEur }} €</td>
+              </tr>
+              <tr class="budget__total-row budget__income-total-row budget__income-total-row--bank">
+                <td class="table__cell" colspan="2"><strong>Bank Account Balance</strong></td>
+                <td class="table__cell"><strong>{{ bankBalance() | number:'1.0-0' }} RSD</strong></td>
+                <td class="table__cell budget__income-eur-cell" colspan="2">≈ {{ bankBalance() | toEur }} €</td>
+              </tr>
+              <tr class="budget__total-row budget__income-total-row budget__income-total-row--cash">
+                <td class="table__cell" colspan="2"><strong>Cash Balance</strong></td>
+                <td class="table__cell"><strong>{{ cashBalance() | number:'1.0-0' }} RSD</strong></td>
+                <td class="table__cell budget__income-eur-cell" colspan="2">≈ {{ cashBalance() | toEur }} €</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        @if (incomeScrollbarVisible) {
+          <div class="budget__income-scrollbar" aria-hidden="true">
+            <div
+              class="budget__income-scrollbar-thumb"
+              [style.width.%]="incomeScrollbarThumbWidth"
+              [style.left.%]="incomeScrollbarThumbLeft"
+            ></div>
+          </div>
+        }
+      }
     </div>
   </div>
 </div>

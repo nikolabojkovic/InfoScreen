@@ -22,8 +22,8 @@ export class Budget implements AfterViewInit {
   newIncomeDescription = '';
   newIncomeMethod: 'cash' | 'bank' | 'withdrawal' = 'bank';
   eurRateInput = this.finance.eurRate();
-  selectedMonth = signal(new Date().getMonth());
-  selectedYear = signal(new Date().getFullYear());
+  selectedMonth = this.finance.selectedMonth;
+  selectedYear = this.finance.selectedYear;
 
   readonly incomeRecords = this.finance.incomeRecords;
   readonly income = this.finance.income;
@@ -99,7 +99,6 @@ export class Budget implements AfterViewInit {
 
   readonly balanceVsBudget = computed(() => this.availableIncome() - this.totalBudget());
   readonly balanceVsActual = computed(() => this.availableIncome() - this.totalActual());
-  readonly predictedDeficit = computed(() => Math.max(this.totalBudget() - this.availableIncome(), 0));
   readonly totalRemainingOutcomeCard = computed(() => this.totalRemaining());
   readonly negativeRemainingTotal = computed(() =>
     this.summaries()
@@ -272,19 +271,19 @@ export class Budget implements AfterViewInit {
 
   prevMonth(): void {
     if (this.selectedMonth() === 0) {
-      this.selectedMonth.set(11);
-      this.selectedYear.update(year => year - 1);
+      this.finance.setSelectedMonth(11);
+      this.finance.setSelectedYear(this.selectedYear() - 1);
     } else {
-      this.selectedMonth.update(month => month - 1);
+      this.finance.setSelectedMonth(this.selectedMonth() - 1);
     }
   }
 
   nextMonth(): void {
     if (this.selectedMonth() === 11) {
-      this.selectedMonth.set(0);
-      this.selectedYear.update(year => year + 1);
+      this.finance.setSelectedMonth(0);
+      this.finance.setSelectedYear(this.selectedYear() + 1);
     } else {
-      this.selectedMonth.update(month => month + 1);
+      this.finance.setSelectedMonth(this.selectedMonth() + 1);
     }
   }
 }

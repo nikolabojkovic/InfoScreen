@@ -6,6 +6,8 @@
   --color-danger: #d32f2f;
   --color-danger-hover: #e53935;
   --color-danger-soft: #ffebee;
+  --color-warning: #f57c00;
+  --color-warning-soft: #fff3e0;
   --color-text: #333;
   --color-text-muted: #666;
   --color-text-light: #888;
@@ -45,6 +47,8 @@
   --color-danger: #ff6b6b;
   --color-danger-hover: #ff8585;
   --color-danger-soft: rgba(255, 107, 107, 0.14);
+  --color-warning: #ffb74d;
+  --color-warning-soft: rgba(255, 183, 77, 0.14);
   --color-text: #ebf3f8;
   --color-text-muted: #afbec9;
   --color-text-light: #8ea1ad;
@@ -92,6 +96,13 @@ body {
   -webkit-font-smoothing: antialiased;
   -webkit-text-size-adjust: 100%;
   transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+html,
+body,
+app-root {
+  width: 100%;
+  overflow-x: hidden;
 }
 
 // Table block

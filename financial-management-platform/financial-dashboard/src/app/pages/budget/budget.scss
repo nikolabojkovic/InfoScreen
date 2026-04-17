@@ -181,6 +181,7 @@
     &--withdrawal {
       color: var(--color-warning);
       background: var(--color-warning-soft);
+      border-color: var(--color-warning);
     }
   }
 
@@ -486,7 +487,7 @@
   // Summary grid
   &__summary-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
   }
 
@@ -586,6 +587,27 @@
     }
 
     &--expenses {
+      color: var(--color-danger);
+    }
+  }
+
+  &__summary-balance-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__summary-breakdown {
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--color-text-muted);
+
+    &--bank {
+      color: var(--color-accent-hover);
+    }
+
+    &--cash {
       color: var(--color-danger);
     }
   }

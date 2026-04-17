@@ -32,8 +32,8 @@ export class Transactions {
   scannedDescription = '';
   scannedPaymentMethod: 'cash' | 'bank' = 'bank';
 
-  selectedMonth = signal(new Date().getMonth());
-  selectedYear = signal(new Date().getFullYear());
+  selectedMonth = this.finance.selectedMonth;
+  selectedYear = this.finance.selectedYear;
 
   readonly monthLabel = computed(() => {
     const d = new Date(this.selectedYear(), this.selectedMonth());
@@ -137,19 +137,19 @@ export class Transactions {
 
   prevMonth(): void {
     if (this.selectedMonth() === 0) {
-      this.selectedMonth.set(11);
-      this.selectedYear.update(y => y - 1);
+      this.finance.setSelectedMonth(11);
+      this.finance.setSelectedYear(this.selectedYear() - 1);
     } else {
-      this.selectedMonth.update(m => m - 1);
+      this.finance.setSelectedMonth(this.selectedMonth() - 1);
     }
   }
 
   nextMonth(): void {
     if (this.selectedMonth() === 11) {
-      this.selectedMonth.set(0);
-      this.selectedYear.update(y => y + 1);
+      this.finance.setSelectedMonth(0);
+      this.finance.setSelectedYear(this.selectedYear() + 1);
     } else {
-      this.selectedMonth.update(m => m + 1);
+      this.finance.setSelectedMonth(this.selectedMonth() + 1);
     }
   }
 

@@ -1,14 +1,14 @@
 .app {
   &__content {
-    min-height: calc(100vh - 56px);
+    min-height: calc(100vh - 72px);
     background: var(--color-bg);
     transition: background-color 0.2s ease;
-    padding-top: 56px;
+    padding-top: 72px;
   }
 
   @media (max-width: 600px) {
     &__content {
-      padding-top: 120px;
+      padding-top: 212px;
     }
   }
 }
