@@ -1,0 +1,18 @@
+<div class="category-detail-container">
+  <h2>Category Items</h2>
+  <form (ngSubmit)="addItem()" class="category-detail-form">
+    <input type="text" [(ngModel)]="newItem.description" name="description" placeholder="Description" required />
+    <input type="number" [(ngModel)]="newItem.amount" name="amount" placeholder="Amount" min="0.01" step="0.01" required />
+    <button type="submit">Add Item</button>
+  </form>
+  <ul class="category-detail-list">
+    <li *ngFor="let item of items; let i = index">
+      <span>{{ item.description }}</span>
+      <span>{{ item.amount | number:'1.2-2' }}</span>
+      <button type="button" (click)="removeItem(i)">Remove</button>
+    </li>
+  </ul>
+  <div class="category-detail-total">
+    <strong>Total:</strong> {{ total | number:'1.2-2' }}
+  </div>
+</div>

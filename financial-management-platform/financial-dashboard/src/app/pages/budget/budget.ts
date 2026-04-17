@@ -1,6 +1,6 @@
-import { AfterViewInit, Component, ElementRef, HostListener, ViewChild, inject, computed, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, ViewChild, inject, computed, signal, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe, NgIf } from '@angular/common';
 import { FinanceService } from '../../services/finance.service';
 import { CategorySummary, ChartSegment, IncomeRecord } from '../../models/finance.model';
 import { ToEurPipe } from '../../pipes/to-eur.pipe';
@@ -8,13 +8,14 @@ import { ConfirmationService } from '../../services/confirmation.service';
 
 @Component({
   selector: 'app-budget',
-  imports: [FormsModule, DecimalPipe, DatePipe, ToEurPipe],
+  imports: [FormsModule, DecimalPipe, DatePipe, ToEurPipe, NgIf],
   templateUrl: './budget.html',
   styleUrl: './budget.scss',
 })
 export class Budget implements AfterViewInit {
   private finance = inject(FinanceService);
   private confirmation = inject(ConfirmationService);
+  private cdr = inject(ChangeDetectorRef);
 
   @ViewChild('incomeTableWrap') incomeTableWrap?: ElementRef<HTMLDivElement>;
 
@@ -22,6 +23,8 @@ export class Budget implements AfterViewInit {
   newIncomeDescription = '';
   newIncomeMethod: 'cash' | 'bank' | 'withdrawal' = 'bank';
   eurRateInput = this.finance.eurRate();
+  eurRateEdit = this.finance.eurRate();
+  eurRateEditing = false;
   selectedMonth = this.finance.selectedMonth;
   selectedYear = this.finance.selectedYear;
 
@@ -43,6 +46,27 @@ export class Budget implements AfterViewInit {
     const d = new Date(this.selectedYear(), this.selectedMonth());
     return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   });
+
+  startEditEurRate() {
+    this.eurRateEdit = this.eurRateInput;
+    this.eurRateEditing = true;
+  }
+
+  cancelEditEurRate() {
+    this.eurRateEdit = this.eurRateInput;
+    this.eurRateEditing = false;
+  }
+
+  confirmEditEurRate() {
+    this.eurRateInput = this.eurRateEdit;
+    this.finance.setEurRate(this.eurRateEdit);
+    this.eurRateEditing = false;
+    // Refresh all relevant signals from the store
+    this.eurRateInput = this.finance.eurRate();
+    this.eurRateEdit = this.finance.eurRate();
+    // Force change detection to update all EUR values
+    this.cdr.detectChanges();
+  }
 
   readonly summaries = computed<CategorySummary[]>(() =>
     this.finance.getCategorySummaries(this.selectedMonth(), this.selectedYear())
@@ -97,7 +121,10 @@ export class Budget implements AfterViewInit {
     this.totalBudget() > 0 ? (this.totalDifference() / this.totalBudget()) * 100 : 0
   );
 
-  readonly balanceVsBudget = computed(() => this.availableIncome() - this.totalBudget());
+  readonly balanceVsBudget = computed(() => {
+    const val = this.availableIncome() - this.totalBudget();
+    return val < 0 ? 0 : val;
+  });
   readonly balanceVsActual = computed(() => this.availableIncome() - this.totalActual());
   readonly totalRemainingOutcomeCard = computed(() => this.totalRemaining());
   readonly negativeRemainingTotal = computed(() =>

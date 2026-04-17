@@ -1,3 +1,23 @@
+// Responsive grid for add transaction form
+.transactions__form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  @media (min-width: 1024px) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 24px;
+    align-items: end;
+  }
+}
+
+.transactions__form-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
 .transactions {
   max-width: 1000px;
   margin: 0 auto;

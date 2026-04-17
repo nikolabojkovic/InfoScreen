@@ -3,20 +3,38 @@
 
   <div class="categories__card">
     <h2 class="categories__card-title">Add Category</h2>
-    <form (ngSubmit)="addCategory()" class="categories__form-row">
-      <div class="categories__field">
-        <label class="categories__label">Name</label>
-        <input type="text" [(ngModel)]="name" name="name" placeholder="Category name" required class="categories__input" />
+    <form (ngSubmit)="addCategory()" class="categories__form-col">
+      <div class="categories__form-row">
+        <div class="categories__field">
+          <label class="categories__label">Name</label>
+          <input type="text" [(ngModel)]="name" name="name" placeholder="Category name" required class="categories__input" />
+        </div>
+        <div class="categories__field categories__field--color">
+          <label class="categories__label">Color</label>
+          <input type="color" [(ngModel)]="color" name="color" class="categories__input categories__input--color" />
+        </div>
       </div>
-      <div class="categories__field categories__field--color">
-        <label class="categories__label">Color</label>
-        <input type="color" [(ngModel)]="color" name="color" class="categories__input categories__input--color" />
+      <div class="categories__items-section">
+        <div style="height: 16px;"></div>
+        <label class="categories__label">Category Items</label>
+        <div class="categories__items-list">
+          <div *ngFor="let item of items; let i = index" class="categories__item-row">
+            <input type="text" [(ngModel)]="items[i].description" name="item-desc-{{i}}" placeholder="Description" required class="categories__input categories__input--item" style="margin-right: 12px;" />
+            <input type="number" [(ngModel)]="items[i].amount" name="item-amount-{{i}}" placeholder="Amount" min="0.01" step="0.01" required class="categories__input categories__input--item" style="margin-right: 12px;" />
+            <button type="button" class="btn btn--sm btn--danger" (click)="removeItem(i)">Remove</button>
+          </div>
+        </div>
+        <div class="categories__item-add-row">
+          <input type="text" [(ngModel)]="newItem.description" name="new-item-desc" placeholder="Description" required class="categories__input categories__input--item" style="margin-right: 12px;" />
+          <input type="number" [(ngModel)]="newItem.amount" name="new-item-amount" placeholder="Amount" min="0.01" step="0.01" required class="categories__input categories__input--item" style="margin-right: 12px;" />
+          <button type="button" class="btn btn--sm btn--primary" (click)="addItem()">Confirm item</button>
+        </div>
       </div>
-      <div class="categories__field">
-        <label class="categories__label">Monthly Budget</label>
-        <input type="number" [(ngModel)]="budgetAmount" name="budget" min="0" step="0.01" class="categories__input" />
-      </div>
-      <button type="submit" class="btn btn--primary">+ Add</button>
+      <div style="height: 16px;"></div>
+      <button type="submit" class="btn btn--primary" 
+        [disabled]="!name.trim() || items.length === 0 || items.some(item => !item.description || item.amount <= 0)">
+        + Add
+      </button>
     </form>
   </div>
 
@@ -36,8 +54,16 @@
           @if (editingId() === cat.id) {
             <tr class="categories__row--editing">
               <td class="table__cell"><input type="color" [(ngModel)]="editColor" class="categories__input--color-small" /></td>
-              <td class="table__cell"><input type="text" [(ngModel)]="editName" class="categories__input--inline" /></td>
-              <td class="table__cell"><input type="number" [(ngModel)]="editBudget" min="0" step="0.01" class="categories__input--inline" /></td>
+              <td class="table__cell" colspan="2">
+                <input type="text" [(ngModel)]="editName" class="categories__input--inline" style="margin-bottom: 8px;" />
+                <div style="margin-bottom: 8px;"><strong>Category Items</strong></div>
+                <div *ngFor="let item of editItems; let i = index" class="categories__item-row">
+                  <input type="text" [(ngModel)]="editItems[i].description" name="edit-item-desc-{{i}}" placeholder="Description" required class="categories__input categories__input--item" style="margin-right: 12px;" />
+                  <input type="number" [(ngModel)]="editItems[i].amount" name="edit-item-amount-{{i}}" placeholder="Amount" min="0.01" step="0.01" required class="categories__input categories__input--item" style="margin-right: 12px;" />
+                  <button type="button" class="btn btn--sm btn--danger" (click)="removeEditItem(i)">Remove</button>
+                </div>
+                <button type="button" class="btn btn--sm btn--primary" (click)="addEditItem()" style="margin-top: 8px;">Add Item</button>
+              </td>
               <td class="table__cell categories__actions">
                 <button class="btn btn--sm btn--success" (click)="saveEdit(cat)">Save</button>
                 <button class="btn btn--sm btn--secondary" (click)="cancelEdit()">Cancel</button>

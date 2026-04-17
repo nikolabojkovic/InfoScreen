@@ -1,20 +1,28 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
+import { Router } from '@angular/router';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { NgIf } from '@angular/common';
 import { FinanceService } from '../../services/finance.service';
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, NgIf],
   templateUrl: './navbar.html',
   styleUrl: './navbar.scss',
 })
 export class Navbar {
   private document = inject(DOCUMENT);
   private finance = inject(FinanceService);
+  private router = inject(Router);
   readonly isDarkTheme = signal(false);
   readonly selectedMonth = this.finance.selectedMonth;
   readonly selectedYear = this.finance.selectedYear;
+  readonly isLoggedIn = computed(() => localStorage.getItem('loggedIn') === 'true');
+  readonly isLoginOrRegister = computed(() => {
+    const url = this.router.url;
+    return url === '/login' || url === '/register';
+  });
 
   private readonly monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',

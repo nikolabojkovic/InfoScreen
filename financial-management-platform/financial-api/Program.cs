@@ -1,14 +1,30 @@
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using FinancialApi.Data;
 using FinancialApi.Models;
 using Microsoft.EntityFrameworkCore;
-using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using Microsoft.OpenApi;
 
-
 var builder = WebApplication.CreateBuilder(args);
+
+// Add CORS policy
+builder.Services.AddCors(options =>
+{
+	options.AddPolicy("AllowMultipleOrigins",
+		policy => policy
+			.WithOrigins(
+				"http://localhost:3000",
+				"http://localhost:4200",
+				"https://developer-tool.com"
+			)
+			.AllowAnyMethod()
+			.AllowAnyHeader()
+			.AllowCredentials());
+});
+
+
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
 	?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
@@ -23,12 +39,12 @@ builder.Services.AddAuthentication(options =>
 {
 	options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
 	options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-  options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+	options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(options =>
 {
-  options.RequireHttpsMetadata = true;
-  options.SaveToken = true;
+	options.RequireHttpsMetadata = true;
+	options.SaveToken = true;
 	options.TokenValidationParameters = new TokenValidationParameters
 	{
 		ValidateIssuer = true,
@@ -39,6 +55,11 @@ builder.Services.AddAuthentication(options =>
 		ValidAudience = jwtAudience,
 		IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
 	};
+})
+.AddGoogle(googleOptions =>
+{
+	googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? "178791769008-9atvmjomlvnql4qv5qs6sh5mlieoejfu.apps.googleusercontent.com";
+	googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? "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";
 });
 
 builder.Services.AddEndpointsApiExplorer();
@@ -90,6 +111,9 @@ using (var scope = app.Services.CreateScope())
 
 app.UseSwagger();
 app.UseSwaggerUI();
+
+// Enable CORS before authentication and authorization
+app.UseCors("AllowMultipleOrigins");
 
 app.UseAuthentication();
 app.UseAuthorization();

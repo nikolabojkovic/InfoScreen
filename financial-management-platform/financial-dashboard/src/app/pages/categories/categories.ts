@@ -1,14 +1,19 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DecimalPipe } from '@angular/common';
+import { DecimalPipe, NgFor } from '@angular/common';
 import { FinanceService } from '../../services/finance.service';
 import { Category } from '../../models/finance.model';
 import { ToEurPipe } from '../../pipes/to-eur.pipe';
 import { ConfirmationService } from '../../services/confirmation.service';
 
+interface CategoryItem {
+  description: string;
+  amount: number;
+}
+
 @Component({
   selector: 'app-categories',
-  imports: [FormsModule, DecimalPipe, ToEurPipe],
+  imports: [FormsModule, DecimalPipe, NgFor, ToEurPipe],
   templateUrl: './categories.html',
   styleUrl: './categories.scss',
 })
@@ -19,12 +24,17 @@ export class Categories {
 
   name = '';
   color = '#4CAF50';
-  budgetAmount = 0;
+  items: CategoryItem[] = [];
+  newItem: CategoryItem = { description: '', amount: 0 };
+
+  get budgetAmount(): number {
+    return this.items.reduce((sum, item) => sum + (item.amount || 0), 0);
+  }
 
   editingId = signal<string | null>(null);
   editName = '';
   editColor = '';
-  editBudget = 0;
+  editItems: CategoryItem[] = [];
 
   addCategory(): void {
     if (!this.name.trim()) return;
@@ -32,27 +42,49 @@ export class Categories {
       name: this.name.trim(),
       color: this.color,
       budgetAmount: this.budgetAmount,
+      items: this.items.map(item => ({ ...item })),
     });
     this.name = '';
     this.color = '#4CAF50';
-    this.budgetAmount = 0;
+    this.items = [];
+    this.newItem = { description: '', amount: 0 };
+  }
+
+  addItem(): void {
+    if (!this.newItem.description || this.newItem.amount <= 0) return;
+    this.items.push({ ...this.newItem });
+    this.newItem = { description: '', amount: 0 };
+  }
+
+  removeItem(index: number): void {
+    this.items.splice(index, 1);
   }
 
   startEdit(cat: Category): void {
     this.editingId.set(cat.id);
     this.editName = cat.name;
     this.editColor = cat.color;
-    this.editBudget = cat.budgetAmount;
+    this.editItems = cat.items ? cat.items.map(item => ({ ...item })) : [];
   }
 
   saveEdit(cat: Category): void {
+    const newBudget = this.editItems.reduce((sum, item) => sum + (item.amount || 0), 0);
     this.finance.updateCategory({
       ...cat,
       name: this.editName.trim(),
       color: this.editColor,
-      budgetAmount: this.editBudget,
+      budgetAmount: newBudget,
+      items: this.editItems.map(item => ({ ...item })),
     });
     this.editingId.set(null);
+  }
+
+  removeEditItem(index: number): void {
+    this.editItems.splice(index, 1);
+  }
+
+  addEditItem(): void {
+    this.editItems.push({ description: '', amount: 0 });
   }
 
   cancelEdit(): void {

@@ -10,6 +10,18 @@
     color: var(--color-accent);
   }
 
+  .categories__item-row {
+    margin-bottom: 12px;
+  }
+
+  .btn[disabled], .btn:disabled {
+    background: #ccc !important;
+    color: #888 !important;
+    cursor: not-allowed !important;
+    border: none !important;
+    opacity: 1 !important;
+  }
+
   &__card {
     background: var(--color-bg-elevated);
     border-radius: 12px;

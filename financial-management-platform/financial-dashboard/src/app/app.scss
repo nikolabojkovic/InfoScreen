@@ -4,11 +4,17 @@
     background: var(--color-bg);
     transition: background-color 0.2s ease;
     padding-top: 72px;
+    &.no-navbar {
+      padding-top: 0;
+    }
   }
 
   @media (max-width: 600px) {
     &__content {
       padding-top: 212px;
+      &.no-navbar {
+        padding-top: 0;
+      }
     }
   }
 }

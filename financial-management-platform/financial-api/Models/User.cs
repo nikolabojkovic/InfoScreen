@@ -9,4 +9,8 @@ public class User
     public string Password { get; set; } = string.Empty;
 
     public string FullName { get; set; } = string.Empty;
+
+    public ICollection<Transaction> Transactions { get; set; }
+    public ICollection<Income> Incomes { get; set; }
+    public ICollection<Category> Categories { get; set; }
 }

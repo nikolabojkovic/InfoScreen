@@ -1,8 +1,14 @@
+export interface CategoryItem {
+  description: string;
+  amount: number;
+}
+
 export interface Category {
   id: string;
   name: string;
   color: string;
   budgetAmount: number;
+  items: CategoryItem[];
 }
 
 export type TransactionPaymentMethod = 'cash' | 'bank';

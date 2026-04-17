@@ -1,14 +1,13 @@
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
 using FinancialApi.Data;
-using FinancialApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
+
 
 namespace financial_api.Controllers
 {
@@ -66,6 +65,56 @@ namespace financial_api.Controllers
 
             var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
             return Ok(new { token = tokenString });
+        }
+
+        [HttpGet("google-login")]
+        public IActionResult GoogleLogin(string returnUrl = "/")
+        {
+            var redirectUrl = Url.Action(nameof(GoogleResponse), "Auth", new { returnUrl });
+            var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
+            return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+        }
+
+        [HttpGet("google-response")]
+        public async Task<IActionResult> GoogleResponse(string returnUrl = "/")
+        {
+            var authenticateResult = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+            if (!authenticateResult.Succeeded || authenticateResult.Principal == null)
+                return Unauthorized();
+
+            var email = authenticateResult.Principal.FindFirst(ClaimTypes.Email)?.Value;
+            var name = authenticateResult.Principal.FindFirst(ClaimTypes.Name)?.Value;
+
+            // Optionally: create or update user in your database here
+
+            // Issue JWT token for the authenticated Google user
+            var jwtSettings = _configuration.GetSection("Jwt");
+            var key = jwtSettings.GetValue<string>("Key");
+            var issuer = jwtSettings.GetValue<string>("Issuer");
+            var audience = jwtSettings.GetValue<string>("Audience");
+
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, email ?? ""),
+                new Claim("fullname", name ?? ""),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+            var creds = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: issuer,
+                audience: audience,
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(2),
+                signingCredentials: creds
+            );
+
+            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+            // Optionally: redirect with token as query param, or return as JSON
+            return Ok(new { token = tokenString, email, name });
         }
     }
 }

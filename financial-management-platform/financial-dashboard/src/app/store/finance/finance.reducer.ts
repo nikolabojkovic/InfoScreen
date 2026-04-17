@@ -39,14 +39,14 @@ export function monthKey(month: number, year: number): string {
 
 export function defaultCategories(): Category[] {
   return [
-    { id: 'cat1', name: 'Home', color: '#4CAF50', budgetAmount: 0 },
-    { id: 'cat2', name: 'Utilities', color: '#FF9800', budgetAmount: 0 },
-    { id: 'cat3', name: 'Car', color: '#2196F3', budgetAmount: 0 },
-    { id: 'cat4', name: 'Food', color: '#F44336', budgetAmount: 0 },
-    { id: 'cat5', name: 'Personal Items', color: '#9C27B0', budgetAmount: 0 },
-    { id: 'cat6', name: 'Medical', color: '#00BCD4', budgetAmount: 0 },
-    { id: 'cat7', name: 'Entertainment', color: '#E91E63', budgetAmount: 0 },
-    { id: 'cat8', name: 'Investment', color: '#607D8B', budgetAmount: 0 },
+    { id: 'cat1', name: 'Home', color: '#4CAF50', budgetAmount: 0, items: [] },
+    { id: 'cat2', name: 'Utilities', color: '#FF9800', budgetAmount: 0, items: [] },
+    { id: 'cat3', name: 'Car', color: '#2196F3', budgetAmount: 0, items: [] },
+    { id: 'cat4', name: 'Food', color: '#F44336', budgetAmount: 0, items: [] },
+    { id: 'cat5', name: 'Personal Items', color: '#9C27B0', budgetAmount: 0, items: [] },
+    { id: 'cat6', name: 'Medical', color: '#00BCD4', budgetAmount: 0, items: [] },
+    { id: 'cat7', name: 'Entertainment', color: '#E91E63', budgetAmount: 0, items: [] },
+    { id: 'cat8', name: 'Investment', color: '#607D8B', budgetAmount: 0, items: [] },
   ];
 }
 

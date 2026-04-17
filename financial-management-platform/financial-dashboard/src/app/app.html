@@ -1,6 +1,9 @@
-<app-navbar />
-<main class="app__content">
+<ng-container *ngIf="!hideNav()">
+  <app-navbar />
+</ng-container>
+<main class="app__content" [class.no-navbar]="hideNav()">
   <router-outlet />
 </main>
-
-<app-confirmation-modal />
+<ng-container *ngIf="!hideNav()">
+  <app-confirmation-modal />
+</ng-container>

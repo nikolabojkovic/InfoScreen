@@ -1,6 +1,6 @@
 import { Injectable, computed, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Category, Transaction, CategorySummary, IncomeRecord } from '../models/finance.model';
+import { Category, CategoryItem, Transaction, CategorySummary, IncomeRecord } from '../models/finance.model';
 import {
   addCategory as addCategoryAction,
   addIncomeRecord as addIncomeRecordAction,

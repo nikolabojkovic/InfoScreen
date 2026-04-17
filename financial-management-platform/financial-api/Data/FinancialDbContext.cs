@@ -6,6 +6,9 @@ namespace FinancialApi.Data;
 public class FinancialDbContext : DbContext
 {
     public DbSet<User> Users => Set<User>();
+    public DbSet<Transaction> Transactions => Set<Transaction>();
+    public DbSet<Income> Incomes => Set<Income>();
+    public DbSet<Category> Categories => Set<Category>();
 
     public FinancialDbContext(DbContextOptions<FinancialDbContext> options)
         : base(options)
@@ -45,5 +48,25 @@ public class FinancialDbContext : DbContext
                 FullName = "Administrator",
             });
         });
+
+        modelBuilder.Entity<Transaction>()
+            .HasOne(t => t.User)
+            .WithMany(u => u.Transactions)
+            .HasForeignKey(t => t.UserId);
+
+        modelBuilder.Entity<Transaction>()
+            .HasOne(t => t.Category)
+            .WithMany()
+            .HasForeignKey(t => t.CategoryId);
+
+        modelBuilder.Entity<Income>()
+            .HasOne(i => i.User)
+            .WithMany(u => u.Incomes)
+            .HasForeignKey(i => i.UserId);
+
+        modelBuilder.Entity<Category>()
+            .HasOne(c => c.User)
+            .WithMany(u => u.Categories)
+            .HasForeignKey(c => c.UserId);
     }
 }

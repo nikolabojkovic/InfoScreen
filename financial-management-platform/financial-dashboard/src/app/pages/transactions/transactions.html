@@ -78,7 +78,7 @@
       </div>
     }
 
-    <form (ngSubmit)="addTransaction()" class="transactions__form-row">
+    <form (ngSubmit)="addTransaction()" class="transactions__form-grid">
       <div class="transactions__field">
         <label class="transactions__label">Date</label>
         <input type="date" [(ngModel)]="date" name="date" required class="transactions__input transactions__input--date" />
@@ -107,7 +107,9 @@
         <label class="transactions__label">Description</label>
         <input type="text" [(ngModel)]="description" name="desc" placeholder="Transaction description" required class="transactions__input" />
       </div>
-      <button type="submit" class="btn btn--primary">+ Add</button>
+      <div class="transactions__form-actions">
+        <button type="submit" class="btn btn--primary">+ Add</button>
+      </div>
     </form>
   </div>
 

@@ -120,6 +120,7 @@
   </div>
 
   <!-- Summary Table -->
+  <div style="height: 16px;"></div>
   <div class="budget__card">
     <h2 class="budget__card-title">Summary by Category</h2>
     <div class="table-responsive">
@@ -217,18 +218,14 @@
     </table>
     </div>
   </div>
+  <div style="height: 16px;"></div>
 
   <!-- Income form and table Table -->
   <div class="budget__top-grid">
     <div class="budget__card budget__card--controls">
+      <div style="font-weight: 600; font-size: 1.1rem; margin-bottom: 8px;">Add income</div>
       <div class="budget__top-fields">
-        <div class="budget__income-field">
-          <label class="budget__income-label">EUR Rate (1 EUR =)</label>
-          <div class="budget__income-wrap">
-            <input type="number" [(ngModel)]="eurRateInput" (change)="updateEurRate()" min="0.01" step="0.01" class="budget__income-input" />
-            <span class="budget__currency">RSD</span>
-          </div>
-        </div>
+        <div style="height: 16px;"></div>
         <div class="budget__income-field">
           <label class="budget__income-label">Income (RSD)</label>
           <div class="budget__income-wrap">
@@ -353,6 +350,24 @@
           </div>
         }
       }
+    </div>
+    <div class="budget__card budget__card--eur-rate" style="max-width: 400px; margin: 0 auto;">
+      <label class="budget__income-label" style="margin-bottom: 4px; display: block;">EUR Rate (1 EUR =)</label>
+      <div class="budget__income-wrap">
+         <input type="number"
+           [value]="eurRateEditing ? eurRateEdit : eurRateInput"
+           (input)="eurRateEditing ? eurRateEdit = $event.target.valueAsNumber : null"
+           [readonly]="!eurRateEditing"
+           min="0.01" step="0.01" class="budget__income-input" />
+        <span class="budget__currency">RSD</span>
+        <ng-container *ngIf="!eurRateEditing">
+          <button class="btn btn--sm btn--secondary" (click)="startEditEurRate()">Edit</button>
+        </ng-container>
+        <ng-container *ngIf="eurRateEditing">
+          <button class="btn btn--sm btn--primary" (click)="confirmEditEurRate()">Confirm</button>
+          <button class="btn btn--sm btn--secondary" (click)="cancelEditEurRate()">Cancel</button>
+        </ng-container>
+      </div>
     </div>
   </div>
 </div>

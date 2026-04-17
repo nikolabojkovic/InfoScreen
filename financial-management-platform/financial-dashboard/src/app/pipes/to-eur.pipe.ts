@@ -1,7 +1,7 @@
 import { Pipe, PipeTransform, inject } from '@angular/core';
 import { FinanceService } from '../services/finance.service';
 
-@Pipe({ name: 'toEur', standalone: true })
+@Pipe({ name: 'toEur', standalone: true, pure: false })
 export class ToEurPipe implements PipeTransform {
   private finance = inject(FinanceService);
 
