@@ -793,6 +793,16 @@
     gap: 16px;
   }
 
+  &__summary-item-pair {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__summary-item--half {
+    flex: 1;
+  }
+
   &__summary-item {
     display: flex;
     justify-content: space-between;
@@ -1019,16 +1029,28 @@
   }
 
   @media (max-width: 600px) {
-    padding: 8px;
+    padding: 12px 10px;
+    overflow-x: hidden;
+    width: 100%;
+    box-sizing: border-box;
 
     &__card {
-      padding: 12px;
-      border-radius: 8px;
+      padding: 14px 12px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    &__card--summary {
+      overflow: visible;
+    }
+
+    &__card--chart {
+      overflow: hidden;
     }
 
     &__card-title {
-      font-size: 0.95rem;
-      margin-bottom: 10px;
+      font-size: 1rem;
+      margin-bottom: 12px;
     }
 
     &__charts-row {
@@ -1042,14 +1064,13 @@
     }
 
     &__income-input {
-      width: 90px;
-      font-size: 0.85rem;
-      padding: 6px 8px;
+      font-size: 0.95rem;
+      padding: 8px 10px;
     }
 
     &__income-add-btn {
-      padding: 6px 10px;
-      font-size: 0.8rem;
+      padding: 8px 12px;
+      font-size: 0.9rem;
     }
 
     &__income-wrap {
@@ -1058,6 +1079,73 @@
 
     &__income-table-wrap {
       margin-top: 8px;
+    }
+
+    /* Summary grid: single column, stacked label+value */
+    &__summary-grid {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    &__summary-item-pair {
+      gap: 10px;
+    }
+
+    &__summary-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+      padding: 12px 14px;
+    }
+
+    &__summary-label {
+      font-size: 0.82rem;
+    }
+
+    &__summary-value {
+      font-size: 1rem;
+      word-break: break-word;
+    }
+
+    /* Donut chart: fill width */
+    &__donut-container {
+      width: 180px;
+      height: 180px;
+    }
+
+    &__donut-total {
+      font-size: 0.92rem;
+    }
+
+    /* Legend more compact */
+    &__legend {
+      gap: 6px 10px;
+      font-size: 0.78rem;
+    }
+
+    /* Bar chart scrollable, smaller */
+    &__bar-chart {
+      height: 130px;
+      overflow-x: auto;
+      width: 100%;
+    }
+
+    /* Legend wraps tightly, no overflow */
+    &__legend {
+      overflow: hidden;
+      width: 100%;
+    }
+
+    &__legend-item {
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  @media (max-width: 600px) {
+      &__income-table-wrap {
       padding-bottom: 4px;
     }
 
@@ -1100,40 +1188,29 @@
     }
 
     &__donut-container {
-      width: 140px;
-      height: 140px;
+      width: 160px;
+      height: 160px;
       margin-bottom: 10px;
     }
 
-    
-      &--green {
-        background: var(--color-success);
-      }
-    
-      &--orange {
-        background: var(--color-warning);
-      }
-    
-      &--red {
-        background: var(--color-danger);
-      }
     &__donut-total {
-      font-size: 0.8rem;
+      font-size: 0.85rem;
     }
 
     &__donut-eur {
-      font-size: 0.65rem;
+      font-size: 0.68rem;
     }
 
     &__donut-label {
-      font-size: 0.65rem;
+      font-size: 0.68rem;
     }
 
     &__bar-chart {
-      height: 120px;
+      height: 130px;
       padding-top: 22px;
       gap: 6px;
       margin-bottom: 8px;
+      overflow-x: auto;
     }
 
     &__bar-group {
@@ -1145,40 +1222,17 @@
       width: 14px;
     }
 
-    &__bar-label {
-      font-size: 0.6rem;
-    }
-
     &__bar-value {
       font-size: 0.55rem;
     }
 
-    &__legend {
-      gap: 4px 10px;
-    }
-
     &__legend-item {
-      font-size: 0.75rem;
+      font-size: 0.78rem;
     }
 
     &__legend-dot {
       width: 10px;
       height: 10px;
-    }
-
-    &__summary-item {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 4px;
-      padding: 8px 10px;
-    }
-
-    &__summary-label {
-      font-size: 0.78rem;
-    }
-
-    &__summary-value {
-      font-size: 0.95rem;
     }
 
     &__budget-input {

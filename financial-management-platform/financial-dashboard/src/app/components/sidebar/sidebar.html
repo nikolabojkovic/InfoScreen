@@ -1,0 +1,63 @@
+<aside class="sidebar" [class.sidebar--collapsed]="!isExpanded()">
+
+  <!-- Toggle button -->
+  <button class="sidebar__toggle" type="button" (click)="sidebar.toggle()" aria-label="Toggle sidebar">
+    <svg class="sidebar__toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="3" y1="6" x2="21" y2="6"/>
+      <line x1="3" y1="12" x2="21" y2="12"/>
+      <line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+
+  <!-- Nav links -->
+  <nav class="sidebar__nav" *ngIf="isLoggedIn()">
+    <a routerLink="/budget" routerLinkActive="sidebar__link--active" class="sidebar__link" title="Budget">
+      <svg class="sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+        <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+      </svg>
+      <span class="sidebar__label">Budget</span>
+    </a>
+    <a routerLink="/transactions" routerLinkActive="sidebar__link--active" class="sidebar__link" title="Transactions">
+      <svg class="sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="5" width="20" height="14" rx="2"/>
+        <line x1="2" y1="10" x2="22" y2="10"/>
+      </svg>
+      <span class="sidebar__label">Transactions</span>
+    </a>
+    <a routerLink="/categories" routerLinkActive="sidebar__link--active" class="sidebar__link" title="Categories">
+      <svg class="sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+        <line x1="7" y1="7" x2="7.01" y2="7"/>
+      </svg>
+      <span class="sidebar__label">Categories</span>
+    </a>
+  </nav>
+
+  <!-- Theme section -->
+  <div class="sidebar__theme-section" *ngIf="isLoggedIn()">
+    <div class="sidebar__theme-divider"></div>
+    <span class="sidebar__theme-label">Theme</span>
+    <button class="sidebar__theme-toggle" type="button" [attr.aria-pressed]="isDarkTheme()" (click)="toggleTheme()" title="Toggle theme">
+      <svg class="sidebar__icon sidebar__theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+      <span class="sidebar__label sidebar__theme-text">{{ isDarkTheme() ? 'Dark' : 'Light' }}</span>
+      <span class="sidebar__theme-track" [class.sidebar__theme-track--dark]="isDarkTheme()">
+        <span class="sidebar__theme-thumb"></span>
+      </span>
+    </button>
+  </div>
+
+</aside>
+
+<!-- Mobile overlay -->
+<div
+  class="sidebar__overlay"
+  [class.sidebar__overlay--visible]="isExpanded()"
+  (click)="sidebar.collapse()">
+</div>

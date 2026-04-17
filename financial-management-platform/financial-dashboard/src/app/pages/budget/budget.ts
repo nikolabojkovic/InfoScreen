@@ -127,6 +127,7 @@ export class Budget implements AfterViewInit {
   });
   readonly balanceVsActual = computed(() => this.availableIncome() - this.totalActual());
   readonly totalRemainingOutcomeCard = computed(() => this.totalRemaining());
+  readonly expectedBalance = computed(() => this.balanceVsActual() - this.totalRemainingOutcomeCard());
   readonly negativeRemainingTotal = computed(() =>
     this.summaries()
       .filter(summary => summary.difference < 0)
@@ -279,22 +280,7 @@ export class Budget implements AfterViewInit {
     }
   }
 
-  editingBudgetId: string | null = null;
-  editingBudgetValue = 0;
 
-  startEditBudget(categoryId: string, currentValue: number): void {
-    this.editingBudgetId = categoryId;
-    this.editingBudgetValue = currentValue;
-  }
-
-  saveBudgetEdit(categoryId: string): void {
-    this.updateCategoryBudget(categoryId, this.editingBudgetValue);
-    this.editingBudgetId = null;
-  }
-
-  cancelBudgetEdit(): void {
-    this.editingBudgetId = null;
-  }
 
   prevMonth(): void {
     if (this.selectedMonth() === 0) {

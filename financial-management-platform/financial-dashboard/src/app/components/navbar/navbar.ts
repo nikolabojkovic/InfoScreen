@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NgIf } from '@angular/common';
 import { FinanceService } from '../../services/finance.service';
+import { SidebarService } from '../../services/sidebar.service';
 
 @Component({
   selector: 'app-navbar',
@@ -15,6 +16,7 @@ export class Navbar {
   private document = inject(DOCUMENT);
   private finance = inject(FinanceService);
   private router = inject(Router);
+  readonly sidebar = inject(SidebarService);
   readonly isDarkTheme = signal(false);
   readonly selectedMonth = this.finance.selectedMonth;
   readonly selectedYear = this.finance.selectedYear;
