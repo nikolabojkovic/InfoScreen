@@ -58,8 +58,8 @@ builder.Services.AddAuthentication(options =>
 })
 .AddGoogle(googleOptions =>
 {
-	googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? "178791769008-9atvmjomlvnql4qv5qs6sh5mlieoejfu.apps.googleusercontent.com";
-	googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? "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";
+	googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+	googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
 });
 
 builder.Services.AddEndpointsApiExplorer();

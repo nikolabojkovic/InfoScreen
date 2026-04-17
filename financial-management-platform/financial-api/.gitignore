@@ -1,0 +1,3 @@
+# Ignore user secrets and sensitive config
+appsettings.Development.json
+# ...existing patterns...
