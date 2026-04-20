@@ -29,10 +29,12 @@ import {
   selectTotalIncome,
   selectTransactions,
 } from '../store/finance/finance.selectors';
+import { SettingsService } from './settings.service';
 
 @Injectable({ providedIn: 'root' })
 export class FinanceService {
   private store = inject(Store);
+  private settingsService = inject(SettingsService);
   private readonly STORAGE_CATEGORIES = 'fin_categories';
   private readonly STORAGE_TRANSACTIONS = 'fin_transactions';
   private readonly STORAGE_INCOME_RECORDS = 'fin_income_records';
@@ -85,6 +87,7 @@ export class FinanceService {
 
   setEurRate(rate: number): void {
     this.store.dispatch(setEurRateAction({ rate }));
+    this.settingsService.setEurRate(rate);
     this.persistState();
   }
 

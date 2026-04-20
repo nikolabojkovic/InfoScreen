@@ -8,4 +8,5 @@ export const routes: Routes = [
   { path: 'budget', canActivate: [authGuard], loadComponent: () => import('./pages/budget/budget').then(m => m.Budget) },
   { path: 'transactions', canActivate: [authGuard], loadComponent: () => import('./pages/transactions/transactions').then(m => m.Transactions) },
   { path: 'categories', canActivate: [authGuard], loadComponent: () => import('./pages/categories/categories').then(m => m.Categories) },
+  { path: 'settings', canActivate: [authGuard], loadComponent: () => import('./pages/settings/settings').then(m => m.Settings) },
 ];

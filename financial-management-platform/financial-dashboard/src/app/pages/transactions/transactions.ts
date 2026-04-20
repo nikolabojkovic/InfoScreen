@@ -1,8 +1,8 @@
-import { Component, inject, computed, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, ViewChild, inject, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { FinanceService } from '../../services/finance.service';
-import { Transaction, TransactionGroup } from '../../models/finance.model';
+import { Transaction, TransactionGroup, IncomeRecord } from '../../models/finance.model';
 import { ToEurPipe } from '../../pipes/to-eur.pipe';
 import { QrScanner } from '../../components/qr-scanner/qr-scanner';
 import { ParsedQrBill } from '../../services/qr-parser.service';
@@ -14,11 +14,15 @@ import { ConfirmationService } from '../../services/confirmation.service';
   templateUrl: './transactions.html',
   styleUrl: './transactions.scss',
 })
-export class Transactions {
+export class Transactions implements AfterViewInit {
   private finance = inject(FinanceService);
   private confirmation = inject(ConfirmationService);
   readonly categories = this.finance.categories;
 
+  // Tab
+  activeTab = signal<'income' | 'outcome'>('outcome');
+
+  // Outcome form
   date = new Date().toISOString().substring(0, 10);
   description = '';
   categoryId = '';
@@ -54,16 +58,59 @@ export class Transactions {
       g.total += tx.amount;
     }
 
-    // Reverse transactions within each group so latest-added appears first
     for (const g of groups.values()) {
       g.transactions.reverse();
     }
+
     return Array.from(groups.values());
   });
 
   readonly monthTotal = computed(() =>
     this.transactionGroups().reduce((sum, g) => sum + g.total, 0)
   );
+
+  // Income
+  readonly incomeRecords = this.finance.incomeRecords;
+  readonly income = this.finance.income;
+  newIncomeAmount = 0;
+  newIncomeDescription = '';
+  newIncomeMethod: 'cash' | 'bank' | 'withdrawal' = 'bank';
+
+  editingIncomeId: string | null = null;
+  editingIncomeAmount = 0;
+  editingIncomeDescription = '';
+  editingIncomeMethod: 'cash' | 'bank' | 'withdrawal' = 'bank';
+
+  @ViewChild('incomeTableWrap') incomeTableWrap?: ElementRef<HTMLDivElement>;
+
+  incomeScrollState = { left: 0, viewport: 0, scrollWidth: 0 };
+
+  readonly monthTransactions = computed(() =>
+    this.finance.getFilteredTransactions(this.selectedMonth(), this.selectedYear())
+  );
+
+  readonly bankIncome = computed(() =>
+    this.incomeRecords().filter(r => r.paymentMethod === 'bank').reduce((sum, r) => sum + r.amount, 0)
+  );
+
+  readonly cashIncome = computed(() =>
+    this.incomeRecords().filter(r => r.paymentMethod === 'cash').reduce((sum, r) => sum + r.amount, 0)
+  );
+
+  readonly withdrawalAmount = computed(() =>
+    this.incomeRecords().filter(r => r.paymentMethod === 'withdrawal').reduce((sum, r) => sum + r.amount, 0)
+  );
+
+  readonly bankOutcome = computed(() =>
+    this.monthTransactions().filter(tx => tx.paymentMethod === 'bank').reduce((sum, tx) => sum + tx.amount, 0)
+  );
+
+  readonly cashOutcome = computed(() =>
+    this.monthTransactions().filter(tx => tx.paymentMethod === 'cash').reduce((sum, tx) => sum + tx.amount, 0)
+  );
+
+  readonly bankBalance = computed(() => this.bankIncome() - this.withdrawalAmount() - this.bankOutcome());
+  readonly cashBalance = computed(() => this.cashIncome() + this.withdrawalAmount() - this.cashOutcome());
 
   getCategoryName(id: string): string {
     return this.finance.getCategoryById(id)?.name ?? 'Unknown';
@@ -202,5 +249,88 @@ export class Transactions {
     this.scannedAmount = 0;
     this.scannedDescription = '';
     this.scannedPaymentMethod = 'bank';
+  }
+
+  // Income methods
+  ngAfterViewInit(): void {
+    queueMicrotask(() => this.updateIncomeScrollState());
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.updateIncomeScrollState();
+  }
+
+  updateIncomeScrollState(): void {
+    const element = this.incomeTableWrap?.nativeElement;
+    if (!element) return;
+    this.incomeScrollState = {
+      left: element.scrollLeft,
+      viewport: element.clientWidth,
+      scrollWidth: element.scrollWidth,
+    };
+  }
+
+  get incomeScrollbarVisible(): boolean {
+    return this.incomeScrollState.scrollWidth > this.incomeScrollState.viewport + 1;
+  }
+
+  get incomeScrollbarThumbWidth(): number {
+    if (!this.incomeScrollbarVisible) return 100;
+    return Math.max((this.incomeScrollState.viewport / this.incomeScrollState.scrollWidth) * 100, 20);
+  }
+
+  get incomeScrollbarThumbLeft(): number {
+    if (!this.incomeScrollbarVisible) return 0;
+    const maxLeft = this.incomeScrollState.scrollWidth - this.incomeScrollState.viewport;
+    if (maxLeft <= 0) return 0;
+    return (this.incomeScrollState.left / maxLeft) * (100 - this.incomeScrollbarThumbWidth);
+  }
+
+  addIncome(): void {
+    if (!this.newIncomeAmount || this.newIncomeAmount <= 0) return;
+    this.finance.addIncomeRecord(this.newIncomeAmount, this.newIncomeDescription.trim(), this.newIncomeMethod);
+    this.newIncomeAmount = 0;
+    this.newIncomeDescription = '';
+    this.newIncomeMethod = 'bank';
+  }
+
+  startEditIncome(record: IncomeRecord): void {
+    this.editingIncomeId = record.id;
+    this.editingIncomeAmount = record.amount;
+    this.editingIncomeDescription = record.description ?? '';
+    this.editingIncomeMethod = record.paymentMethod ?? 'bank';
+  }
+
+  saveIncomeEdit(): void {
+    const record = this.finance.incomeRecords().find(item => item.id === this.editingIncomeId);
+    if (record && this.editingIncomeAmount > 0) {
+      this.finance.updateIncomeRecord({
+        ...record,
+        amount: this.editingIncomeAmount,
+        description: this.editingIncomeDescription.trim(),
+        paymentMethod: this.editingIncomeMethod,
+      });
+    }
+    this.editingIncomeId = null;
+  }
+
+  cancelIncomeEdit(): void {
+    this.editingIncomeId = null;
+    this.editingIncomeDescription = '';
+    this.editingIncomeMethod = 'bank';
+  }
+
+  async deleteIncome(id: string): Promise<void> {
+    const confirmed = await this.confirmation.confirm({
+      title: 'Delete income record?',
+      message: 'This income record will be permanently deleted. Continue?',
+      confirmLabel: 'Delete',
+      cancelLabel: 'Cancel',
+    });
+
+    if (!confirmed) return;
+
+    this.finance.deleteIncomeRecord(id);
   }
 }

@@ -1,72 +1,32 @@
-import { AfterViewInit, Component, ElementRef, HostListener, ViewChild, inject, computed, signal, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, computed, signal, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DatePipe, DecimalPipe, NgIf } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { FinanceService } from '../../services/finance.service';
-import { CategorySummary, ChartSegment, IncomeRecord } from '../../models/finance.model';
+import { CategorySummary, ChartSegment } from '../../models/finance.model';
 import { ToEurPipe } from '../../pipes/to-eur.pipe';
 import { ConfirmationService } from '../../services/confirmation.service';
 
 @Component({
   selector: 'app-budget',
-  imports: [FormsModule, DecimalPipe, DatePipe, ToEurPipe, NgIf],
+  imports: [FormsModule, DecimalPipe, ToEurPipe],
   templateUrl: './budget.html',
   styleUrl: './budget.scss',
 })
-export class Budget implements AfterViewInit {
+export class Budget {
   private finance = inject(FinanceService);
   private confirmation = inject(ConfirmationService);
   private cdr = inject(ChangeDetectorRef);
 
-  @ViewChild('incomeTableWrap') incomeTableWrap?: ElementRef<HTMLDivElement>;
-
-  newIncomeAmount = 0;
-  newIncomeDescription = '';
-  newIncomeMethod: 'cash' | 'bank' | 'withdrawal' = 'bank';
-  eurRateInput = this.finance.eurRate();
-  eurRateEdit = this.finance.eurRate();
-  eurRateEditing = false;
   selectedMonth = this.finance.selectedMonth;
   selectedYear = this.finance.selectedYear;
 
   readonly incomeRecords = this.finance.incomeRecords;
   readonly income = this.finance.income;
 
-  editingIncomeId: string | null = null;
-  editingIncomeAmount = 0;
-  editingIncomeDescription = '';
-  editingIncomeMethod: 'cash' | 'bank' | 'withdrawal' = 'bank';
-
-  incomeScrollState = {
-    left: 0,
-    viewport: 0,
-    scrollWidth: 0,
-  };
-
   readonly monthLabel = computed(() => {
     const d = new Date(this.selectedYear(), this.selectedMonth());
     return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   });
-
-  startEditEurRate() {
-    this.eurRateEdit = this.eurRateInput;
-    this.eurRateEditing = true;
-  }
-
-  cancelEditEurRate() {
-    this.eurRateEdit = this.eurRateInput;
-    this.eurRateEditing = false;
-  }
-
-  confirmEditEurRate() {
-    this.eurRateInput = this.eurRateEdit;
-    this.finance.setEurRate(this.eurRateEdit);
-    this.eurRateEditing = false;
-    // Refresh all relevant signals from the store
-    this.eurRateInput = this.finance.eurRate();
-    this.eurRateEdit = this.finance.eurRate();
-    // Force change detection to update all EUR values
-    this.cdr.detectChanges();
-  }
 
   readonly summaries = computed<CategorySummary[]>(() =>
     this.finance.getCategorySummaries(this.selectedMonth(), this.selectedYear())
@@ -172,42 +132,6 @@ export class Budget implements AfterViewInit {
     this.summaries().reduce((sum, category) => sum + Math.max(category.budgetAmount - category.actualAmount, 0), 0)
   );
 
-  ngAfterViewInit(): void {
-    queueMicrotask(() => this.updateIncomeScrollState());
-  }
-
-  @HostListener('window:resize')
-  onWindowResize(): void {
-    this.updateIncomeScrollState();
-  }
-
-  updateIncomeScrollState(): void {
-    const element = this.incomeTableWrap?.nativeElement;
-    if (!element) return;
-
-    this.incomeScrollState = {
-      left: element.scrollLeft,
-      viewport: element.clientWidth,
-      scrollWidth: element.scrollWidth,
-    };
-  }
-
-  get incomeScrollbarVisible(): boolean {
-    return this.incomeScrollState.scrollWidth > this.incomeScrollState.viewport + 1;
-  }
-
-  get incomeScrollbarThumbWidth(): number {
-    if (!this.incomeScrollbarVisible) return 100;
-    return Math.max((this.incomeScrollState.viewport / this.incomeScrollState.scrollWidth) * 100, 20);
-  }
-
-  get incomeScrollbarThumbLeft(): number {
-    if (!this.incomeScrollbarVisible) return 0;
-    const maxLeft = this.incomeScrollState.scrollWidth - this.incomeScrollState.viewport;
-    if (maxLeft <= 0) return 0;
-    return (this.incomeScrollState.left / maxLeft) * (100 - this.incomeScrollbarThumbWidth);
-  }
-
   barWidth(value: number): number {
     return (value / this.barMax()) * 100;
   }
@@ -220,57 +144,6 @@ export class Budget implements AfterViewInit {
     if (percent === 100) return '#4caf50';
     if (percent >= 80) return '#ff9800';
     return '#2196f3';
-  }
-
-  addIncome(): void {
-    if (!this.newIncomeAmount || this.newIncomeAmount <= 0) return;
-    this.finance.addIncomeRecord(this.newIncomeAmount, this.newIncomeDescription.trim(), this.newIncomeMethod);
-    this.newIncomeAmount = 0;
-    this.newIncomeDescription = '';
-    this.newIncomeMethod = 'bank';
-  }
-
-  startEditIncome(record: IncomeRecord): void {
-    this.editingIncomeId = record.id;
-    this.editingIncomeAmount = record.amount;
-    this.editingIncomeDescription = record.description ?? '';
-    this.editingIncomeMethod = record.paymentMethod ?? 'bank';
-  }
-
-  saveIncomeEdit(): void {
-    const record = this.finance.incomeRecords().find(item => item.id === this.editingIncomeId);
-    if (record && this.editingIncomeAmount > 0) {
-      this.finance.updateIncomeRecord({
-        ...record,
-        amount: this.editingIncomeAmount,
-        description: this.editingIncomeDescription.trim(),
-        paymentMethod: this.editingIncomeMethod,
-      });
-    }
-    this.editingIncomeId = null;
-  }
-
-  cancelIncomeEdit(): void {
-    this.editingIncomeId = null;
-    this.editingIncomeDescription = '';
-    this.editingIncomeMethod = 'bank';
-  }
-
-  async deleteIncome(id: string): Promise<void> {
-    const confirmed = await this.confirmation.confirm({
-      title: 'Delete income record?',
-      message: 'This income record will be permanently deleted. Continue?',
-      confirmLabel: 'Delete',
-      cancelLabel: 'Cancel',
-    });
-
-    if (!confirmed) return;
-
-    this.finance.deleteIncomeRecord(id);
-  }
-
-  updateEurRate(): void {
-    this.finance.setEurRate(this.eurRateInput);
   }
 
   updateCategoryBudget(categoryId: string, newBudget: number): void {

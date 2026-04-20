@@ -1,0 +1,29 @@
+<div class="settings">
+  <h1 class="settings__title">Settings</h1>
+
+  <section class="settings__section">
+    <h2 class="settings__section-title">Currency</h2>
+    <div class="settings__card">
+      <label class="settings__label">EUR Rate <span class="settings__label-sub">(1 EUR = ? RSD)</span></label>
+      <div class="settings__row">
+        <input
+          type="number"
+          class="settings__input"
+          [value]="eurRateEditing ? eurRateEdit : eurRateInput"
+          (input)="eurRateEditing ? eurRateEdit = $any($event.target).valueAsNumber : null"
+          [readonly]="!eurRateEditing"
+          min="0.01"
+          step="0.01"
+        />
+        <span class="settings__currency">RSD</span>
+        <ng-container *ngIf="!eurRateEditing">
+          <button class="btn btn--sm btn--secondary" (click)="startEditEurRate()">Edit</button>
+        </ng-container>
+        <ng-container *ngIf="eurRateEditing">
+          <button class="btn btn--sm btn--primary" (click)="confirmEditEurRate()">Save</button>
+          <button class="btn btn--sm btn--secondary" (click)="cancelEditEurRate()">Cancel</button>
+        </ng-container>
+      </div>
+    </div>
+  </section>
+</div>

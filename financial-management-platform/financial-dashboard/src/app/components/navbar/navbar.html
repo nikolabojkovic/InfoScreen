@@ -18,7 +18,7 @@
       <span class="navbar__month-label">{{ monthLabel() }}</span>
       <button class="navbar__month-btn" type="button" (click)="nextMonth()" aria-label="Next month">▶</button>
     </div>
-    <button class="navbar__theme-toggle" type="button" [attr.aria-pressed]="isDarkTheme()" (click)="toggleTheme()" style="display:none">
+    <button *ngIf="!isLoggedIn()" class="navbar__theme-toggle" type="button" [attr.aria-pressed]="isDarkTheme()" (click)="toggleTheme()">
       <span class="navbar__theme-text">{{ isDarkTheme() ? 'Dark' : 'Light' }}</span>
       <span class="navbar__theme-track" [class.navbar__theme-track--dark]="isDarkTheme()">
         <span class="navbar__theme-thumb"></span>

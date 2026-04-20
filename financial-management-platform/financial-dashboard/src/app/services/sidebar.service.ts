@@ -1,14 +1,16 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { SettingsService } from './settings.service';
 
 @Injectable({ providedIn: 'root' })
 export class SidebarService {
-  readonly isExpanded = signal(typeof window !== 'undefined' && window.innerWidth >= 768);
+  private settings = inject(SettingsService);
+  readonly isExpanded = this.settings.sidebarExpanded;
 
   toggle(): void {
-    this.isExpanded.update(v => !v);
+    this.settings.setSidebarExpanded(!this.isExpanded());
   }
 
   collapse(): void {
-    this.isExpanded.set(false);
+    this.settings.setSidebarExpanded(false);
   }
 }

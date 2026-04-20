@@ -1,10 +1,12 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NgIf } from '@angular/common';
 import { FinanceService } from '../../services/finance.service';
 import { SidebarService } from '../../services/sidebar.service';
+import { AuthService } from '../../services/auth.service';
+import { SettingsService } from '../../services/settings.service';
 
 @Component({
   selector: 'app-navbar',
@@ -16,11 +18,13 @@ export class Navbar {
   private document = inject(DOCUMENT);
   private finance = inject(FinanceService);
   private router = inject(Router);
+  private settings = inject(SettingsService);
   readonly sidebar = inject(SidebarService);
-  readonly isDarkTheme = signal(false);
+  readonly isDarkTheme = computed(() => this.settings.theme() === 'dark');
   readonly selectedMonth = this.finance.selectedMonth;
   readonly selectedYear = this.finance.selectedYear;
-  readonly isLoggedIn = computed(() => localStorage.getItem('loggedIn') === 'true');
+  private auth = inject(AuthService);
+  readonly isLoggedIn = this.auth.isLoggedIn;
   readonly isLoginOrRegister = computed(() => {
     const url = this.router.url;
     return url === '/login' || url === '/register';
@@ -32,7 +36,8 @@ export class Navbar {
   ];
 
   constructor() {
-    this.applyInitialTheme();
+    // Apply stored theme on init
+    this.document.documentElement.setAttribute('data-theme', this.settings.theme());
   }
 
   monthLabel(): string {
@@ -58,26 +63,8 @@ export class Navbar {
   }
 
   toggleTheme(): void {
-    this.setTheme(this.isDarkTheme() ? 'light' : 'dark');
-  }
-
-  private applyInitialTheme(): void {
-    if (typeof window === 'undefined') {
-      this.setTheme('light', false);
-      return;
-    }
-
-    const savedTheme = window.localStorage.getItem('finance-dashboard-theme');
-    const theme = savedTheme === 'dark' || savedTheme === 'light' ? savedTheme : 'light';
-    this.setTheme(theme, false);
-  }
-
-  private setTheme(theme: 'light' | 'dark', persist = true): void {
-    this.document.documentElement.setAttribute('data-theme', theme);
-    this.isDarkTheme.set(theme === 'dark');
-
-    if (persist && typeof window !== 'undefined') {
-      window.localStorage.setItem('finance-dashboard-theme', theme);
-    }
+    const next = this.isDarkTheme() ? 'light' : 'dark';
+    this.settings.setTheme(next);
+    this.document.documentElement.setAttribute('data-theme', next);
   }
 }

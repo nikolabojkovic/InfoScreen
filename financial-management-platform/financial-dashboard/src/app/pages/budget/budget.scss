@@ -867,7 +867,7 @@
 
     &--warning {
       background: var(--color-bg-warning);
-      border-color: var(--color-bg-warning);
+      border-color: var(--color-warning-border);
 
       .budget__summary-value {
         color: var(--color-text);

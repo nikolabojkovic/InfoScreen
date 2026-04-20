@@ -8,7 +8,7 @@
   box-shadow: none !important;
 }
 :root {
-  --color-accent: #1b5e20;
+  --color-accent: #2f8a35;
   --color-accent-hover: #2e7d32;
   --color-accent-strong: #388e3c;
   --color-accent-soft: #e8f5e9;
@@ -17,6 +17,7 @@
   --color-danger-soft: #ffebee;
   --color-warning: #f57c00;
   --color-warning-soft: #fff3e0;
+  --color-warning-border: #ffb74d;
   --color-text: #333;
   --color-text-muted: #666;
   --color-text-light: #888;
@@ -32,12 +33,12 @@
   --color-border-strong: #e0e0e0;
   --color-border-light: #f0f0f0;
   --color-success-border: #c8e6c9;
-  --color-shadow: rgba(0, 0, 0, 0.08);
+  --color-shadow: #00000014;
   --color-shadow-strong: rgba(0, 0, 0, 0.2);
   --color-overlay: rgba(0, 0, 0, 0.7);
-  --color-navbar-bg: #1b5e20;
-  --color-navbar-bg-start: #206b26;
-  --color-navbar-bg-end: #134019;
+  --color-navbar-bg: #069912;
+  --color-navbar-bg-start: rgba(6, 110, 14, 0.88);
+  --color-navbar-bg-end: rgba(30, 68, 36, 0.92);
   --color-navbar-border: rgba(255, 255, 255, 0.10);
   --color-navbar-highlight: rgba(255, 255, 255, 0.07);
   --color-navbar-pill: rgba(255, 255, 255, 0.14);
@@ -81,8 +82,8 @@
   --color-shadow-strong: rgba(0, 0, 0, 0.45);
   --color-overlay: rgba(2, 8, 12, 0.78);
   --color-navbar-bg: #02525b;
-  --color-navbar-bg-start: #0a5f6e;
-  --color-navbar-bg-end: #011c22;
+  --color-navbar-bg-start: rgba(10, 95, 110, 0.55);
+  --color-navbar-bg-end: rgba(1, 28, 34, 0.55);
   --color-navbar-border: rgba(39, 221, 245, 0.12);
   --color-navbar-highlight: rgba(39, 221, 245, 0.05);
   --color-navbar-pill: rgba(39, 221, 245, 0.12);

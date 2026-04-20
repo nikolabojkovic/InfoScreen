@@ -1,6 +1,14 @@
 <div class="transactions">
   <h1 class="transactions__title">Transactions</h1>
 
+  <!-- Tab Navigation -->
+  <div class="transactions__tab-nav">
+    <button class="transactions__tab-btn" [class.transactions__tab-btn--active]="activeTab() === 'outcome'" (click)="activeTab.set('outcome')">Outcome</button>
+    <button class="transactions__tab-btn" [class.transactions__tab-btn--active]="activeTab() === 'income'" (click)="activeTab.set('income')">Income</button>
+  </div>
+
+  @if (activeTab() === 'outcome') {
+
   <div class="transactions__card">
     <div class="transactions__card-header">
       <h2 class="transactions__card-title">Add Transaction</h2>
@@ -236,4 +244,152 @@
   @if (showScanner()) {
     <app-qr-scanner (scanned)="onQrScanned($event)" (closed)="closeScanner()" />
   }
+
+  } <!-- end outcome tab -->
+
+  @if (activeTab() === 'income') {
+
+  <!-- Income Form -->
+  <div class="transactions__card">
+    <div class="transactions__income-form">
+      <div class="transactions__income-form-title">Add Income</div>
+      <div class="transactions__income-row">
+        <div class="transactions__income-col">
+          <label class="transactions__income-label" for="income-amount">Amount</label>
+          <div class="transactions__income-input-group">
+            <input
+              id="income-amount"
+              type="number"
+              [(ngModel)]="newIncomeAmount"
+              (keydown.enter)="addIncome()"
+              min="0"
+              step="1"
+              placeholder="Amount"
+              class="transactions__income-input"
+            />
+            <span class="transactions__income-currency">RSD</span>
+          </div>
+        </div>
+        <div class="transactions__income-col">
+          <label class="transactions__income-label" for="income-method">Type</label>
+          <select id="income-method" [(ngModel)]="newIncomeMethod" class="transactions__income-select">
+            <option value="bank">Bank Account</option>
+            <option value="cash">Cash</option>
+            <option value="withdrawal">Withdrawal</option>
+          </select>
+        </div>
+      </div>
+      <div class="transactions__income-desc-row">
+        <input type="text" [(ngModel)]="newIncomeDescription" placeholder="Income description" class="transactions__income-input transactions__income-input--full" />
+      </div>
+      <div class="transactions__income-actions">
+        <button class="btn btn--primary" (click)="addIncome()" [disabled]="newIncomeAmount <= 0">+ Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Income Table -->
+  <div class="transactions__card">
+    <h2 class="transactions__card-title">Income Table</h2>
+    @if (incomeRecords().length > 0) {
+      <div #incomeTableWrap class="transactions__income-table-wrap" (scroll)="updateIncomeScrollState()">
+        <table class="table transactions__income-table">
+          <thead>
+            <tr>
+              <th class="table__header">Description</th>
+              <th class="table__header">Type</th>
+              <th class="table__header">Amount (RSD)</th>
+              <th class="table__header">Date &amp; Time</th>
+              <th class="table__header"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (rec of incomeRecords(); track rec.id) {
+              <tr>
+                <td class="table__cell transactions__income-desc-cell">
+                  @if (editingIncomeId === rec.id) {
+                    <input type="text" [(ngModel)]="editingIncomeDescription" class="transactions__input transactions__input--inline" (keydown.enter)="saveIncomeEdit()" (keydown.escape)="cancelIncomeEdit()" />
+                  } @else {
+                    {{ rec.description || 'Income' }}
+                  }
+                </td>
+                <td class="table__cell transactions__income-type-cell">
+                  @if (editingIncomeId === rec.id) {
+                    <select [(ngModel)]="editingIncomeMethod" class="transactions__select transactions__select--inline">
+                      <option value="bank">Bank Account</option>
+                      <option value="cash">Cash</option>
+                      <option value="withdrawal">Withdrawal</option>
+                    </select>
+                  } @else {
+                    <span class="transactions__income-badge"
+                      [class.transactions__income-badge--bank]="rec.paymentMethod === 'bank'"
+                      [class.transactions__income-badge--cash]="rec.paymentMethod === 'cash'"
+                      [class.transactions__income-badge--withdrawal]="rec.paymentMethod === 'withdrawal'">
+                      {{ rec.paymentMethod === 'cash' ? 'Cash' : rec.paymentMethod === 'withdrawal' ? 'Withdrawal' : 'Bank Account' }}
+                    </span>
+                  }
+                </td>
+                <td class="table__cell transactions__income-amount-cell">
+                  @if (editingIncomeId === rec.id) {
+                    <input
+                      type="number"
+                      [(ngModel)]="editingIncomeAmount"
+                      min="0"
+                      step="1"
+                      class="transactions__input transactions__input--inline"
+                      (keydown.enter)="saveIncomeEdit()"
+                      (keydown.escape)="cancelIncomeEdit()"
+                    />
+                  } @else {
+                    {{ rec.amount | number:'1.0-0' }}
+                  }
+                </td>
+                <td class="table__cell transactions__income-date-cell">{{ rec.createdAt | date:'dd.MM.yyyy HH:mm' }}</td>
+                <td class="table__cell transactions__income-actions-cell">
+                  @if (editingIncomeId === rec.id) {
+                    <button class="transactions__btn-save" (click)="saveIncomeEdit()" title="Save">✓</button>
+                    <button class="transactions__btn-cancel" (click)="cancelIncomeEdit()" title="Cancel">✕</button>
+                  } @else {
+                    <button class="transactions__btn-edit" (click)="startEditIncome(rec)" title="Edit">✎</button>
+                    <button class="transactions__btn-delete" (click)="deleteIncome(rec.id)" title="Delete">✕</button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr class="transactions__income-total-row">
+              <td class="table__cell" colspan="2"><strong>Total Income</strong></td>
+              <td class="table__cell"><strong>{{ income() | number:'1.0-0' }} RSD</strong></td>
+              <td class="table__cell transactions__income-eur-cell" colspan="2">≈ {{ income() | toEur }} €</td>
+            </tr>
+            <tr class="transactions__income-total-row transactions__income-total-row--bank">
+              <td class="table__cell" colspan="2"><strong>Bank Account Balance</strong></td>
+              <td class="table__cell"><strong>{{ bankBalance() | number:'1.0-0' }} RSD</strong></td>
+              <td class="table__cell transactions__income-eur-cell" colspan="2">≈ {{ bankBalance() | toEur }} €</td>
+            </tr>
+            <tr class="transactions__income-total-row transactions__income-total-row--cash">
+              <td class="table__cell" colspan="2"><strong>Cash Balance</strong></td>
+              <td class="table__cell"><strong>{{ cashBalance() | number:'1.0-0' }} RSD</strong></td>
+              <td class="table__cell transactions__income-eur-cell" colspan="2">≈ {{ cashBalance() | toEur }} €</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      @if (incomeScrollbarVisible) {
+        <div class="transactions__income-scrollbar" aria-hidden="true">
+          <div
+            class="transactions__income-scrollbar-thumb"
+            [style.width.%]="incomeScrollbarThumbWidth"
+            [style.left.%]="incomeScrollbarThumbLeft"
+          ></div>
+        </div>
+      }
+    } @else {
+      <p class="transactions__empty">No income records yet.</p>
+    }
+  </div>
+
+  } <!-- end income tab -->
+
 </div>
