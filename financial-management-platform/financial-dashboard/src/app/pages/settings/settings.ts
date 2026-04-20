@@ -12,12 +12,14 @@ import { SettingsService } from '../../services/settings.service';
 })
 export class Settings {
   private finance = inject(FinanceService);
-  private settingsService = inject(SettingsService);
+  readonly settingsService = inject(SettingsService);
   private cdr = inject(ChangeDetectorRef);
 
   eurRateInput = this.finance.eurRate();
   eurRateEdit = this.finance.eurRate();
   eurRateEditing = false;
+  readonly dataSourceLoading = signal(false);
+  readonly dataSourceError = signal('');
 
   startEditEurRate(): void {
     this.eurRateEdit = this.eurRateInput;
@@ -36,5 +38,23 @@ export class Settings {
     this.eurRateInput = this.finance.eurRate();
     this.eurRateEdit = this.finance.eurRate();
     this.cdr.detectChanges();
+  }
+
+  async setDataSource(value: 'local' | 'remote'): Promise<void> {
+    const previous = this.settingsService.dataSource();
+    if (value === previous) return;
+    this.settingsService.setDataSource(value);
+    if (value === 'remote') {
+      this.dataSourceLoading.set(true);
+      this.dataSourceError.set('');
+      try {
+        await this.finance.loadFromApi();
+      } catch (e) {
+        this.dataSourceError.set('Failed to load data from API. Switched back to local.');
+        this.settingsService.setDataSource('local');
+      } finally {
+        this.dataSourceLoading.set(false);
+      }
+    }
   }
 }

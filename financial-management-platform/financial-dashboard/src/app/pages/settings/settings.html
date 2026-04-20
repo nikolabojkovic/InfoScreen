@@ -2,6 +2,39 @@
   <h1 class="settings__title">Settings</h1>
 
   <section class="settings__section">
+    <h2 class="settings__section-title">Data Source</h2>
+    <div class="settings__card">
+      <label class="settings__label">Where to store your data</label>
+      <div class="settings__row settings__row--gap">
+        <label class="settings__radio-label">
+          <input
+            type="radio"
+            name="dataSource"
+            value="local"
+            [checked]="settingsService.dataSource() === 'local'"
+            (change)="setDataSource('local')"
+            [disabled]="dataSourceLoading()"
+          />
+          Local Storage
+        </label>
+        <label class="settings__radio-label">
+          <input
+            type="radio"
+            name="dataSource"
+            value="remote"
+            [checked]="settingsService.dataSource() === 'remote'"
+            (change)="setDataSource('remote')"
+            [disabled]="dataSourceLoading()"
+          />
+          Remote API
+        </label>
+      </div>
+      <div *ngIf="dataSourceLoading()" class="settings__info">Loading data from API…</div>
+      <div *ngIf="dataSourceError()" class="settings__error">{{ dataSourceError() }}</div>
+    </div>
+  </section>
+
+  <section class="settings__section">
     <h2 class="settings__section-title">Currency</h2>
     <div class="settings__card">
       <label class="settings__label">EUR Rate <span class="settings__label-sub">(1 EUR = ? RSD)</span></label>

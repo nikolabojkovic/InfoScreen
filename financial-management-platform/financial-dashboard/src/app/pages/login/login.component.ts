@@ -15,24 +15,27 @@ import { AuthService } from '../../services/auth.service';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent {
-  email = '';
+  username = '';
   password = '';
   error = '';
+  loading = false;
 
   constructor(private router: Router, private auth: AuthService) {}
 
   login() {
-    const userStr = localStorage.getItem('user');
-    if (!userStr) {
-      this.error = 'No account found. Please register.';
-      return;
-    }
-    const user = JSON.parse(userStr);
-    if (user.email === this.email && user.password === this.password) {
-      this.auth.login();
-      this.router.navigate(['/']);
-    } else {
-      this.error = 'Invalid email or password.';
-    }
+    this.error = '';
+    this.loading = true;
+    this.auth.login(this.username, this.password).subscribe({
+      next: () => {
+        this.loading = false;
+        this.router.navigate(['/']);
+      },
+      error: (err) => {
+        this.loading = false;
+        this.error = err.status === 401
+          ? 'Invalid username or password.'
+          : 'Login failed. Please try again.';
+      },
+    });
   }
 }

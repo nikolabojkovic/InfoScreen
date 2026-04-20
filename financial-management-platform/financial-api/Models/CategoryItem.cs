@@ -1,12 +1,12 @@
 namespace FinancialApi.Models;
 
-public class Income
+public class CategoryItem
 {
     public int Id { get; set; }
+    public int CategoryId { get; set; }
+    public Category Category { get; set; } = null!;
     public string Description { get; set; } = string.Empty;
-    public string PaymentMethod { get; set; } = string.Empty; // bank | cash | withdrawal
     public decimal Amount { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public int UserId { get; set; }
     public User User { get; set; } = null!;
 }

@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgIf } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-register',
@@ -14,15 +15,18 @@ import { RouterModule } from '@angular/router';
   styleUrls: ['./register.component.scss']
 })
 export class RegisterComponent {
-  email = '';
+  username = '';
+  fullName = '';
   password = '';
   confirmPassword = '';
   error = '';
+  loading = false;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private auth: AuthService) {}
 
   register() {
-    if (!this.email || !this.password || !this.confirmPassword) {
+    this.error = '';
+    if (!this.username || !this.password || !this.confirmPassword) {
       this.error = 'All fields are required.';
       return;
     }
@@ -30,8 +34,18 @@ export class RegisterComponent {
       this.error = 'Passwords do not match.';
       return;
     }
-    const user = { email: this.email, password: this.password };
-    localStorage.setItem('user', JSON.stringify(user));
-    this.router.navigate(['/login']);
+    this.loading = true;
+    this.auth.register(this.username, this.password, this.fullName).subscribe({
+      next: () => {
+        this.loading = false;
+        this.router.navigate(['/login']);
+      },
+      error: (err) => {
+        this.loading = false;
+        this.error = err.status === 409
+          ? 'Username already taken.'
+          : 'Registration failed. Please try again.';
+      },
+    });
   }
 }

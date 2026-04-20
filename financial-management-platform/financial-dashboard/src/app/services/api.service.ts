@@ -1,0 +1,99 @@
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
+
+export interface ApiCategoryItem {
+  id?: number;
+  description: string;
+  amount: number;
+}
+
+export interface ApiCategory {
+  id: number;
+  name: string;
+  color: string;
+  budgetAmount: number;
+  userId: number;
+  items: ApiCategoryItem[];
+}
+
+export interface ApiTransaction {
+  id: number;
+  date: string;        // yyyy-MM-dd
+  description: string;
+  categoryId: number | null;
+  amount: number;
+  paymentMethod: string;
+  type: string;        // income | expense
+}
+
+@Injectable({ providedIn: 'root' })
+export class ApiService {
+  private http = inject(HttpClient);
+  private base = environment.apiUrl;
+
+  // ── Categories ────────────────────────────────────────────────────────────
+
+  getCategories(): Observable<ApiCategory[]> {
+    return this.http.get<ApiCategory[]>(`${this.base}/api/categories`);
+  }
+
+  createCategory(data: Omit<ApiCategory, 'id' | 'userId'>): Observable<ApiCategory> {
+    return this.http.post<ApiCategory>(`${this.base}/api/categories`, data);
+  }
+
+  updateCategory(id: number, data: Omit<ApiCategory, 'id' | 'userId'>): Observable<ApiCategory> {
+    return this.http.put<ApiCategory>(`${this.base}/api/categories/${id}`, data);
+  }
+
+  deleteCategory(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/api/categories/${id}`);
+  }
+
+  // ── Transactions (expenses) ───────────────────────────────────────────────
+
+  getTransactions(month?: number, year?: number, type?: string): Observable<ApiTransaction[]> {
+    let params = new HttpParams();
+    if (month != null) params = params.set('month', month);
+    if (year != null) params = params.set('year', year);
+    if (type) params = params.set('type', type);
+    return this.http.get<ApiTransaction[]>(`${this.base}/api/transactions`, { params });
+  }
+
+  createTransaction(data: Omit<ApiTransaction, 'id'>): Observable<ApiTransaction> {
+    return this.http.post<ApiTransaction>(`${this.base}/api/transactions`, data);
+  }
+
+  updateTransaction(id: number, data: Omit<ApiTransaction, 'id'>): Observable<ApiTransaction> {
+    return this.http.put<ApiTransaction>(`${this.base}/api/transactions/${id}`, data);
+  }
+
+  deleteTransaction(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/api/transactions/${id}`);
+  }
+
+  // ── Income ────────────────────────────────────────────────────────────────
+
+  getIncomes(month?: number, year?: number): Observable<ApiTransaction[]> {
+    return this.getTransactions(month, year, 'income');
+  }
+
+  createIncome(data: Omit<ApiTransaction, 'id' | 'type' | 'categoryId'>): Observable<ApiTransaction> {
+    return this.http.post<ApiTransaction>(`${this.base}/api/incomes`, {
+      ...data,
+      type: 'income',
+    });
+  }
+
+  updateIncome(id: number, data: Omit<ApiTransaction, 'id' | 'type' | 'categoryId'>): Observable<ApiTransaction> {
+    return this.http.put<ApiTransaction>(`${this.base}/api/incomes/${id}`, {
+      ...data,
+      type: 'income',
+    });
+  }
+
+  deleteIncome(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/api/incomes/${id}`);
+  }
+}

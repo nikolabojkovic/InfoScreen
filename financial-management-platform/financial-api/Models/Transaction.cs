@@ -1,16 +1,15 @@
-using System;
-namespace FinancialApi.Models
+namespace FinancialApi.Models;
+
+public class Transaction
 {
-    public class Transaction
-    {
-        public int Id { get; set; }
-        public DateTime Date { get; set; }
-        public int CategoryId { get; set; }
-        public Category Category { get; set; }
-        public string PaymentType { get; set; } // BankAccount, Cash
-        public decimal Amount { get; set; }
-        public string Description { get; set; }
-        public int UserId { get; set; }
-        public User User { get; set; }
-    }
+    public int Id { get; set; }
+    public DateOnly Date { get; set; }
+    public string Type { get; set; } = "expense"; // income | expense
+    public int? CategoryId { get; set; }
+    public Category? Category { get; set; }
+    public string PaymentMethod { get; set; } = string.Empty; // bank | cash
+    public decimal Amount { get; set; }
+    public string Description { get; set; } = string.Empty;
+    public int UserId { get; set; }
+    public User User { get; set; } = null!;
 }

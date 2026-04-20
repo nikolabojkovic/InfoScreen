@@ -20,7 +20,6 @@ const STORAGE_CATEGORIES = 'fin_categories';
 const STORAGE_TRANSACTIONS = 'fin_transactions';
 const STORAGE_INCOME = 'fin_income';
 const STORAGE_INCOME_RECORDS = 'fin_income_records';
-const STORAGE_EUR_RATE = 'fin_eur_rate';
 const STORAGE_SELECTED_MONTH = 'budget_selected_month';
 const STORAGE_SELECTED_YEAR = 'budget_selected_year';
 
@@ -57,6 +56,17 @@ function load<T>(key: string, fallback: T): T {
   } catch {
     return fallback;
   }
+}
+
+function loadEurRateFromSettings(): number {
+  try {
+    const raw = localStorage.getItem('finance-dashboard-settings');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (typeof parsed.eurRate === 'number' && parsed.eurRate > 0) return parsed.eurRate;
+    }
+  } catch {}
+  return 117;
 }
 
 function migrateIncomeRecords(): IncomeRecord[] {
@@ -114,7 +124,7 @@ function createInitialState(): FinanceState {
     categoriesByMonth: migrateCategories(selectedMonth, selectedYear),
     transactions: migrateTransactions(),
     incomeRecords: migrateIncomeRecords(),
-    eurRate: load<number>(STORAGE_EUR_RATE, 117),
+    eurRate: loadEurRateFromSettings(),
     selectedMonth,
     selectedYear,
   };
@@ -126,7 +136,6 @@ function saveState(state: FinanceState): void {
   localStorage.setItem(STORAGE_CATEGORIES, JSON.stringify(state.categoriesByMonth));
   localStorage.setItem(STORAGE_TRANSACTIONS, JSON.stringify(state.transactions));
   localStorage.setItem(STORAGE_INCOME_RECORDS, JSON.stringify(state.incomeRecords));
-  localStorage.setItem(STORAGE_EUR_RATE, JSON.stringify(state.eurRate));
   localStorage.setItem(STORAGE_SELECTED_MONTH, JSON.stringify(state.selectedMonth));
   localStorage.setItem(STORAGE_SELECTED_YEAR, JSON.stringify(state.selectedYear));
 }

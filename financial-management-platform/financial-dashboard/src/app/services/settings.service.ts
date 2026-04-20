@@ -4,16 +4,17 @@ export interface AppSettings {
   theme: 'light' | 'dark';
   sidebarExpanded: boolean;
   eurRate: number;
+  dataSource: 'local' | 'remote';
 }
 
 const STORAGE_KEY = 'finance-dashboard-settings';
 const LEGACY_THEME_KEY = 'finance-dashboard-theme';
-const LEGACY_EUR_RATE_KEY = 'fin_eur_rate';
 
 const DEFAULTS: AppSettings = {
   theme: 'light',
   sidebarExpanded: false,
   eurRate: 117,
+  dataSource: 'local',
 };
 
 @Injectable({ providedIn: 'root' })
@@ -21,6 +22,7 @@ export class SettingsService {
   readonly theme = signal<'light' | 'dark'>(DEFAULTS.theme);
   readonly sidebarExpanded = signal<boolean>(DEFAULTS.sidebarExpanded);
   readonly eurRate = signal<number>(DEFAULTS.eurRate);
+  readonly dataSource = signal<'local' | 'remote'>(DEFAULTS.dataSource);
 
   constructor() {
     if (typeof window === 'undefined') return;
@@ -28,6 +30,7 @@ export class SettingsService {
     this.theme.set(settings.theme);
     this.sidebarExpanded.set(settings.sidebarExpanded);
     this.eurRate.set(settings.eurRate);
+    this.dataSource.set(settings.dataSource);
   }
 
   setTheme(theme: 'light' | 'dark'): void {
@@ -45,6 +48,11 @@ export class SettingsService {
     this.save();
   }
 
+  setDataSource(source: 'local' | 'remote'): void {
+    this.dataSource.set(source);
+    this.save();
+  }
+
   private load(): AppSettings {
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -55,7 +63,8 @@ export class SettingsService {
           sidebarExpanded: parsed.sidebarExpanded === true,
           eurRate: typeof parsed.eurRate === 'number' && parsed.eurRate > 0
             ? parsed.eurRate
-            : this.readLegacyEurRate(),
+            : DEFAULTS.eurRate,
+          dataSource: parsed.dataSource === 'remote' ? 'remote' : 'local',
         };
       }
     } catch {}
@@ -64,7 +73,8 @@ export class SettingsService {
     return {
       theme: this.readLegacyTheme(),
       sidebarExpanded: DEFAULTS.sidebarExpanded,
-      eurRate: this.readLegacyEurRate(),
+      eurRate: DEFAULTS.eurRate,
+      dataSource: DEFAULTS.dataSource,
     };
   }
 
@@ -77,26 +87,14 @@ export class SettingsService {
     }
   }
 
-  private readLegacyEurRate(): number {
-    try {
-      const raw = window.localStorage.getItem(LEGACY_EUR_RATE_KEY);
-      if (raw) {
-        const val = JSON.parse(raw);
-        if (typeof val === 'number' && val > 0) return val;
-      }
-    } catch {}
-    return DEFAULTS.eurRate;
-  }
-
   private save(): void {
     if (typeof window === 'undefined') return;
     const settings: AppSettings = {
       theme: this.theme(),
       sidebarExpanded: this.sidebarExpanded(),
       eurRate: this.eurRate(),
+      dataSource: this.dataSource(),
     };
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-    // Keep legacy EUR rate key in sync so ngrx reducer can still read it on init
-    window.localStorage.setItem(LEGACY_EUR_RATE_KEY, JSON.stringify(settings.eurRate));
   }
 }

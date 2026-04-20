@@ -30,11 +30,42 @@ namespace financial_api.Controllers
             public string Password { get; set; }
         }
 
+        public class RegisterRequest
+        {
+            public string Username { get; set; }
+            public string Password { get; set; }
+            public string FullName { get; set; }
+        }
+
+        [HttpPost("register")]
+        [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
+                return BadRequest("Username and password are required.");
+
+            if (await _context.Users.AnyAsync(u => u.Username == request.Username))
+                return Conflict("Username already taken.");
+
+            _context.Users.Add(new FinancialApi.Models.User
+            {
+                Username = request.Username,
+                Password = request.Password,
+                FullName = request.FullName ?? request.Username,
+            });
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Registration successful." });
+        }
+
         [HttpPost("login")]
+        [Microsoft.AspNetCore.Authorization.AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             if (string.IsNullOrEmpty(request.Username) || string.IsNullOrEmpty(request.Password))
                 return BadRequest("Username and password are required.");
+
+            Console.WriteLine($"Login attempt for user: {request.Username}");
+            Console.WriteLine($"Provided password: {request.Password}");
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == request.Username && u.Password == request.Password);
             if (user == null)
