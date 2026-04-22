@@ -39,6 +39,7 @@ public class FinancialDbContext : DbContext
             entity.Property(c => c.Name).HasMaxLength(200).IsRequired();
             entity.Property(c => c.Color).HasMaxLength(20).IsRequired().HasDefaultValue("#2196f3");
             entity.Property(c => c.BudgetAmount).HasColumnType("decimal(18,2)");
+            entity.Property(c => c.Date).IsRequired();
             entity.Property(c => c.CreatedAt).IsRequired();
             entity.Property(c => c.ModifiedAt).IsRequired(false);
             entity.HasOne(c => c.User)
@@ -73,6 +74,7 @@ public class FinancialDbContext : DbContext
             entity.Property(t => t.Description).HasMaxLength(500).IsRequired();
             entity.Property(t => t.PaymentMethod).HasMaxLength(20).IsRequired();
             entity.Property(t => t.Amount).HasColumnType("decimal(18,2)");
+            entity.Property(t => t.Date).IsRequired();
             entity.Property(t => t.CreatedAt).IsRequired();
             entity.Property(t => t.ModifiedAt).IsRequired(false);
             entity.HasOne(t => t.User)

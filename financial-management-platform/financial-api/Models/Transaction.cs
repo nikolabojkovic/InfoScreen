@@ -11,6 +11,7 @@ public class Transaction
     public string Description { get; set; } = string.Empty;
     public int UserId { get; set; }
     public User User { get; set; } = null!;
+    public DateOnly Date { get; set; }  // user-selected date (date only)
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? ModifiedAt { get; set; }
 }

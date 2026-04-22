@@ -2,6 +2,7 @@ namespace FinancialApi.Dtos;
 
 public record TransactionDto(
     int Id,
+    string Date,
     string CreatedAt,
     string Description,
     int? CategoryId,
@@ -11,7 +12,7 @@ public record TransactionDto(
 );
 
 public record CreateTransactionRequest(
-    string CreatedAt,
+    string Date,
     string Description,
     int? CategoryId,
     decimal Amount,
@@ -20,7 +21,7 @@ public record CreateTransactionRequest(
 );
 
 public record UpdateTransactionRequest(
-    string CreatedAt,
+    string Date,
     string Description,
     int? CategoryId,
     decimal Amount,

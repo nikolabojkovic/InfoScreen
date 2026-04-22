@@ -4,6 +4,7 @@ public record CategoryItemDto(int Id, string Description, decimal Amount);
 
 public record CategoryDto(
     int Id,
+    string Date,
     string Name,
     string Color,
     decimal BudgetAmount,
@@ -16,7 +17,8 @@ public record CreateCategoryRequest(
     string Name,
     string Color,
     decimal BudgetAmount,
-    List<CreateCategoryItemRequest> Items
+    List<CreateCategoryItemRequest> Items,
+    string? Date
 );
 
 public record UpdateCategoryItemRequest(int? Id, string Description, decimal Amount);

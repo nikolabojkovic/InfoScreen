@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, HostListener, ViewChild, inject, computed, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, ViewChild, inject, computed, signal, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { FinanceService } from '../../services/finance.service';
@@ -23,7 +23,7 @@ export class Transactions implements AfterViewInit {
   activeTab = signal<'income' | 'outcome'>('outcome');
 
   // Outcome form
-  date = new Date().toISOString().substring(0, 10);
+  date = signal(this.defaultDate());
   description = '';
   categoryId = '';
   amount: number = 0;
@@ -38,6 +38,32 @@ export class Transactions implements AfterViewInit {
 
   selectedMonth = this.finance.selectedMonth;
   selectedYear = this.finance.selectedYear;
+
+  constructor() {
+    effect(() => {
+      // When the selected month/year changes, reset the form date to the 1st of that month.
+      // If the selected month/year matches today, default to today's date instead.
+      const m = this.selectedMonth();
+      const y = this.selectedYear();
+      const today = new Date();
+      if (today.getMonth() === m && today.getFullYear() === y) {
+        this.date.set(today.toISOString().substring(0, 10));
+      } else {
+        const mm = String(m + 1).padStart(2, '0');
+        this.date.set(`${y}-${mm}-01`);
+      }
+    });
+  }
+
+  private defaultDate(): string {
+    const today = new Date();
+    const m = this.finance.selectedMonth();
+    const y = this.finance.selectedYear();
+    if (today.getMonth() === m && today.getFullYear() === y) {
+      return today.toISOString().substring(0, 10);
+    }
+    return `${y}-${String(m + 1).padStart(2, '0')}-01`;
+  }
 
   readonly monthLabel = computed(() => {
     const d = new Date(this.selectedYear(), this.selectedMonth());
@@ -123,7 +149,7 @@ export class Transactions implements AfterViewInit {
   addTransaction(): void {
     if (!this.description.trim() || !this.categoryId || this.amount <= 0) return;
     this.finance.addTransaction({
-      createdAt: this.date,
+      createdAt: this.date(),
       description: this.description.trim(),
       categoryId: this.categoryId,
       amount: this.amount,

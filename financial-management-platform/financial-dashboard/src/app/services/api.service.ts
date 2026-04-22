@@ -22,12 +22,14 @@ export interface ApiCategory {
   color: string;
   budgetAmount: number;
   userId: number;
+  date: string;    // yyyy-MM-dd (first day of selected month)
   items: ApiCategoryItem[];
 }
 
 export interface ApiTransaction {
   id: number;
-  createdAt: string;   // yyyy-MM-dd
+  date: string;        // yyyy-MM-dd (user-selected date for expenses; first day of month for incomes)
+  createdAt: string;   // ISO datetime — set server-side
   description: string;
   categoryId: number | null;
   amount: number;
@@ -49,11 +51,11 @@ export class ApiService {
     return this.http.get<ApiCategory[]>(`${this.base}/api/categories`, { params });
   }
 
-  createCategory(data: Omit<ApiCategory, 'id' | 'userId'>): Observable<ApiCategory> {
+  createCategory(data: Omit<ApiCategory, 'id' | 'userId'> & { date?: string }): Observable<ApiCategory> {
     return this.http.post<ApiCategory>(`${this.base}/api/categories`, data);
   }
 
-  updateCategory(id: number, data: Omit<ApiCategory, 'id' | 'userId'>): Observable<ApiCategory> {
+  updateCategory(id: number, data: Omit<ApiCategory, 'id' | 'userId' | 'date'>): Observable<ApiCategory> {
     return this.http.put<ApiCategory>(`${this.base}/api/categories/${id}`, data);
   }
 
@@ -71,11 +73,11 @@ export class ApiService {
     return this.http.get<ApiTransaction[]>(`${this.base}/api/transactions`, { params });
   }
 
-  createTransaction(data: Omit<ApiTransaction, 'id'>): Observable<ApiTransaction> {
+  createTransaction(data: Omit<ApiTransaction, 'id' | 'createdAt'>): Observable<ApiTransaction> {
     return this.http.post<ApiTransaction>(`${this.base}/api/transactions`, data);
   }
 
-  updateTransaction(id: number, data: Omit<ApiTransaction, 'id'>): Observable<ApiTransaction> {
+  updateTransaction(id: number, data: Omit<ApiTransaction, 'id' | 'createdAt'>): Observable<ApiTransaction> {
     return this.http.put<ApiTransaction>(`${this.base}/api/transactions/${id}`, data);
   }
 
@@ -89,18 +91,12 @@ export class ApiService {
     return this.getTransactions(month, year, 'income');
   }
 
-  createIncome(data: Omit<ApiTransaction, 'id' | 'type' | 'categoryId'>): Observable<ApiTransaction> {
-    return this.http.post<ApiTransaction>(`${this.base}/api/incomes`, {
-      ...data,
-      type: 'income',
-    });
+  createIncome(data: { date: string; description: string; amount: number; paymentMethod: string }): Observable<ApiTransaction> {
+    return this.http.post<ApiTransaction>(`${this.base}/api/incomes`, data);
   }
 
-  updateIncome(id: number, data: Omit<ApiTransaction, 'id' | 'type' | 'categoryId'>): Observable<ApiTransaction> {
-    return this.http.put<ApiTransaction>(`${this.base}/api/incomes/${id}`, {
-      ...data,
-      type: 'income',
-    });
+  updateIncome(id: number, data: { date: string; description: string; amount: number; paymentMethod: string }): Observable<ApiTransaction> {
+    return this.http.put<ApiTransaction>(`${this.base}/api/incomes/${id}`, data);
   }
 
   deleteIncome(id: number): Observable<void> {

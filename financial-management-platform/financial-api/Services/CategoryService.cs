@@ -17,6 +17,7 @@ public class CategoryService : ICategoryService
 
     private static CategoryDto ToDto(Category c) => new(
         c.Id,
+        c.Date.ToString("yyyy-MM-dd"),
         c.Name,
         c.Color,
         c.BudgetAmount,
@@ -30,9 +31,9 @@ public class CategoryService : ICategoryService
             .Where(c => c.UserId == userId);
 
         if (month.HasValue && year.HasValue)
-            query = query.Where(c => c.CreatedAt.Month == month.Value && c.CreatedAt.Year == year.Value);
+            query = query.Where(c => c.Date.Month == month.Value && c.Date.Year == year.Value);
         else if (year.HasValue)
-            query = query.Where(c => c.CreatedAt.Year == year.Value);
+            query = query.Where(c => c.Date.Year == year.Value);
 
         var categories = await query.OrderBy(c => c.Name).ToListAsync();
         return categories.Select(ToDto).ToList();
@@ -49,12 +50,20 @@ public class CategoryService : ICategoryService
 
     public async Task<CategoryDto> CreateAsync(int userId, CreateCategoryRequest request)
     {
+        DateOnly date = DateOnly.FromDateTime(DateTime.UtcNow);
+        if (!string.IsNullOrWhiteSpace(request.Date)
+            && DateOnly.TryParse(request.Date, out var parsed))
+        {
+            date = parsed;
+        }
+
         var category = new Category
         {
             Name = request.Name.Trim(),
             Color = request.Color,
             BudgetAmount = request.BudgetAmount,
             UserId = userId,
+            Date = date,
             CreatedAt = DateTime.UtcNow,
             Items = request.Items.Select(i => new CategoryItem
             {

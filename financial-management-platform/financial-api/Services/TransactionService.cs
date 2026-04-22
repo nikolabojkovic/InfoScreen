@@ -17,7 +17,8 @@ public class TransactionService : ITransactionService
 
     private static TransactionDto ToDto(Transaction t) => new(
         t.Id,
-        t.CreatedAt.ToString("yyyy-MM-dd"),
+        t.Date.ToString("yyyy-MM-dd"),
+        t.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ"),
         t.Description,
         t.CategoryId,
         t.Amount,
@@ -33,11 +34,11 @@ public class TransactionService : ITransactionService
             query = query.Where(t => t.Type == type);
 
         if (month.HasValue && year.HasValue)
-            query = query.Where(t => t.CreatedAt.Month == month.Value && t.CreatedAt.Year == year.Value);
+            query = query.Where(t => t.Date.Month == month.Value && t.Date.Year == year.Value);
         else if (year.HasValue)
-            query = query.Where(t => t.CreatedAt.Year == year.Value);
+            query = query.Where(t => t.Date.Year == year.Value);
 
-        var transactions = await query.OrderByDescending(t => t.CreatedAt).ToListAsync();
+        var transactions = await query.OrderByDescending(t => t.Date).ThenByDescending(t => t.Id).ToListAsync();
         return transactions.Select(ToDto).ToList();
     }
 
@@ -54,7 +55,7 @@ public class TransactionService : ITransactionService
         if (request.Type != "income" && request.Type != "expense")
             return ServiceResult<TransactionDto>.Fail("Type must be 'income' or 'expense'.");
 
-        if (!DateTime.TryParse(request.CreatedAt, out var createdAt))
+        if (!DateOnly.TryParse(request.Date, out var date))
             return ServiceResult<TransactionDto>.Fail("Invalid date format. Use yyyy-MM-dd.");
 
         if (request.Type == "expense")
@@ -70,7 +71,8 @@ public class TransactionService : ITransactionService
 
         var transaction = new Transaction
         {
-            CreatedAt = DateTime.SpecifyKind(createdAt.Date, DateTimeKind.Utc),
+            Date = date,
+            CreatedAt = DateTime.UtcNow,
             Type = request.Type,
             Description = request.Description.Trim(),
             CategoryId = request.CategoryId,
@@ -94,7 +96,7 @@ public class TransactionService : ITransactionService
         if (request.Type != "income" && request.Type != "expense")
             return ServiceResult<TransactionDto>.Fail("Type must be 'income' or 'expense'.");
 
-        if (!DateTime.TryParse(request.CreatedAt, out var createdAt))
+        if (!DateOnly.TryParse(request.Date, out var date))
             return ServiceResult<TransactionDto>.Fail("Invalid date format. Use yyyy-MM-dd.");
 
         if (request.Type == "expense")
@@ -108,7 +110,7 @@ public class TransactionService : ITransactionService
                 return ServiceResult<TransactionDto>.Fail("Category not found.");
         }
 
-        transaction.CreatedAt = DateTime.SpecifyKind(createdAt.Date, DateTimeKind.Utc);
+        transaction.Date = date;
         transaction.Type = request.Type;
         transaction.Description = request.Description.Trim();
         transaction.CategoryId = request.CategoryId;

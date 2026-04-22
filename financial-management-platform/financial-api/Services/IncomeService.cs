@@ -17,7 +17,8 @@ public class IncomeService : IIncomeService
 
     private static IncomeDto ToDto(Transaction t) => new(
         t.Id,
-        t.CreatedAt.ToString("yyyy-MM-dd"),
+        t.Date.ToString("yyyy-MM-dd"),
+        t.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ"),
         t.Description,
         t.Amount,
         t.PaymentMethod
@@ -29,11 +30,11 @@ public class IncomeService : IIncomeService
             .Where(t => t.UserId == userId && t.Type == "income");
 
         if (month.HasValue && year.HasValue)
-            query = query.Where(t => t.CreatedAt.Month == month.Value && t.CreatedAt.Year == year.Value);
+            query = query.Where(t => t.Date.Month == month.Value && t.Date.Year == year.Value);
         else if (year.HasValue)
-            query = query.Where(t => t.CreatedAt.Year == year.Value);
+            query = query.Where(t => t.Date.Year == year.Value);
 
-        var incomes = await query.OrderByDescending(t => t.CreatedAt).ToListAsync();
+        var incomes = await query.OrderByDescending(t => t.Date).ThenByDescending(t => t.Id).ToListAsync();
         return incomes.Select(ToDto).ToList();
     }
 
@@ -47,12 +48,13 @@ public class IncomeService : IIncomeService
 
     public async Task<ServiceResult<IncomeDto>> CreateAsync(int userId, CreateIncomeRequest request)
     {
-        if (!DateTime.TryParse(request.CreatedAt, out var createdAt))
+        if (!DateOnly.TryParse(request.Date, out var date))
             return ServiceResult<IncomeDto>.Fail("Invalid date format. Use yyyy-MM-dd.");
 
         var transaction = new Transaction
         {
-            CreatedAt = DateTime.SpecifyKind(createdAt.Date, DateTimeKind.Utc),
+            Date = date,
+            CreatedAt = DateTime.UtcNow,
             Type = "income",
             Description = request.Description.Trim(),
             CategoryId = null,
@@ -73,10 +75,10 @@ public class IncomeService : IIncomeService
 
         if (income == null) return ServiceResult<IncomeDto>.Miss();
 
-        if (!DateTime.TryParse(request.CreatedAt, out var createdAt))
+        if (!DateOnly.TryParse(request.Date, out var date))
             return ServiceResult<IncomeDto>.Fail("Invalid date format. Use yyyy-MM-dd.");
 
-        income.CreatedAt = DateTime.SpecifyKind(createdAt.Date, DateTimeKind.Utc);
+        income.Date = date;
         income.Description = request.Description.Trim();
         income.Amount = request.Amount;
         income.PaymentMethod = request.PaymentMethod;
