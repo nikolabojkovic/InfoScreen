@@ -46,14 +46,14 @@ export class Transactions implements AfterViewInit {
 
   readonly transactionGroups = computed<TransactionGroup[]>(() => {
     const txns = this.finance.getFilteredTransactions(this.selectedMonth(), this.selectedYear());
-    const sorted = [...txns].sort((a, b) => b.date.localeCompare(a.date));
+    const sorted = [...txns].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
     const groups: Map<string, TransactionGroup> = new Map();
     for (const tx of sorted) {
-      if (!groups.has(tx.date)) {
-        groups.set(tx.date, { date: tx.date, transactions: [], total: 0 });
+      if (!groups.has(tx.createdAt)) {
+        groups.set(tx.createdAt, { createdAt: tx.createdAt, transactions: [], total: 0 });
       }
-      const g = groups.get(tx.date)!;
+      const g = groups.get(tx.createdAt)!;
       g.transactions.push(tx);
       g.total += tx.amount;
     }
@@ -123,7 +123,7 @@ export class Transactions implements AfterViewInit {
   addTransaction(): void {
     if (!this.description.trim() || !this.categoryId || this.amount <= 0) return;
     this.finance.addTransaction({
-      date: this.date,
+      createdAt: this.date,
       description: this.description.trim(),
       categoryId: this.categoryId,
       amount: this.amount,
@@ -157,7 +157,7 @@ export class Transactions implements AfterViewInit {
 
   startEdit(tx: Transaction): void {
     this.editingTxId = tx.id;
-    this.editDate = tx.date;
+    this.editDate = tx.createdAt;
     this.editDescription = tx.description;
     this.editCategoryId = tx.categoryId;
     this.editAmount = tx.amount;
@@ -168,7 +168,7 @@ export class Transactions implements AfterViewInit {
     if (!this.editingTxId || !this.editDescription.trim() || !this.editCategoryId || this.editAmount <= 0) return;
     this.finance.updateTransaction({
       id: this.editingTxId,
-      date: this.editDate,
+      createdAt: this.editDate,
       description: this.editDescription.trim(),
       categoryId: this.editCategoryId,
       amount: this.editAmount,
@@ -229,7 +229,7 @@ export class Transactions implements AfterViewInit {
     if (!amount || amount <= 0) return;
 
     this.finance.addTransaction({
-      date: new Date().toISOString().substring(0, 10),
+      createdAt: new Date().toISOString().substring(0, 10),
       description: this.scannedDescription.trim() || bill.description,
       categoryId: this.scannedCategoryId,
       amount,

@@ -10,4 +10,6 @@ public class UserSettings
     public bool SidebarExpanded { get; set; } = false;
     public decimal EurRate { get; set; } = 117;
     public string DataSource { get; set; } = "remote";
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? ModifiedAt { get; set; }
 }

@@ -17,7 +17,7 @@ export type PaymentMethod = TransactionPaymentMethod;
 
 export interface Transaction {
   id: string;
-  date: string;
+  createdAt: string;
   description: string;
   categoryId: string;
   amount: number;
@@ -40,7 +40,7 @@ export interface ChartSegment {
 }
 
 export interface TransactionGroup {
-  date: string;
+  createdAt: string;
   transactions: Transaction[];
   total: number;
 }

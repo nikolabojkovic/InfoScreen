@@ -9,4 +9,6 @@ public class Category
     public int UserId { get; set; }
     public User User { get; set; } = null!;
     public ICollection<CategoryItem> Items { get; set; } = new List<CategoryItem>();
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? ModifiedAt { get; set; }
 }

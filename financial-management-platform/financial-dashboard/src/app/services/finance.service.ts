@@ -96,9 +96,9 @@ export class FinanceService {
   // Transaction CRUD
   async addTransaction(tx: Omit<Transaction, 'id'>): Promise<void> {
     if (this.settingsService.dataSource() === 'remote') {
-      const date = new Date(tx.date);
+      const date = new Date(tx.createdAt);
       const created = await firstValueFrom(this.apiService.createTransaction({
-        date: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`,
+        createdAt: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`,
         description: tx.description,
         categoryId: tx.categoryId ? Number(tx.categoryId) : null,
         amount: tx.amount,
@@ -122,9 +122,9 @@ export class FinanceService {
 
   async updateTransaction(updated: Transaction): Promise<void> {
     if (this.settingsService.dataSource() === 'remote') {
-      const date = new Date(updated.date);
+      const date = new Date(updated.createdAt);
       await firstValueFrom(this.apiService.updateTransaction(Number(updated.id), {
-        date: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`,
+        createdAt: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`,
         description: updated.description,
         categoryId: updated.categoryId ? Number(updated.categoryId) : null,
         amount: updated.amount,
@@ -145,11 +145,27 @@ export class FinanceService {
   setSelectedMonth(month: number): void {
     this.store.dispatch(setSelectedMonthAction({ month }));
     this.persistMonthYear();
+    if (this.settingsService.dataSource() === 'remote') {
+      this.loadFromApi();
+    }
   }
 
   setSelectedYear(year: number): void {
     this.store.dispatch(setSelectedYearAction({ year }));
     this.persistMonthYear();
+    if (this.settingsService.dataSource() === 'remote') {
+      this.loadFromApi();
+    }
+  }
+
+  /** Set both month and year atomically, triggering a single API load. */
+  setMonthYear(month: number, year: number): void {
+    this.store.dispatch(setSelectedYearAction({ year }));
+    this.store.dispatch(setSelectedMonthAction({ month }));
+    this.persistMonthYear();
+    if (this.settingsService.dataSource() === 'remote') {
+      this.loadFromApi();
+    }
   }
 
   // Income records CRUD
@@ -158,7 +174,7 @@ export class FinanceService {
     if (this.settingsService.dataSource() === 'remote') {
       const dateStr = `${this.selectedYear()}-${String(this.selectedMonth() + 1).padStart(2, '0')}-01`;
       const created = await firstValueFrom(this.apiService.createIncome({
-        date: dateStr, description, amount, paymentMethod,
+        createdAt: dateStr, description, amount, paymentMethod,
       }));
       const record: IncomeRecord = { id: String(created.id), amount, description, paymentMethod, createdAt };
       this.store.dispatch(addIncomeRecordAction({ record }));
@@ -174,7 +190,7 @@ export class FinanceService {
       const date = new Date(updated.createdAt);
       const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
       await firstValueFrom(this.apiService.updateIncome(Number(updated.id), {
-        date: dateStr, description: updated.description, amount: updated.amount,
+        createdAt: dateStr, description: updated.description, amount: updated.amount,
         paymentMethod: updated.paymentMethod,
       }));
     }
@@ -197,7 +213,7 @@ export class FinanceService {
     const key = monthKey(month, year);
 
     const [apiCategories, apiTransactions, apiIncomes] = await Promise.all([
-      firstValueFrom(this.apiService.getCategories()),
+      firstValueFrom(this.apiService.getCategories(month + 1, year)),
       firstValueFrom(this.apiService.getTransactions(month + 1, year, 'expense')),
       firstValueFrom(this.apiService.getIncomes(month + 1, year)),
     ]);
@@ -208,13 +224,13 @@ export class FinanceService {
         name: c.name,
         color: c.color,
         budgetAmount: c.budgetAmount,
-        items: [],
+        items: c.items.map(i => ({ description: i.description, amount: i.amount })),
       })),
     };
 
     const transactions: Transaction[] = apiTransactions.map(t => ({
       id: String(t.id),
-      date: t.date,
+      createdAt: t.createdAt,
       description: t.description,
       categoryId: t.categoryId != null ? String(t.categoryId) : '',
       amount: t.amount,
@@ -226,7 +242,7 @@ export class FinanceService {
       amount: i.amount,
       description: i.description,
       paymentMethod: i.paymentMethod as IncomeRecord['paymentMethod'],
-      createdAt: i.date,
+      createdAt: i.createdAt,
     }));
 
     this.store.dispatch(replaceFinanceDataAction({ categoriesByMonth, transactions, incomeRecords }));
@@ -234,7 +250,7 @@ export class FinanceService {
 
   getCategorySummaries(month: number, year: number): CategorySummary[] {
     const filtered = this.transactions().filter(t => {
-      const d = new Date(t.date);
+      const d = new Date(t.createdAt);
       return d.getMonth() === month && d.getFullYear() === year;
     });
 
@@ -253,7 +269,7 @@ export class FinanceService {
 
   getFilteredTransactions(month: number, year: number): Transaction[] {
     return this.transactions().filter(t => {
-      const d = new Date(t.date);
+      const d = new Date(t.createdAt);
       return d.getMonth() === month && d.getFullYear() === year;
     });
   }

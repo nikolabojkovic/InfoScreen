@@ -140,10 +140,10 @@
         </tr>
       </thead>
       <tbody>
-        @for (group of transactionGroups(); track group.date) {
+        @for (group of transactionGroups(); track group.createdAt) {
           <tr class="transactions__group-header">
             <td class="table__cell" colspan="5">
-              <strong>{{ group.date | date:'d MMM yyyy' }}</strong>
+              <strong>{{ group.createdAt | date:'d MMM yyyy' }}</strong>
             </td>
             <td class="table__cell transactions__text-right transactions__group-total">
               <span class="dual-currency">
@@ -207,7 +207,7 @@
             } @else {
             <tr class="transactions__row">
               <td class="table__cell transactions__text-center transactions__text-muted">{{ i + 1 }}</td>
-              <td class="table__cell">{{ tx.date | date:'d MMM' }}</td>
+                <td class="table__cell">{{ tx.createdAt | date:'d MMM' }}</td>
               <td class="table__cell">{{ tx.description }}</td>
               <td class="table__cell">
                 <span class="transactions__cat-badge">

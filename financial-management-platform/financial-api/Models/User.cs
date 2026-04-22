@@ -14,4 +14,6 @@ public class User
     public ICollection<Category> Categories { get; set; } = new List<Category>();
     public ICollection<CategoryItem> CategoryItems { get; set; } = new List<CategoryItem>();
     public UserSettings? Settings { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? ModifiedAt { get; set; }
 }

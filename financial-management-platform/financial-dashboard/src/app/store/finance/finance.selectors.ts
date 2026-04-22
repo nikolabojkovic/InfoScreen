@@ -45,7 +45,7 @@ export const selectCategoryById = (id: string) => createSelector(selectCategorie
 export const selectFilteredTransactions = (month: number, year: number) => createSelector(
   selectTransactions,
   transactions => transactions.filter(transaction => {
-    const date = new Date(transaction.date);
+    const date = new Date(transaction.createdAt);
     return date.getMonth() === month && date.getFullYear() === year;
   })
 );

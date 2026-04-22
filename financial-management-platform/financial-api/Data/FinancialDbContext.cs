@@ -28,6 +28,8 @@ public class FinancialDbContext : DbContext
             entity.Property(u => u.Password).HasMaxLength(255).IsRequired();
             entity.Property(u => u.FullName).HasMaxLength(200).IsRequired();
             entity.HasIndex(u => u.Username).IsUnique();
+            entity.Property(u => u.CreatedAt).IsRequired();
+            entity.Property(u => u.ModifiedAt).IsRequired(false);
         });
 
         modelBuilder.Entity<Category>(entity =>
@@ -37,6 +39,8 @@ public class FinancialDbContext : DbContext
             entity.Property(c => c.Name).HasMaxLength(200).IsRequired();
             entity.Property(c => c.Color).HasMaxLength(20).IsRequired().HasDefaultValue("#2196f3");
             entity.Property(c => c.BudgetAmount).HasColumnType("decimal(18,2)");
+            entity.Property(c => c.CreatedAt).IsRequired();
+            entity.Property(c => c.ModifiedAt).IsRequired(false);
             entity.HasOne(c => c.User)
                   .WithMany(u => u.Categories)
                   .HasForeignKey(c => c.UserId)
@@ -49,6 +53,8 @@ public class FinancialDbContext : DbContext
             entity.HasKey(ci => ci.Id);
             entity.Property(ci => ci.Description).HasMaxLength(500).IsRequired();
             entity.Property(ci => ci.Amount).HasColumnType("decimal(18,2)");
+            entity.Property(ci => ci.CreatedAt).IsRequired();
+            entity.Property(ci => ci.ModifiedAt).IsRequired(false);
             entity.HasOne(ci => ci.Category)
                   .WithMany(c => c.Items)
                   .HasForeignKey(ci => ci.CategoryId)
@@ -67,6 +73,8 @@ public class FinancialDbContext : DbContext
             entity.Property(t => t.Description).HasMaxLength(500).IsRequired();
             entity.Property(t => t.PaymentMethod).HasMaxLength(20).IsRequired();
             entity.Property(t => t.Amount).HasColumnType("decimal(18,2)");
+            entity.Property(t => t.CreatedAt).IsRequired();
+            entity.Property(t => t.ModifiedAt).IsRequired(false);
             entity.HasOne(t => t.User)
                   .WithMany(u => u.Transactions)
                   .HasForeignKey(t => t.UserId)
@@ -85,6 +93,8 @@ public class FinancialDbContext : DbContext
             entity.Property(s => s.Theme).HasMaxLength(10).IsRequired().HasDefaultValue("light");
             entity.Property(s => s.DataSource).HasMaxLength(10).IsRequired().HasDefaultValue("local");
             entity.Property(s => s.EurRate).HasColumnType("decimal(18,2)");
+            entity.Property(s => s.CreatedAt).IsRequired();
+            entity.Property(s => s.ModifiedAt).IsRequired(false);
             entity.HasOne(s => s.User)
                   .WithOne(u => u.Settings)
                   .HasForeignKey<UserSettings>(s => s.UserId)

@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, signal, ViewChild, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NgIf } from '@angular/common';
@@ -30,13 +30,14 @@ export class Navbar {
     return url === '/login' || url === '/register';
   });
 
+  @ViewChild('monthPicker') monthPickerRef!: ElementRef<HTMLInputElement>;
+
   private readonly monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December',
   ];
 
   constructor() {
-    // Apply stored theme on init
     this.document.documentElement.setAttribute('data-theme', this.settings.theme());
   }
 
@@ -44,10 +45,33 @@ export class Navbar {
     return `${this.monthNames[this.selectedMonth()]} ${this.selectedYear()}`;
   }
 
+  /** Value for the hidden input: yyyy-MM */
+  get monthPickerValue(): string {
+    const y = this.selectedYear();
+    const m = String(this.selectedMonth() + 1).padStart(2, '0');
+    return `${y}-${m}`;
+  }
+
+  openPicker(): void {
+    const el = this.monthPickerRef?.nativeElement;
+    if (el) {
+      el.value = this.monthPickerValue;
+      el.showPicker?.();
+      el.focus();
+    }
+  }
+
+  onPickerChange(event: Event): void {
+    const value = (event.target as HTMLInputElement).value; // yyyy-MM
+    if (!value) return;
+    const [y, m] = value.split('-').map(Number);
+    this.finance.setMonthYear(m - 1, y);
+  }
+
   prevMonth(): void {
     if (this.selectedMonth() === 0) {
-      this.finance.setSelectedMonth(11);
       this.finance.setSelectedYear(this.selectedYear() - 1);
+      this.finance.setSelectedMonth(11);
     } else {
       this.finance.setSelectedMonth(this.selectedMonth() - 1);
     }
@@ -55,8 +79,8 @@ export class Navbar {
 
   nextMonth(): void {
     if (this.selectedMonth() === 11) {
-      this.finance.setSelectedMonth(0);
       this.finance.setSelectedYear(this.selectedYear() + 1);
+      this.finance.setSelectedMonth(0);
     } else {
       this.finance.setSelectedMonth(this.selectedMonth() + 1);
     }

@@ -113,10 +113,10 @@ function migrateIncomeRecords(): IncomeRecord[] {
 function migrateTransactions(): Transaction[] {
   const transactions = load<Array<Partial<Transaction>>>(userKey(STORAGE_TRANSACTIONS), []);
   return transactions
-    .filter(transaction => !!transaction.id && !!transaction.date && !!transaction.description && !!transaction.categoryId)
+    .filter(transaction => !!transaction.id && !!(transaction.createdAt ?? (transaction as any).date) && !!transaction.description && !!transaction.categoryId)
     .map(transaction => ({
       id: transaction.id as string,
-      date: transaction.date as string,
+      createdAt: (transaction.createdAt ?? (transaction as any).date) as string,
       description: transaction.description as string,
       categoryId: transaction.categoryId as string,
       amount: Number(transaction.amount ?? 0),
@@ -168,7 +168,7 @@ function getActiveMonthKey(state: FinanceState): string {
 }
 
 function getActiveCategories(state: FinanceState): Category[] {
-  return state.categoriesByMonth[getActiveMonthKey(state)] ?? defaultCategories();
+  return state.categoriesByMonth[getActiveMonthKey(state)] ?? [];
 }
 
 function setActiveCategories(state: FinanceState, categories: Category[]): FinanceState {
@@ -191,7 +191,7 @@ export const financeReducer = createReducer(
   on(deleteCategory, (state, { id }) => ({
     ...setActiveCategories(state, getActiveCategories(state).filter(category => category.id !== id)),
     transactions: state.transactions.filter(transaction => {
-      const date = new Date(transaction.date);
+      const date = new Date(transaction.createdAt);
       const isCurrentMonth = date.getMonth() === state.selectedMonth && date.getFullYear() === state.selectedYear;
       return !(isCurrentMonth && transaction.categoryId === id);
     }),
@@ -206,8 +206,28 @@ export const financeReducer = createReducer(
     transactions: state.transactions.filter(transaction => transaction.id !== id),
   })),
   on(setEurRate, (state, { rate }) => ({ ...state, eurRate: rate })),
-  on(setSelectedMonth, (state, { month }) => ({ ...state, selectedMonth: month })),
-  on(setSelectedYear, (state, { year }) => ({ ...state, selectedYear: year })),
+  on(setSelectedMonth, (state, { month }) => {
+    const newState = { ...state, selectedMonth: month };
+    const key = getActiveMonthKey(newState);
+    if (!newState.categoriesByMonth[key]?.length) {
+      const existing = Object.values(state.categoriesByMonth).find(cats => cats.length > 0);
+      if (existing) {
+        return { ...newState, categoriesByMonth: { ...newState.categoriesByMonth, [key]: existing } };
+      }
+    }
+    return newState;
+  }),
+  on(setSelectedYear, (state, { year }) => {
+    const newState = { ...state, selectedYear: year };
+    const key = getActiveMonthKey(newState);
+    if (!newState.categoriesByMonth[key]?.length) {
+      const existing = Object.values(state.categoriesByMonth).find(cats => cats.length > 0);
+      if (existing) {
+        return { ...newState, categoriesByMonth: { ...newState.categoriesByMonth, [key]: existing } };
+      }
+    }
+    return newState;
+  }),
   on(addIncomeRecord, (state, { record }) => ({ ...state, incomeRecords: [...state.incomeRecords, record] })),
   on(updateIncomeRecord, (state, { record }) => ({
     ...state,

@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using FinancialApi.Data;
 using FinancialApi.Models;
+using FinancialApi.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 
@@ -31,7 +32,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 // JWT configuration
 var jwtSettings = builder.Configuration.GetSection("Jwt");
-var jwtKey = jwtSettings.GetValue<string>("Key");
+var jwtKey = jwtSettings.GetValue<string>("Key")
+	?? throw new InvalidOperationException("JWT Key is not configured.");
 var jwtIssuer = jwtSettings.GetValue<string>("Issuer");
 var jwtAudience = jwtSettings.GetValue<string>("Audience");
 
@@ -55,11 +57,6 @@ builder.Services.AddAuthentication(options =>
 		ValidAudience = jwtAudience,
 		IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
 	};
-})
-.AddGoogle(googleOptions =>
-{
-	googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
-	googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
 });
 
 builder.Services.AddEndpointsApiExplorer();
@@ -87,6 +84,16 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddControllers();
 builder.Services.AddDbContext<FinancialDbContext>(options =>
 	options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 36))));
+
+// Application services
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<IIncomeService, IncomeService>();
+builder.Services.AddScoped<ISettingsService, SettingsService>();
 
 
 var app = builder.Build();

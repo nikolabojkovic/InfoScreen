@@ -27,7 +27,7 @@ export interface ApiCategory {
 
 export interface ApiTransaction {
   id: number;
-  date: string;        // yyyy-MM-dd
+  createdAt: string;   // yyyy-MM-dd
   description: string;
   categoryId: number | null;
   amount: number;
@@ -42,8 +42,11 @@ export class ApiService {
 
   // ── Categories ────────────────────────────────────────────────────────────
 
-  getCategories(): Observable<ApiCategory[]> {
-    return this.http.get<ApiCategory[]>(`${this.base}/api/categories`);
+  getCategories(month?: number, year?: number): Observable<ApiCategory[]> {
+    let params = new HttpParams();
+    if (month != null) params = params.set('month', month);
+    if (year != null) params = params.set('year', year);
+    return this.http.get<ApiCategory[]>(`${this.base}/api/categories`, { params });
   }
 
   createCategory(data: Omit<ApiCategory, 'id' | 'userId'>): Observable<ApiCategory> {

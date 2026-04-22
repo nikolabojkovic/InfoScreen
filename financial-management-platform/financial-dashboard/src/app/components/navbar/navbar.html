@@ -15,7 +15,16 @@
     </div>
     <div *ngIf="isLoggedIn()" class="navbar__month-nav" aria-label="Selected month">
       <button class="navbar__month-btn" type="button" (click)="prevMonth()" aria-label="Previous month">◀</button>
-      <span class="navbar__month-label">{{ monthLabel() }}</span>
+      <span class="navbar__month-label" (click)="openPicker()" title="Pick month">{{ monthLabel() }}</span>
+      <input
+        #monthPicker
+        type="month"
+        class="navbar__month-picker"
+        [value]="monthPickerValue"
+        (change)="onPickerChange($event)"
+        tabindex="-1"
+        aria-hidden="true"
+      />
       <button class="navbar__month-btn" type="button" (click)="nextMonth()" aria-label="Next month">▶</button>
     </div>
     <button *ngIf="!isLoggedIn()" class="navbar__theme-toggle" type="button" [attr.aria-pressed]="isDarkTheme()" (click)="toggleTheme()">

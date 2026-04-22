@@ -15,7 +15,10 @@
             (change)="setDataSource('local')"
             [disabled]="dataSourceLoading()"
           />
-          Local Storage
+          <span class="settings__radio-text">
+            Local Storage
+            <span class="settings__radio-desc">Data related to your account will be available only on this device</span>
+          </span>
         </label>
         <label class="settings__radio-label">
           <input
@@ -26,7 +29,10 @@
             (change)="setDataSource('remote')"
             [disabled]="dataSourceLoading()"
           />
-          Remote API
+          <span class="settings__radio-text">
+            Remote API
+            <span class="settings__radio-desc">Data related to your account will be available on any device</span>
+          </span>
         </label>
       </div>
       <div *ngIf="dataSourceLoading()" class="settings__info">Loading data from API…</div>
