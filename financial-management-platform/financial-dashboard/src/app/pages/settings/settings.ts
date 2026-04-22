@@ -1,8 +1,10 @@
 import { Component, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgIf } from '@angular/common';
+import { Router } from '@angular/router';
 import { FinanceService } from '../../services/finance.service';
 import { SettingsService } from '../../services/settings.service';
+import { ConfirmationService } from '../../services/confirmation.service';
 
 @Component({
   selector: 'app-settings',
@@ -14,6 +16,8 @@ export class Settings {
   private finance = inject(FinanceService);
   readonly settingsService = inject(SettingsService);
   private cdr = inject(ChangeDetectorRef);
+  private confirmationService = inject(ConfirmationService);
+  private router = inject(Router);
 
   eurRateInput = this.finance.eurRate();
   eurRateEdit = this.finance.eurRate();
@@ -43,18 +47,34 @@ export class Settings {
   async setDataSource(value: 'local' | 'remote'): Promise<void> {
     const previous = this.settingsService.dataSource();
     if (value === previous) return;
-    this.settingsService.setDataSource(value);
-    if (value === 'remote') {
-      this.dataSourceLoading.set(true);
-      this.dataSourceError.set('');
-      try {
+
+    this.dataSourceLoading.set(true);
+    this.dataSourceError.set('');
+
+    try {
+      await this.settingsService.setDataSource(value);
+
+      if (value === 'remote') {
         await this.finance.loadFromApi();
-      } catch (e) {
-        this.dataSourceError.set('Failed to load data from API. Switched back to local.');
-        this.settingsService.setDataSource('local');
-      } finally {
-        this.dataSourceLoading.set(false);
+      } else {
+        this.finance.loadFromLocal();
       }
+    } catch {
+      if (value === 'remote') {
+        // Roll back setting
+        await this.settingsService.setDataSource('local').catch(() => {});
+        const goToSettings = await this.confirmationService.confirm({
+          title: 'API Unavailable',
+          message: 'The remote API is not available right now. Switched back to local. Check your connection and try again.',
+          confirmLabel: 'OK',
+          cancelLabel: '',
+        });
+        void goToSettings;
+      } else {
+        this.dataSourceError.set('Failed to switch to local mode.');
+      }
+    } finally {
+      this.dataSourceLoading.set(false);
     }
   }
 }

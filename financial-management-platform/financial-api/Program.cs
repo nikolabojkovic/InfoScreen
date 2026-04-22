@@ -15,9 +15,9 @@ builder.Services.AddCors(options =>
 	options.AddPolicy("AllowMultipleOrigins",
 		policy => policy
 			.WithOrigins(
-				"http://localhost:3000",
 				"http://localhost:4200",
-				"https://developer-tool.com"
+				"https://developer-tool.com",
+        "https://financial.developer-tool.com"
 			)
 			.AllowAnyMethod()
 			.AllowAnyHeader()
@@ -43,7 +43,7 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-	options.RequireHttpsMetadata = false;
+	options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
 	options.SaveToken = true;
 	options.TokenValidationParameters = new TokenValidationParameters
 	{

@@ -8,14 +8,31 @@ import { financeFeatureKey, financeReducer } from './store/finance/finance.reduc
 import { authInterceptor } from './services/auth.interceptor';
 import { FinanceService } from './services/finance.service';
 import { SettingsService } from './services/settings.service';
+import { ApiErrorService } from './services/api-error.service';
 
-function initializeData(financeService: FinanceService, settingsService: SettingsService) {
+const JWT_KEY = 'jwt_token';
+
+function initializeData(
+  financeService: FinanceService,
+  settingsService: SettingsService,
+  apiErrorService: ApiErrorService,
+) {
   return async () => {
+    const hasToken = !!localStorage.getItem(JWT_KEY);
+    if (!hasToken) return;
+
+    try {
+      await settingsService.loadFromApi();
+    } catch {
+      apiErrorService.setUnavailable();
+      return; // Don't attempt finance load if settings already failed
+    }
+
     if (settingsService.dataSource() === 'remote') {
       try {
         await financeService.loadFromApi();
       } catch {
-        // API unavailable or not authenticated — localStorage state is retained
+        apiErrorService.setUnavailable();
       }
     }
   };
@@ -31,7 +48,7 @@ export const appConfig: ApplicationConfig = {
     {
       provide: APP_INITIALIZER,
       useFactory: initializeData,
-      deps: [FinanceService, SettingsService],
+      deps: [FinanceService, SettingsService, ApiErrorService],
       multi: true,
     },
   ],

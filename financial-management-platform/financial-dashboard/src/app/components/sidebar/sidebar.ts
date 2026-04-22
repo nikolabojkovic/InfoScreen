@@ -5,6 +5,7 @@ import { NgIf } from '@angular/common';
 import { SidebarService } from '../../services/sidebar.service';
 import { AuthService } from '../../services/auth.service';
 import { SettingsService } from '../../services/settings.service';
+import { FinanceService } from '../../services/finance.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -18,6 +19,7 @@ export class Sidebar {
   readonly sidebar = inject(SidebarService);
   private auth = inject(AuthService);
   private settings = inject(SettingsService);
+  private financeService = inject(FinanceService);
   readonly isExpanded = this.sidebar.isExpanded;
   readonly isLoggedIn = this.auth.isLoggedIn;
   readonly isDarkTheme = computed(() => this.settings.theme() === 'dark');
@@ -43,6 +45,7 @@ export class Sidebar {
 
   logout(): void {
     this.auth.logout();
+    this.financeService.clearStore();
     this.router.navigate(['/login']);
   }
 }

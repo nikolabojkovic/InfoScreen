@@ -17,8 +17,8 @@
       <label>Confirm Password</label>
       <input type="password" [(ngModel)]="confirmPassword" name="confirmPassword" required autocomplete="new-password" />
     </div>
-    <div *ngIf="error" class="error">{{ error }}</div>
-    <button type="submit" [disabled]="loading">{{ loading ? 'Registering…' : 'Register' }}</button>
+    <div *ngIf="error()" class="error">{{ error() }}</div>
+    <button type="submit" [disabled]="loading()">{{ loading() ? 'Registering…' : 'Register' }}</button>
     <p>Already have an account? <a routerLink="/login">Login</a></p>
   </form>
 </div>

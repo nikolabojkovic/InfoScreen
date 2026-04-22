@@ -16,3 +16,8 @@ export const setSelectedYear = createAction('[Finance] Set Selected Year', props
 export const addIncomeRecord = createAction('[Finance] Add Income Record', props<{ record: IncomeRecord }>());
 export const updateIncomeRecord = createAction('[Finance] Update Income Record', props<{ record: IncomeRecord }>());
 export const deleteIncomeRecord = createAction('[Finance] Delete Income Record', props<{ id: string }>());
+
+export const replaceFinanceData = createAction(
+  '[Finance] Replace Finance Data',
+  props<{ categoriesByMonth: Record<string, Category[]>; transactions: Transaction[]; incomeRecords: IncomeRecord[] }>()
+);

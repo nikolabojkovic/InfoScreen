@@ -2,14 +2,14 @@
   <app-navbar />
 </ng-container>
 <div class="app__layout">
-  <ng-container *ngIf="!hideNav()">
+  <ng-container *ngIf="!hideSidebar()">
     <app-sidebar />
   </ng-container>
   <main
     class="app__content"
     [class.no-navbar]="hideNav()"
-    [class.app__content--expanded]="!hideNav() && sidebarExpanded()"
-    [class.app__content--collapsed]="!hideNav() && !sidebarExpanded()">
+    [class.app__content--expanded]="!hideSidebar() && sidebarExpanded()"
+    [class.app__content--collapsed]="!hideSidebar() && !sidebarExpanded()">
     <router-outlet />
   </main>
 </div>

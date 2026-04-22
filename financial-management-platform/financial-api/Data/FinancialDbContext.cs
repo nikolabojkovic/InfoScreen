@@ -9,6 +9,7 @@ public class FinancialDbContext : DbContext
     public DbSet<Transaction> Transactions => Set<Transaction>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<CategoryItem> CategoryItems => Set<CategoryItem>();
+    public DbSet<UserSettings> UserSettings => Set<UserSettings>();
 
     public FinancialDbContext(DbContextOptions<FinancialDbContext> options)
         : base(options)
@@ -75,6 +76,19 @@ public class FinancialDbContext : DbContext
                   .HasForeignKey(t => t.CategoryId)
                   .IsRequired(false)
                   .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<UserSettings>(entity =>
+        {
+            entity.ToTable("UserSettings");
+            entity.HasKey(s => s.Id);
+            entity.Property(s => s.Theme).HasMaxLength(10).IsRequired().HasDefaultValue("light");
+            entity.Property(s => s.DataSource).HasMaxLength(10).IsRequired().HasDefaultValue("local");
+            entity.Property(s => s.EurRate).HasColumnType("decimal(18,2)");
+            entity.HasOne(s => s.User)
+                  .WithOne(u => u.Settings)
+                  .HasForeignKey<UserSettings>(s => s.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

@@ -7,6 +7,7 @@ import {
   deleteCategory,
   deleteIncomeRecord,
   deleteTransaction,
+  replaceFinanceData,
   setEurRate,
   setSelectedMonth,
   setSelectedYear,
@@ -22,6 +23,25 @@ const STORAGE_INCOME = 'fin_income';
 const STORAGE_INCOME_RECORDS = 'fin_income_records';
 const STORAGE_SELECTED_MONTH = 'budget_selected_month';
 const STORAGE_SELECTED_YEAR = 'budget_selected_year';
+
+/** Decodes the JWT sub claim without verification — used only for key namespacing. */
+function getUsernameFromJwt(): string {
+  try {
+    const token = localStorage.getItem('jwt_token');
+    if (!token) return 'guest';
+    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64 + '==='.slice((base64.length + 3) % 4);
+    const payload = JSON.parse(atob(padded)) as Record<string, unknown>;
+    return typeof payload['sub'] === 'string' && payload['sub'] ? payload['sub'] : 'guest';
+  } catch {
+    return 'guest';
+  }
+}
+
+function userKey(base: string): string {
+  const u = getUsernameFromJwt();
+  return u !== 'guest' ? `${base}_${u}` : base;
+}
 
 export interface FinanceState {
   categoriesByMonth: Record<string, Category[]>;
@@ -60,7 +80,10 @@ function load<T>(key: string, fallback: T): T {
 
 function loadEurRateFromSettings(): number {
   try {
-    const raw = localStorage.getItem('finance-dashboard-settings');
+    const key = getUsernameFromJwt() !== 'guest'
+      ? `finance-dashboard-settings_${getUsernameFromJwt()}`
+      : 'finance-dashboard-settings';
+    const raw = localStorage.getItem(key);
     if (raw) {
       const parsed = JSON.parse(raw);
       if (typeof parsed.eurRate === 'number' && parsed.eurRate > 0) return parsed.eurRate;
@@ -70,7 +93,7 @@ function loadEurRateFromSettings(): number {
 }
 
 function migrateIncomeRecords(): IncomeRecord[] {
-  const records = load<IncomeRecord[]>(STORAGE_INCOME_RECORDS, []);
+  const records = load<IncomeRecord[]>(userKey(STORAGE_INCOME_RECORDS), []);
   if (records.length > 0) {
     return records.map(record => ({
       ...record,
@@ -79,7 +102,7 @@ function migrateIncomeRecords(): IncomeRecord[] {
     }));
   }
 
-  const oldIncome = load<number>(STORAGE_INCOME, 0);
+  const oldIncome = load<number>(userKey(STORAGE_INCOME), 0);
   if (oldIncome > 0) {
     return [{ id: Date.now().toString(36), amount: oldIncome, description: '', paymentMethod: 'bank', createdAt: new Date().toISOString() }];
   }
@@ -88,7 +111,7 @@ function migrateIncomeRecords(): IncomeRecord[] {
 }
 
 function migrateTransactions(): Transaction[] {
-  const transactions = load<Array<Partial<Transaction>>>(STORAGE_TRANSACTIONS, []);
+  const transactions = load<Array<Partial<Transaction>>>(userKey(STORAGE_TRANSACTIONS), []);
   return transactions
     .filter(transaction => !!transaction.id && !!transaction.date && !!transaction.description && !!transaction.categoryId)
     .map(transaction => ({
@@ -102,7 +125,7 @@ function migrateTransactions(): Transaction[] {
 }
 
 function migrateCategories(selectedMonth: number, selectedYear: number): Record<string, Category[]> {
-  const loaded = load<unknown>(STORAGE_CATEGORIES, defaultCategories());
+  const loaded = load<unknown>(userKey(STORAGE_CATEGORIES), defaultCategories());
   const key = monthKey(selectedMonth, selectedYear);
 
   if (Array.isArray(loaded)) {
@@ -117,8 +140,8 @@ function migrateCategories(selectedMonth: number, selectedYear: number): Record<
 }
 
 function createInitialState(): FinanceState {
-  const selectedMonth = load<number>(STORAGE_SELECTED_MONTH, new Date().getMonth());
-  const selectedYear = load<number>(STORAGE_SELECTED_YEAR, new Date().getFullYear());
+  const selectedMonth = load<number>(userKey(STORAGE_SELECTED_MONTH), new Date().getMonth());
+  const selectedYear = load<number>(userKey(STORAGE_SELECTED_YEAR), new Date().getFullYear());
 
   return {
     categoriesByMonth: migrateCategories(selectedMonth, selectedYear),
@@ -193,6 +216,12 @@ export const financeReducer = createReducer(
   on(deleteIncomeRecord, (state, { id }) => ({
     ...state,
     incomeRecords: state.incomeRecords.filter(record => record.id !== id),
+  })),
+  on(replaceFinanceData, (state, { categoriesByMonth, transactions, incomeRecords }) => ({
+    ...state,
+    categoriesByMonth,
+    transactions,
+    incomeRecords,
   }))
 );
 

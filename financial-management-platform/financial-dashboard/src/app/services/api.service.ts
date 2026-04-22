@@ -3,6 +3,13 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
+export interface ApiSettings {
+  theme: string;
+  sidebarExpanded: boolean;
+  eurRate: number;
+  dataSource: string;
+}
+
 export interface ApiCategoryItem {
   id?: number;
   description: string;
@@ -95,5 +102,15 @@ export class ApiService {
 
   deleteIncome(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/api/incomes/${id}`);
+  }
+
+  // ── Settings ──────────────────────────────────────────────────────────────
+
+  getSettings(): Observable<ApiSettings> {
+    return this.http.get<ApiSettings>(`${this.base}/api/settings`);
+  }
+
+  updateSettings(data: ApiSettings): Observable<ApiSettings> {
+    return this.http.put<ApiSettings>(`${this.base}/api/settings`, data);
   }
 }

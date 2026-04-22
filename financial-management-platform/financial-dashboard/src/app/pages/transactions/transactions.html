@@ -197,7 +197,8 @@
                     </div>
 
                     <div class="transactions__edit-actions">
-                      <button class="transactions__btn-save" (click)="saveEdit()" title="Save">✓ Save</button>
+                      <button class="transactions__btn-save" (click)="saveEdit()" title="Save"
+                        [disabled]="!editDate || !editDescription.trim() || !editCategoryId || editAmount <= 0">✓ Save</button>
                       <button class="transactions__btn-cancel" (click)="cancelEdit()" title="Cancel">✕ Cancel</button>
                     </div>
                   </div>
@@ -283,7 +284,7 @@
         <input type="text" [(ngModel)]="newIncomeDescription" placeholder="Income description" class="transactions__income-input transactions__income-input--full" />
       </div>
       <div class="transactions__income-actions">
-        <button class="btn btn--primary" (click)="addIncome()" [disabled]="newIncomeAmount <= 0">+ Add</button>
+          <button class="btn btn--primary" (click)="addIncome()" [disabled]="newIncomeAmount <= 0 || !newIncomeDescription.trim()">+ Add</button>
       </div>
     </div>
   </div>
@@ -347,7 +348,8 @@
                 <td class="table__cell transactions__income-date-cell">{{ rec.createdAt | date:'dd.MM.yyyy HH:mm' }}</td>
                 <td class="table__cell transactions__income-actions-cell">
                   @if (editingIncomeId === rec.id) {
-                    <button class="transactions__btn-save" (click)="saveIncomeEdit()" title="Save">✓</button>
+                    <button class="transactions__btn-save" (click)="saveIncomeEdit()" title="Save"
+                      [disabled]="editingIncomeAmount <= 0">✓</button>
                     <button class="transactions__btn-cancel" (click)="cancelIncomeEdit()" title="Cancel">✕</button>
                   } @else {
                     <button class="transactions__btn-edit" (click)="startEditIncome(rec)" title="Edit">✎</button>

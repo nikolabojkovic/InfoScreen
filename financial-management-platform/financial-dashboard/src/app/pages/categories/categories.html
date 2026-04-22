@@ -65,8 +65,9 @@
                 <button type="button" class="btn btn--sm btn--primary" (click)="addEditItem()" style="margin-top: 8px;">Add Item</button>
               </td>
               <td class="table__cell categories__actions">
-                <button class="btn btn--sm btn--success" (click)="saveEdit(cat)">Save</button>
-                <button class="btn btn--sm btn--secondary" (click)="cancelEdit()">Cancel</button>
+                <button class="categories__btn-save" (click)="saveEdit(cat)"
+                  [disabled]="!editName.trim() || editItems.some(item => !item.description || item.amount <= 0)">&#x2713; Save</button>
+                <button class="categories__btn-cancel" (click)="cancelEdit()">&#x2715; Cancel</button>
               </td>
             </tr>
           } @else {
@@ -80,8 +81,8 @@
                 </span>
               </td>
               <td class="table__cell categories__actions">
-                <button class="btn btn--sm btn--secondary" (click)="startEdit(cat)">Edit</button>
-                <button class="btn btn--sm btn--danger" (click)="deleteCategory(cat.id)">Delete</button>
+                <button class="categories__btn-edit" (click)="startEdit(cat)" title="Edit">&#x270E;</button>
+                <button class="categories__btn-delete" (click)="deleteCategory(cat.id)" title="Delete">&#x2715;</button>
               </td>
             </tr>
           }

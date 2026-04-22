@@ -8,6 +8,7 @@ import {
   deleteCategory as deleteCategoryAction,
   deleteIncomeRecord as deleteIncomeRecordAction,
   deleteTransaction as deleteTransactionAction,
+  replaceFinanceData as replaceFinanceDataAction,
   setEurRate as setEurRateAction,
   setSelectedMonth as setSelectedMonthAction,
   setSelectedYear as setSelectedYearAction,
@@ -29,8 +30,10 @@ import {
   selectTotalIncome,
   selectTransactions,
 } from '../store/finance/finance.selectors';
+import { monthKey } from '../store/finance/finance.reducer';
 import { SettingsService } from './settings.service';
 import { ApiService } from './api.service';
+import { AuthService } from './auth.service';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -38,9 +41,12 @@ export class FinanceService {
   private store = inject(Store);
   private settingsService = inject(SettingsService);
   private apiService = inject(ApiService);
-  private readonly STORAGE_CATEGORIES = 'fin_categories';
-  private readonly STORAGE_TRANSACTIONS = 'fin_transactions';
-  private readonly STORAGE_INCOME_RECORDS = 'fin_income_records';
+  private authService = inject(AuthService);
+
+  private storageKey(base: string): string {
+    const u = this.authService.getUsername();
+    return u !== 'guest' ? `${base}_${u}` : base;
+  }
   readonly financeState = this.store.selectSignal(selectFinanceState);
   readonly categories = this.store.selectSignal(selectCategories);
   readonly transactions = this.store.selectSignal(selectTransactions);
@@ -133,17 +139,17 @@ export class FinanceService {
   setEurRate(rate: number): void {
     this.store.dispatch(setEurRateAction({ rate }));
     this.settingsService.setEurRate(rate);
-    this.persistState();
+    if (this.settingsService.dataSource() === 'local') this.persistState();
   }
 
   setSelectedMonth(month: number): void {
     this.store.dispatch(setSelectedMonthAction({ month }));
-    this.persistState();
+    this.persistMonthYear();
   }
 
   setSelectedYear(year: number): void {
     this.store.dispatch(setSelectedYearAction({ year }));
-    this.persistState();
+    this.persistMonthYear();
   }
 
   // Income records CRUD
@@ -188,54 +194,42 @@ export class FinanceService {
   async loadFromApi(): Promise<void> {
     const month = this.selectedMonth();
     const year = this.selectedYear();
+    const key = monthKey(month, year);
 
-    const [categories, transactions, incomes] = await Promise.all([
+    const [apiCategories, apiTransactions, apiIncomes] = await Promise.all([
       firstValueFrom(this.apiService.getCategories()),
       firstValueFrom(this.apiService.getTransactions(month + 1, year, 'expense')),
       firstValueFrom(this.apiService.getIncomes(month + 1, year)),
     ]);
 
-    // Replace store state: clear first then add
-    for (const existing of this.categories()) {
-      this.store.dispatch(deleteCategoryAction({ id: existing.id }));
-    }
-    for (const existing of this.transactions()) {
-      this.store.dispatch(deleteTransactionAction({ id: existing.id }));
-    }
-    for (const existing of this.allIncomeRecords()) {
-      this.store.dispatch(deleteIncomeRecordAction({ id: existing.id }));
-    }
+    const categoriesByMonth: Record<string, Category[]> = {
+      [key]: apiCategories.map(c => ({
+        id: String(c.id),
+        name: c.name,
+        color: c.color,
+        budgetAmount: c.budgetAmount,
+        items: [],
+      })),
+    };
 
-    for (const c of categories) {
-      this.store.dispatch(addCategoryAction({
-        category: { id: String(c.id), name: c.name, color: c.color, budgetAmount: c.budgetAmount, items: [] },
-      }));
-    }
+    const transactions: Transaction[] = apiTransactions.map(t => ({
+      id: String(t.id),
+      date: t.date,
+      description: t.description,
+      categoryId: t.categoryId != null ? String(t.categoryId) : '',
+      amount: t.amount,
+      paymentMethod: t.paymentMethod as Transaction['paymentMethod'],
+    }));
 
-    for (const t of transactions) {
-      this.store.dispatch(addTransactionAction({
-        transaction: {
-          id: String(t.id),
-          date: t.date,
-          description: t.description,
-          categoryId: t.categoryId != null ? String(t.categoryId) : '',
-          amount: t.amount,
-          paymentMethod: t.paymentMethod as any,
-        },
-      }));
-    }
+    const incomeRecords: IncomeRecord[] = apiIncomes.map(i => ({
+      id: String(i.id),
+      amount: i.amount,
+      description: i.description,
+      paymentMethod: i.paymentMethod as IncomeRecord['paymentMethod'],
+      createdAt: i.date,
+    }));
 
-    for (const i of incomes) {
-      this.store.dispatch(addIncomeRecordAction({
-        record: {
-          id: String(i.id),
-          amount: i.amount,
-          description: i.description,
-          paymentMethod: i.paymentMethod as any,
-          createdAt: i.date,
-        },
-      }));
-    }
+    this.store.dispatch(replaceFinanceDataAction({ categoriesByMonth, transactions, incomeRecords }));
   }
 
   getCategorySummaries(month: number, year: number): CategorySummary[] {
@@ -272,12 +266,47 @@ export class FinanceService {
     return Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
   }
 
+  /** Clears the store (call on logout so the next user starts with empty state). */
+  clearStore(): void {
+    this.store.dispatch(replaceFinanceDataAction({ categoriesByMonth: {}, transactions: [], incomeRecords: [] }));
+  }
+
+  /** Loads finance data from localStorage into the store (used when switching to local mode). */
+  loadFromLocal(): void {
+    const categoriesRaw = localStorage.getItem(this.storageKey('fin_categories'));
+    const transactionsRaw = localStorage.getItem(this.storageKey('fin_transactions'));
+    const incomesRaw = localStorage.getItem(this.storageKey('fin_income_records'));
+
+    let categoriesByMonth: Record<string, Category[]> = {};
+    let transactions: Transaction[] = [];
+    let incomeRecords: IncomeRecord[] = [];
+
+    if (categoriesRaw) {
+      try { categoriesByMonth = JSON.parse(categoriesRaw) as Record<string, Category[]>; } catch {}
+    }
+    if (transactionsRaw) {
+      try { transactions = JSON.parse(transactionsRaw) as Transaction[]; } catch {}
+    }
+    if (incomesRaw) {
+      try { incomeRecords = JSON.parse(incomesRaw) as IncomeRecord[]; } catch {}
+    }
+
+    this.store.dispatch(replaceFinanceDataAction({ categoriesByMonth, transactions, incomeRecords }));
+  }
+
+  /** Persists only the currently selected month/year (always safe to store). */
+  private persistMonthYear(): void {
+    const state = this.financeState();
+    localStorage.setItem(this.storageKey('budget_selected_month'), JSON.stringify(state.selectedMonth));
+    localStorage.setItem(this.storageKey('budget_selected_year'), JSON.stringify(state.selectedYear));
+  }
+
   private persistState(): void {
     const state = this.financeState();
-    localStorage.setItem(this.STORAGE_CATEGORIES, JSON.stringify(state.categoriesByMonth));
-    localStorage.setItem(this.STORAGE_TRANSACTIONS, JSON.stringify(state.transactions));
-    localStorage.setItem(this.STORAGE_INCOME_RECORDS, JSON.stringify(state.incomeRecords));
-    localStorage.setItem('budget_selected_month', JSON.stringify(state.selectedMonth));
-    localStorage.setItem('budget_selected_year', JSON.stringify(state.selectedYear));
+    localStorage.setItem(this.storageKey('fin_categories'), JSON.stringify(state.categoriesByMonth));
+    localStorage.setItem(this.storageKey('fin_transactions'), JSON.stringify(state.transactions));
+    localStorage.setItem(this.storageKey('fin_income_records'), JSON.stringify(state.incomeRecords));
+    localStorage.setItem(this.storageKey('budget_selected_month'), JSON.stringify(state.selectedMonth));
+    localStorage.setItem(this.storageKey('budget_selected_year'), JSON.stringify(state.selectedYear));
   }
 }

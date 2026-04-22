@@ -1,6 +1,6 @@
 
 
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgIf } from '@angular/common';
@@ -19,32 +19,32 @@ export class RegisterComponent {
   fullName = '';
   password = '';
   confirmPassword = '';
-  error = '';
-  loading = false;
+  readonly error = signal('');
+  readonly loading = signal(false);
 
   constructor(private router: Router, private auth: AuthService) {}
 
   register() {
-    this.error = '';
+    this.error.set('');
     if (!this.username || !this.password || !this.confirmPassword) {
-      this.error = 'All fields are required.';
+      this.error.set('All fields are required.');
       return;
     }
     if (this.password !== this.confirmPassword) {
-      this.error = 'Passwords do not match.';
+      this.error.set('Passwords do not match.');
       return;
     }
-    this.loading = true;
+    this.loading.set(true);
     this.auth.register(this.username, this.password, this.fullName).subscribe({
       next: () => {
-        this.loading = false;
+        this.loading.set(false);
         this.router.navigate(['/login']);
       },
       error: (err) => {
-        this.loading = false;
-        this.error = err.status === 409
+        this.loading.set(false);
+        this.error.set(err.status === 409
           ? 'Username already taken.'
-          : 'Registration failed. Please try again.';
+          : 'Registration failed. Please try again.');
       },
     });
   }
