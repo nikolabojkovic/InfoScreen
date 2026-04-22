@@ -1,7 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DecimalPipe, NgFor } from '@angular/common';
+import { DecimalPipe, NgFor, NgIf } from '@angular/common';
 import { FinanceService } from '../../services/finance.service';
+import { SettingsService } from '../../services/settings.service';
 import { Category } from '../../models/finance.model';
 import { ToEurPipe } from '../../pipes/to-eur.pipe';
 import { ConfirmationService } from '../../services/confirmation.service';
@@ -13,14 +14,16 @@ interface CategoryItem {
 
 @Component({
   selector: 'app-categories',
-  imports: [FormsModule, DecimalPipe, NgFor, ToEurPipe],
+  imports: [FormsModule, DecimalPipe, NgFor, NgIf, ToEurPipe],
   templateUrl: './categories.html',
   styleUrl: './categories.scss',
 })
 export class Categories {
   private finance = inject(FinanceService);
   private confirmation = inject(ConfirmationService);
+  readonly settingsService = inject(SettingsService);
   readonly categories = this.finance.categories;
+  readonly categoryTemplate = this.finance.categoryTemplate;
 
   name = '';
   color = '#4CAF50';
@@ -102,5 +105,20 @@ export class Categories {
     if (!confirmed) return;
 
     this.finance.deleteCategory(id);
+  }
+
+  saveAsTemplate(): void {
+    this.finance.saveAsTemplate();
+  }
+
+  async restoreFromTemplate(): Promise<void> {
+    const confirmed = await this.confirmation.confirm({
+      title: 'Restore from template?',
+      message: 'This will add all template categories to the current month. Existing categories are kept. Continue?',
+      confirmLabel: 'Restore',
+      cancelLabel: 'Cancel',
+    });
+    if (!confirmed) return;
+    this.finance.restoreFromTemplate();
   }
 }

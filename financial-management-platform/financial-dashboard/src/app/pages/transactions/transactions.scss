@@ -488,6 +488,15 @@
       }
     }
 
+    &__income-actions {
+      .btn.btn--primary {
+        width: 100%;
+        font-size: 1.05rem;
+        padding: 12px 0;
+        font-weight: 600;
+      }
+    }
+
     &__month-nav {
       flex-wrap: wrap;
       gap: 8px;

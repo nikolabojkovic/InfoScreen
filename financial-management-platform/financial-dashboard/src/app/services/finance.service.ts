@@ -1,4 +1,4 @@
-import { Injectable, computed, inject } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Category, CategoryItem, Transaction, CategorySummary, IncomeRecord } from '../models/finance.model';
 import {
@@ -278,6 +278,46 @@ export class FinanceService {
 
   getCategoryById(id: string): Category | undefined {
     return this.categories().find(c => c.id === id);
+  }
+
+  // ── Category template (local mode only) ────────────────────────────────────
+
+  private readonly TEMPLATE_KEY = 'fin_category_template';
+
+  /** Signal that holds the saved template categories (null = no template saved yet). */
+  readonly categoryTemplate = signal<Pick<Category, 'name' | 'color' | 'budgetAmount' | 'items'>[] | null>(
+    this.loadTemplateFromStorage()
+  );
+
+  private loadTemplateFromStorage(): Pick<Category, 'name' | 'color' | 'budgetAmount' | 'items'>[] | null {
+    try {
+      const raw = localStorage.getItem(this.storageKey(this.TEMPLATE_KEY));
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  saveAsTemplate(): void {
+    const template = this.categories().map(c => ({
+      name: c.name,
+      color: c.color,
+      budgetAmount: c.budgetAmount,
+      items: c.items.map(i => ({ description: i.description, amount: i.amount })),
+    }));
+    localStorage.setItem(this.storageKey(this.TEMPLATE_KEY), JSON.stringify(template));
+    this.categoryTemplate.set(template);
+  }
+
+  restoreFromTemplate(): void {
+    const template = this.categoryTemplate();
+    if (!template) return;
+    for (const cat of template) {
+      this.store.dispatch(addCategoryAction({
+        category: { ...cat, id: this.genId() },
+      }));
+    }
+    this.persistState();
   }
 
   private genId(): string {

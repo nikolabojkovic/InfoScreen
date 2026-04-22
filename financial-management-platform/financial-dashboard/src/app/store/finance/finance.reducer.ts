@@ -206,28 +206,8 @@ export const financeReducer = createReducer(
     transactions: state.transactions.filter(transaction => transaction.id !== id),
   })),
   on(setEurRate, (state, { rate }) => ({ ...state, eurRate: rate })),
-  on(setSelectedMonth, (state, { month }) => {
-    const newState = { ...state, selectedMonth: month };
-    const key = getActiveMonthKey(newState);
-    if (!newState.categoriesByMonth[key]?.length) {
-      const existing = Object.values(state.categoriesByMonth).find(cats => cats.length > 0);
-      if (existing) {
-        return { ...newState, categoriesByMonth: { ...newState.categoriesByMonth, [key]: existing } };
-      }
-    }
-    return newState;
-  }),
-  on(setSelectedYear, (state, { year }) => {
-    const newState = { ...state, selectedYear: year };
-    const key = getActiveMonthKey(newState);
-    if (!newState.categoriesByMonth[key]?.length) {
-      const existing = Object.values(state.categoriesByMonth).find(cats => cats.length > 0);
-      if (existing) {
-        return { ...newState, categoriesByMonth: { ...newState.categoriesByMonth, [key]: existing } };
-      }
-    }
-    return newState;
-  }),
+  on(setSelectedMonth, (state, { month }) => ({ ...state, selectedMonth: month })),
+  on(setSelectedYear, (state, { year }) => ({ ...state, selectedYear: year })),
   on(addIncomeRecord, (state, { record }) => ({ ...state, incomeRecords: [...state.incomeRecords, record] })),
   on(updateIncomeRecord, (state, { record }) => ({
     ...state,
@@ -248,7 +228,11 @@ export const financeReducer = createReducer(
 export function financeStorageMetaReducer(reducer: ActionReducer<FinanceState>): ActionReducer<FinanceState> {
   return (state: FinanceState | undefined, action: Action): FinanceState => {
     const nextState = reducer(state, action);
-    saveState(nextState);
+    // Don't persist on replaceFinanceData — that action is used for loading from API
+    // (remote-only data that should not overwrite the local store).
+    if (action.type !== replaceFinanceData.type) {
+      saveState(nextState);
+    }
     return nextState;
   };
 }

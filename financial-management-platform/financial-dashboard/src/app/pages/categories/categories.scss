@@ -58,12 +58,6 @@
         width: 100%;
       }
 
-      .categories__submit-row .btn {
-        min-width: 120px;
-        width: auto;
-        display: inline-block;
-      }
-
       @media (max-width: 600px) {
         .categories__submit-row {
           justify-content: stretch;
@@ -87,7 +81,6 @@
       margin-left: auto;
       margin-right: 0;
       width: auto;
-      min-width: 120px;
       display: inline-block;
     }
   @media (max-width: 600px) {
@@ -170,12 +163,6 @@
     /* Submit row */
     .categories__submit-row {
       padding-top: 4px;
-    }
-    .categories__submit-row .btn {
-      padding: 9px 32px;
-      font-size: 0.97rem;
-      font-weight: 700;
-      border-radius: 8px;
     }
   }
 .categories {
@@ -365,6 +352,16 @@
     color: var(--color-text-placeholder);
     padding: 32px !important;
     font-style: italic;
+  }
+
+  &__table-toolbar {
+    margin-bottom: 14px;
+  }
+
+  &__table-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
   }
 
   @media (max-width: 600px) {

@@ -103,3 +103,11 @@
     color: var(--color-text-muted);
   }
 }
+
+.categories__color-dot {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  vertical-align: middle;
+}

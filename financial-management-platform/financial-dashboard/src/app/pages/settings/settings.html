@@ -65,4 +65,38 @@
       </div>
     </div>
   </section>
+
+  <section class="settings__section" *ngIf="settingsService.dataSource() === 'local'">
+    <h2 class="settings__section-title">Categories Template</h2>
+    <div class="settings__card">
+      <ng-container *ngIf="categoryTemplate() && categoryTemplate()!.length > 0; else noTemplate">
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th class="table__header" style="width: 40px"></th>
+                <th class="table__header">Category Name</th>
+                <th class="table__header">Monthly Budget</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let cat of categoryTemplate()">
+                <td class="table__cell"><span class="categories__color-dot" [style.background]="cat.color"></span></td>
+                <td class="table__cell">{{ cat.name }}</td>
+                <td class="table__cell">
+                  <span class="dual-currency">
+                    <span class="dual-currency__rsd">{{ cat.budgetAmount | number:'1.2-2' }} RSD</span>
+                    <span class="dual-currency__eur">{{ cat.budgetAmount | toEur }} €</span>
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+      <ng-template #noTemplate>
+        <p class="categories__empty">No template saved yet. Go to Categories and click "Save as Template".</p>
+      </ng-template>
+    </div>
+  </section>
 </div>

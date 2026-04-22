@@ -20,13 +20,13 @@
           <div *ngFor="let item of items; let i = index" class="categories__item-row categories__item-add-row">
             <input type="text" [(ngModel)]="items[i].description" name="item-desc-{{i}}" placeholder="Description" required class="categories__input categories__input--item" />
             <input type="number" [(ngModel)]="items[i].amount" name="item-amount-{{i}}" placeholder="Amount" min="0.01" step="0.01" required class="categories__input categories__input--item" />
-            <button type="button" class="btn btn--sm btn--danger" (click)="removeItem(i)">Remove</button>
+            <button type="button" class="categories__btn-cancel" (click)="removeItem(i)" title="Remove">&#x2715;</button>
           </div>
         </div>
         <div class="categories__item-add-row">
           <input type="text" [(ngModel)]="newItem.description" name="new-item-desc" placeholder="Description" required class="categories__input categories__input--item" />
           <input type="number" [(ngModel)]="newItem.amount" name="new-item-amount" placeholder="Amount" min="0.01" step="0.01" required class="categories__input categories__input--item" />
-          <button type="button" class="btn btn--sm btn--primary" (click)="addItem()" [disabled]="!newItem.description || newItem.amount <= 0">Save Item</button>
+          <button type="button" class="categories__btn-save" (click)="addItem()" [disabled]="!newItem.description || newItem.amount <= 0" title="Save item">&#x2713;</button>
         </div>
       </div>
       <div class="categories__submit-row">
@@ -39,6 +39,16 @@
   </div>
 
   <div class="categories__card">
+    <div class="categories__table-toolbar">
+      <div class="categories__table-actions" *ngIf="settingsService.dataSource() === 'local'">
+        <button class="btn btn--sm btn--secondary" (click)="saveAsTemplate()" [disabled]="categories().length === 0" title="Save current categories as a reusable template">
+          Save as Template
+        </button>
+        <button class="btn btn--sm btn--secondary" (click)="restoreFromTemplate()" [disabled]="!categoryTemplate()" title="Add template categories to the current month">
+          Restore from Template
+        </button>
+      </div>
+    </div>
     <div class="table-responsive">
     <table class="table">
       <thead>
@@ -60,9 +70,9 @@
                 <div *ngFor="let item of editItems; let i = index" class="categories__item-row">
                   <input type="text" [(ngModel)]="editItems[i].description" name="edit-item-desc-{{i}}" placeholder="Description" required class="categories__input categories__input--item" style="margin-right: 12px;" />
                   <input type="number" [(ngModel)]="editItems[i].amount" name="edit-item-amount-{{i}}" placeholder="Amount" min="0.01" step="0.01" required class="categories__input categories__input--item" style="margin-right: 12px;" />
-                  <button type="button" class="btn btn--sm btn--danger" (click)="removeEditItem(i)">Remove</button>
+                  <button type="button" class="categories__btn-cancel" (click)="removeEditItem(i)" title="Remove">&#x2715;</button>
                 </div>
-                <button type="button" class="btn btn--sm btn--primary" (click)="addEditItem()" style="margin-top: 8px;">Add Item</button>
+                <button type="button" class="categories__btn-save" (click)="addEditItem()" style="margin-top: 8px;" title="Add item">&#x2b;</button>
               </td>
               <td class="table__cell categories__actions">
                 <button class="categories__btn-save" (click)="saveEdit(cat)"

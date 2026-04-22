@@ -1,14 +1,15 @@
 import { Component, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgIf } from '@angular/common';
+import { DecimalPipe, NgFor, NgIf } from '@angular/common';
 import { Router } from '@angular/router';
 import { FinanceService } from '../../services/finance.service';
 import { SettingsService } from '../../services/settings.service';
 import { ConfirmationService } from '../../services/confirmation.service';
+import { ToEurPipe } from '../../pipes/to-eur.pipe';
 
 @Component({
   selector: 'app-settings',
-  imports: [FormsModule, NgIf],
+  imports: [FormsModule, NgIf, NgFor, DecimalPipe, ToEurPipe],
   templateUrl: './settings.html',
   styleUrl: './settings.scss',
 })
@@ -18,6 +19,8 @@ export class Settings {
   private cdr = inject(ChangeDetectorRef);
   private confirmationService = inject(ConfirmationService);
   private router = inject(Router);
+
+  readonly categoryTemplate = this.finance.categoryTemplate;
 
   eurRateInput = this.finance.eurRate();
   eurRateEdit = this.finance.eurRate();

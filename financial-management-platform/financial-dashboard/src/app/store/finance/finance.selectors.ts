@@ -1,11 +1,11 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { Category, IncomeRecord, Transaction } from '../../models/finance.model';
-import { defaultCategories, financeFeatureKey, FinanceState, monthKey } from './finance.reducer';
+import { financeFeatureKey, FinanceState, monthKey } from './finance.reducer';
 
 export const selectFinanceState = createFeatureSelector<FinanceState>(financeFeatureKey);
 export const selectCategories = createSelector(
   selectFinanceState,
-  state => state.categoriesByMonth[monthKey(state.selectedMonth, state.selectedYear)] ?? defaultCategories()
+  state => state.categoriesByMonth[monthKey(state.selectedMonth, state.selectedYear)] ?? []
 );
 export const selectTransactions = createSelector(selectFinanceState, state => state.transactions);
 export const selectAllIncomeRecords = createSelector(selectFinanceState, state => state.incomeRecords);
