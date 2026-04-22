@@ -1,6 +1,7 @@
 using FinancialApi.Data;
 using FinancialApi.Dtos;
 using FinancialApi.Models;
+using FinancialApi.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinancialApi.Services;

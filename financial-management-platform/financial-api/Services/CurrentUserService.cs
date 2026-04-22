@@ -1,4 +1,5 @@
 using FinancialApi.Data;
+using FinancialApi.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 

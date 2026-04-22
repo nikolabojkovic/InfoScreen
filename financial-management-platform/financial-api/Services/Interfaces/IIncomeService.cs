@@ -1,6 +1,7 @@
 using FinancialApi.Dtos;
+using FinancialApi.Services;
 
-namespace FinancialApi.Services;
+namespace FinancialApi.Services.Interfaces;
 
 public interface IIncomeService
 {

@@ -1,4 +1,4 @@
-namespace FinancialApi.Services;
+namespace FinancialApi.Services.Interfaces;
 
 public interface IJwtService
 {
