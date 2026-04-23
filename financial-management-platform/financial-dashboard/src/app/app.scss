@@ -1,0 +1,45 @@
+$sidebar-expanded: 240px;
+$sidebar-collapsed: 64px;
+$navbar-height: 72px;
+
+.app {
+  &__layout {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  &__content {
+    flex: 1;
+    min-height: calc(100vh - #{$navbar-height});
+    background: var(--color-bg);
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease;
+    padding-top: $navbar-height;
+
+    &.no-navbar {
+      padding-top: 0;
+      margin-left: 0 !important;
+    }
+
+    &--expanded {
+      margin-left: $sidebar-expanded;
+    }
+
+    &--collapsed {
+      margin-left: $sidebar-collapsed;
+    }
+  }
+
+  @media (max-width: 1023px) {
+    &__content {
+      padding-top: $navbar-height;
+      margin-left: 0 !important;
+      overflow-x: hidden;
+      width: 100%;
+      max-width: 100vw;
+
+      &.no-navbar {
+        padding-top: 0;
+      }
+    }
+  }
+}

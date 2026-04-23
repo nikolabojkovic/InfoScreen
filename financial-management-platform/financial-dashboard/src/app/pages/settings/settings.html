@@ -1,0 +1,102 @@
+<div class="settings">
+  <h1 class="settings__title">Settings</h1>
+
+  <section class="settings__section">
+    <h2 class="settings__section-title">Data Source</h2>
+    <div class="settings__card">
+      <label class="settings__label">Where to store your data</label>
+      <div class="settings__row settings__row--gap">
+        <label class="settings__radio-label">
+          <input
+            type="radio"
+            name="dataSource"
+            value="local"
+            [checked]="settingsService.dataSource() === 'local'"
+            (change)="setDataSource('local')"
+            [disabled]="dataSourceLoading()"
+          />
+          <span class="settings__radio-text">
+            Local Storage
+            <span class="settings__radio-desc">Data related to your account will be available only on this device</span>
+          </span>
+        </label>
+        <label class="settings__radio-label">
+          <input
+            type="radio"
+            name="dataSource"
+            value="remote"
+            [checked]="settingsService.dataSource() === 'remote'"
+            (change)="setDataSource('remote')"
+            [disabled]="dataSourceLoading()"
+          />
+          <span class="settings__radio-text">
+            Remote API
+            <span class="settings__radio-desc">Data related to your account will be available on any device</span>
+          </span>
+        </label>
+      </div>
+      <div *ngIf="dataSourceLoading()" class="settings__info">Loading data from API…</div>
+      <div *ngIf="dataSourceError()" class="settings__error">{{ dataSourceError() }}</div>
+    </div>
+  </section>
+
+  <section class="settings__section">
+    <h2 class="settings__section-title">Currency</h2>
+    <div class="settings__card">
+      <label class="settings__label">EUR Rate <span class="settings__label-sub">(1 EUR = ? RSD)</span></label>
+      <div class="settings__row">
+        <input
+          type="number"
+          class="settings__input"
+          [value]="eurRateEditing ? eurRateEdit : eurRateInput"
+          (input)="eurRateEditing ? eurRateEdit = $any($event.target).valueAsNumber : null"
+          [readonly]="!eurRateEditing"
+          min="0.01"
+          step="0.01"
+        />
+        <span class="settings__currency">RSD</span>
+        <ng-container *ngIf="!eurRateEditing">
+          <button class="btn btn--sm btn--secondary" (click)="startEditEurRate()">Edit</button>
+        </ng-container>
+        <ng-container *ngIf="eurRateEditing">
+          <button class="btn btn--sm btn--primary" (click)="confirmEditEurRate()">Save</button>
+          <button class="btn btn--sm btn--secondary" (click)="cancelEditEurRate()">Cancel</button>
+        </ng-container>
+      </div>
+    </div>
+  </section>
+
+  <section class="settings__section" *ngIf="settingsService.dataSource() === 'local'">
+    <h2 class="settings__section-title">Categories Template</h2>
+    <div class="settings__card">
+      <ng-container *ngIf="categoryTemplate() && categoryTemplate()!.length > 0; else noTemplate">
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th class="table__header" style="width: 40px"></th>
+                <th class="table__header">Category Name</th>
+                <th class="table__header">Monthly Budget</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let cat of categoryTemplate()">
+                <td class="table__cell"><span class="categories__color-dot" [style.background]="cat.color"></span></td>
+                <td class="table__cell">{{ cat.name }}</td>
+                <td class="table__cell">
+                  <span class="dual-currency">
+                    <span class="dual-currency__rsd">{{ cat.budgetAmount | number:'1.2-2' }} RSD</span>
+                    <span class="dual-currency__eur">{{ cat.budgetAmount | toEur }} €</span>
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+      <ng-template #noTemplate>
+        <p class="categories__empty">No template saved yet. Go to Categories and click "Save as Template".</p>
+      </ng-template>
+    </div>
+  </section>
+</div>

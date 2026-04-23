@@ -1,0 +1,113 @@
+.settings {
+  padding: 32px 24px;
+  max-width: 600px;
+
+  &__title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0 0 28px;
+  }
+
+  &__section {
+    margin-bottom: 32px;
+  }
+
+  &__section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--color-text-muted);
+    margin: 0 0 14px;
+  }
+
+  &__card {
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    padding: 20px 24px;
+  }
+
+  &__label {
+    display: block;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 10px;
+  }
+
+  &__label-sub {
+    font-weight: 400;
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  &__radio-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    cursor: pointer;
+
+    input[type='radio'] {
+      margin-top: 3px;
+      flex-shrink: 0;
+    }
+  }
+
+  &__radio-text {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  &__radio-desc {
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    margin-top: 2px;
+  }
+
+  &__input {
+    width: 130px;
+    padding: 8px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    background: var(--color-bg-input);
+    color: var(--color-text);
+    font-size: 0.97rem;
+    outline: none;
+
+    &:focus {
+      border-color: var(--color-accent);
+    }
+
+    &[readonly] {
+      opacity: 0.7;
+      cursor: default;
+    }
+  }
+
+  &__currency {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+  }
+}
+
+.categories__color-dot {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  vertical-align: middle;
+}

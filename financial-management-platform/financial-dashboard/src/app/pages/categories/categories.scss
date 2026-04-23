@@ -1,0 +1,406 @@
+                @media (min-width: 601px) {
+                  .categories__item-row,
+                  .categories__item-add-row {
+                    display: flex;
+                    flex-direction: row;
+                    gap: 12px;
+                    margin-bottom: 12px;
+                    width: 100%;
+                    box-sizing: border-box;
+                  }
+                  .categories__item-row .categories__input--item,
+                  .categories__item-add-row .categories__input--item {
+                    box-sizing: border-box;
+                  }
+                    .categories__item-row .categories__input--item[name^="item-desc-"],
+                    .categories__item-add-row .categories__input--item[name^="item-desc-"],
+                    .categories__item-add-row .categories__input--item[name="new-item-desc"] {
+                      flex: 10 1 0%;
+                      min-width: 0;
+                      box-sizing: border-box;
+                    }
+                    .categories__item-row .categories__input--item[name^="item-amount-"],
+                    .categories__item-add-row .categories__input--item[name^="item-amount-"],
+                    .categories__item-add-row .categories__input--item[name="new-item-amount"] {
+                      flex: 0 0 90px;
+                      width: 90px;
+                      min-width: 0;
+                      box-sizing: border-box;
+                    }
+                    .categories__item-row .btn,
+                    .categories__item-add-row .btn {
+                      flex: 0 0 auto;
+                      min-width: 0;
+                      box-sizing: border-box;
+                    }
+                }
+
+                @media (max-width: 600px) {
+                  .categories__item-row,
+                  .categories__item-add-row {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                    margin-bottom: 12px;
+                  }
+                  .categories__item-row .categories__input--item,
+                  .categories__item-add-row .categories__input--item,
+                  .categories__item-row .btn,
+                  .categories__item-add-row .btn {
+                    width: 100% !important;
+                    min-width: 0;
+                    box-sizing: border-box;
+                  }
+                }
+      .categories__submit-row {
+        display: flex;
+        justify-content: flex-end;
+        width: 100%;
+      }
+
+      @media (max-width: 600px) {
+        .categories__submit-row {
+          justify-content: stretch;
+        }
+        .categories__submit-row .btn {
+          width: 100% !important;
+          display: block;
+          font-size: 1rem;
+          padding: 8px 0;
+          border-radius: 8px;
+          font-weight: 600;
+          letter-spacing: 0.01em;
+          box-shadow: none;
+          margin: 0;
+          min-width: 0;
+        }
+      }
+    /* Desktop: align + Add button to right in add category form */
+    form.categories__form-col > button[type="submit"].btn {
+      align-self: flex-end;
+      margin-left: auto;
+      margin-right: 0;
+      width: auto;
+      display: inline-block;
+    }
+  @media (max-width: 600px) {
+    form.categories__form-col > button[type="submit"].btn {
+      width: 100% !important;
+      display: block;
+      font-size: 1rem;
+      padding: 8px 0;
+      border-radius: 8px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      box-shadow: none;
+      margin: 0;
+      align-self: stretch;
+    }
+  }
+
+  /* Laptop / desktop improvements for Add Category form */
+  @media (min-width: 601px) {
+    form.categories__form-col {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* Name field stretches, Color field stays compact */
+    form.categories__form-col .categories__form-row {
+      align-items: flex-end;
+      gap: 16px;
+    }
+    form.categories__form-col .categories__form-row .categories__field:not(.categories__field--color) {
+      flex: 1 1 0%;
+    }
+    form.categories__form-col .categories__form-row .categories__field--color {
+      flex: 0 0 70px;
+    }
+
+    /* Items section: subtle card look */
+    .categories__items-section {
+      background: var(--color-bg-soft, rgba(0,0,0,0.03));
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .categories__items-section > .categories__label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--color-text-muted);
+      margin-bottom: 4px;
+    }
+    .categories__items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Tighten the add-new-item row inputs */
+    .categories__item-add-row,
+    .categories__item-row {
+      align-items: center;
+    }
+    .categories__item-add-row .categories__input--item,
+    .categories__item-row .categories__input--item {
+      height: 38px;
+      padding: 6px 10px;
+      font-size: 0.92rem;
+    }
+    .categories__item-add-row .btn,
+    .categories__item-row .btn {
+      height: 38px;
+      padding: 0 14px;
+      font-size: 0.88rem;
+      white-space: nowrap;
+    }
+
+    /* Submit row */
+    .categories__submit-row {
+      padding-top: 4px;
+    }
+  }
+.categories {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+
+  &__title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--color-accent);
+  }
+
+  .categories__item-row {
+    margin-bottom: 12px;
+  }
+
+  .btn[disabled], .btn:disabled {
+    background: #ccc !important;
+    color: #888 !important;
+    cursor: not-allowed !important;
+    border: none !important;
+    opacity: 1 !important;
+  }
+
+  &__card {
+    background: var(--color-bg-elevated);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px var(--color-shadow);
+  }
+
+  &__card-title {
+    font-size: 1.1rem;
+    margin-bottom: 16px;
+    color: var(--color-text);
+  }
+
+  &__form-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 140px;
+
+    &--color {
+      flex: 0 0 70px;
+      min-width: 70px;
+    }
+  }
+
+  &__label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+  }
+
+  &__input {
+    padding: 8px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+
+    &--color {
+      width: 48px;
+      height: 36px;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      cursor: pointer;
+      padding: 2px;
+    }
+
+    &--color-small {
+      width: 32px;
+      height: 28px;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    &--inline {
+      padding: 4px 8px;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+  }
+
+  &__color-dot {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    vertical-align: middle;
+  }
+
+  &__row {
+    &--editing {
+      background: var(--color-bg-soft) !important;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 2px;
+    white-space: nowrap;
+  }
+
+  &__btn-edit {
+    background: none;
+    border: none;
+    color: var(--color-text-placeholder);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+
+    &:hover {
+      color: var(--color-accent);
+      background: var(--color-accent-soft);
+    }
+  }
+
+  &__btn-delete {
+    background: none;
+    border: none;
+    color: var(--color-danger);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+
+    &:hover {
+      background: var(--color-danger-soft);
+    }
+  }
+
+  &__btn-save {
+    background: none;
+    border: none;
+    color: var(--color-accent-hover);
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 4px;
+
+    &:hover {
+      background: var(--color-accent-soft);
+    }
+
+    &:disabled {
+      color: #aaa;
+      cursor: not-allowed;
+      background: none;
+    }
+  }
+
+  &__btn-cancel {
+    background: none;
+    border: none;
+    color: var(--color-danger);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+
+    &:hover {
+      background: var(--color-danger-soft);
+    }
+  }
+
+  &__empty {
+    text-align: center;
+    color: var(--color-text-placeholder);
+    padding: 32px !important;
+    font-style: italic;
+  }
+
+  &__table-toolbar {
+    margin-bottom: 14px;
+  }
+
+  &__table-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 600px) {
+    padding: 16px 12px;
+
+    &__card {
+      padding: 14px;
+      border-radius: 8px;
+    }
+
+    &__form-row {
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    &__field {
+      min-width: 0;
+      width: 100%;
+
+      &--color {
+        flex: 0 0 auto;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+      }
+    }
+
+    &__form-row .btn {
+      width: 100%;
+    }
+
+    &__actions {
+      flex-direction: column;
+      gap: 4px;
+
+      .btn {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  }
+}

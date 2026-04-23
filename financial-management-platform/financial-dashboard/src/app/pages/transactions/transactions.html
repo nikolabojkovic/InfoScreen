@@ -1,0 +1,397 @@
+<div class="transactions">
+  <h1 class="transactions__title">Transactions</h1>
+
+  <!-- Tab Navigation -->
+  <div class="transactions__tab-nav">
+    <button class="transactions__tab-btn" [class.transactions__tab-btn--active]="activeTab() === 'outcome'" (click)="activeTab.set('outcome')">Outcome</button>
+    <button class="transactions__tab-btn" [class.transactions__tab-btn--active]="activeTab() === 'income'" (click)="activeTab.set('income')">Income</button>
+  </div>
+
+  @if (activeTab() === 'outcome') {
+
+  <div class="transactions__card">
+    <div class="transactions__card-header">
+      <h2 class="transactions__card-title">Add Transaction</h2>
+      <button class="btn btn--primary transactions__scan-btn" (click)="openScanner()">📷 Scan QR Bill</button>
+    </div>
+
+    <!-- Scanned Bill Confirmation -->
+    @if (scannedBill()) {
+      <div class="transactions__scanned">
+        <h2 class="transactions__card-title">📋 Scanned Bill</h2>
+        <div class="transactions__scanned-details">
+          @if (scannedBill()!.recipient) {
+            <div class="transactions__scanned-row">
+              <span class="transactions__scanned-label">Recipient</span>
+              <span class="transactions__scanned-value">{{ scannedBill()!.recipient }}</span>
+            </div>
+          }
+          @if (scannedBill()!.paymentPurpose) {
+            <div class="transactions__scanned-row">
+              <span class="transactions__scanned-label">Purpose</span>
+              <span class="transactions__scanned-value">{{ scannedBill()!.paymentPurpose }}</span>
+            </div>
+          }
+          @if (scannedBill()!.referenceNumber) {
+            <div class="transactions__scanned-row">
+              <span class="transactions__scanned-label">Reference</span>
+              <span class="transactions__scanned-value">{{ scannedBill()!.referenceNumber }}</span>
+            </div>
+          }
+        </div>
+
+        <div class="transactions__scanned-form">
+          @if (scannedBill()!.amount > 0) {
+            <div class="transactions__scanned-row">
+              <span class="transactions__scanned-label">Amount</span>
+              <span class="transactions__scanned-value transactions__scanned-value--amount">
+                {{ scannedBill()!.amount | number:'1.2-2' }} {{ scannedBill()!.currency }}
+              </span>
+            </div>
+          } @else {
+            <div class="transactions__field">
+              <label class="transactions__label">Amount (RSD)</label>
+              <input type="number" [(ngModel)]="scannedAmount" class="transactions__input transactions__input--amount" placeholder="Enter total from receipt" min="0" step="0.01" />
+            </div>
+          }
+
+          <div class="transactions__field">
+            <label class="transactions__label">Description</label>
+            <input type="text" [(ngModel)]="scannedDescription" class="transactions__input" placeholder="e.g. Groceries, Pharmacy..." />
+          </div>
+
+          <div class="transactions__field">
+            <label class="transactions__label">Category</label>
+            <select [(ngModel)]="scannedCategoryId" class="transactions__select">
+              <option value="" disabled>Choose category</option>
+              @for (cat of categories(); track cat.id) {
+                <option [value]="cat.id">{{ cat.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="transactions__field">
+            <label class="transactions__label">Paid With</label>
+            <select [(ngModel)]="scannedPaymentMethod" class="transactions__select">
+              <option value="bank">Bank Account</option>
+              <option value="cash">Cash</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="transactions__scanned-actions">
+          <button class="btn btn--primary" [disabled]="!scannedCategoryId || (!scannedBill()!.amount && !scannedAmount)" (click)="confirmScannedBill()">✓ Create Transaction</button>
+          <button class="btn btn--secondary" (click)="cancelScannedBill()">Cancel</button>
+        </div>
+      </div>
+    }
+
+    <form (ngSubmit)="addTransaction()" class="transactions__form-grid">
+      <div class="transactions__field">
+        <label class="transactions__label">Date</label>
+        <input type="date" [ngModel]="date()" (ngModelChange)="date.set($event)" name="date" required class="transactions__input transactions__input--date" />
+      </div>
+      <div class="transactions__field">
+        <label class="transactions__label">Category</label>
+        <select [(ngModel)]="categoryId" name="category" required class="transactions__select">
+          <option value="" disabled>Select category</option>
+          @for (cat of categories(); track cat.id) {
+            <option [value]="cat.id">{{ cat.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="transactions__field">
+        <label class="transactions__label">Paid With</label>
+        <select [(ngModel)]="paymentMethod" name="paymentMethod" class="transactions__select">
+          <option value="bank">Bank Account</option>
+          <option value="cash">Cash</option>
+        </select>
+      </div>
+      <div class="transactions__field">
+        <label class="transactions__label">Amount</label>
+        <input type="number" [(ngModel)]="amount" name="amount" min="0.01" step="0.01" required class="transactions__input" />
+      </div>
+      <div class="transactions__field transactions__field--desc">
+        <label class="transactions__label">Description</label>
+        <input type="text" [(ngModel)]="description" name="desc" placeholder="Transaction description" required class="transactions__input" />
+      </div>
+      <div class="transactions__form-actions">
+        <button type="submit" class="btn btn--primary" [disabled]="!date() || !categoryId || amount <= 0 || !description.trim()">+ Add</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="transactions__card">
+    <div class="transactions__month-nav">
+      <span class="transactions__month-total">Total: {{ monthTotal() | number:'1.2-2' }} RSD <span class="dual-currency__eur">{{ monthTotal() | toEur }} €</span></span>
+    </div>
+
+    <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th class="table__header" style="width: 50px">#</th>
+          <th class="table__header">Date</th>
+          <th class="table__header">Description</th>
+          <th class="table__header">Category</th>
+          <th class="table__header">Paid With</th>
+          <th class="table__header transactions__text-right">Amount</th>
+          <th class="table__header" style="width: 80px"></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (group of transactionGroups(); track group.createdAt) {
+          <tr class="transactions__group-header">
+            <td class="table__cell" colspan="5">
+              <strong>{{ group.createdAt | date:'d MMM yyyy' }}</strong>
+            </td>
+            <td class="table__cell transactions__text-right transactions__group-total">
+              <span class="dual-currency">
+                <span class="dual-currency__rsd">{{ group.total | number:'1.2-2' }} RSD</span>
+                <span class="dual-currency__eur">{{ group.total | toEur }} €</span>
+              </span>
+            </td>
+            <td class="table__cell"></td>
+          </tr>
+          @for (tx of group.transactions; track tx.id; let i = $index) {
+            @if (editingTxId === tx.id) {
+              <tr class="transactions__row transactions__row--editing">
+                <td class="table__cell transactions__edit-cell" colspan="7">
+                  <div class="transactions__edit-form">
+                    <div class="transactions__edit-meta">
+                      <span class="transactions__text-muted">Editing transaction {{ i + 1 }}</span>
+                    </div>
+
+                    <div class="transactions__edit-fields">
+                      <div class="transactions__field transactions__field--edit">
+                        <label class="transactions__label">Date</label>
+                        <input type="date" [(ngModel)]="editDate" class="transactions__input transactions__input--inline" />
+                      </div>
+
+                      <div class="transactions__field transactions__field--edit">
+                        <label class="transactions__label">Description</label>
+                        <input type="text" [(ngModel)]="editDescription" class="transactions__input transactions__input--inline" />
+                      </div>
+
+                      <div class="transactions__field transactions__field--edit">
+                        <label class="transactions__label">Category</label>
+                        <select [(ngModel)]="editCategoryId" class="transactions__select transactions__select--inline">
+                          @for (cat of categories(); track cat.id) {
+                            <option [value]="cat.id">{{ cat.name }}</option>
+                          }
+                        </select>
+                      </div>
+
+                      <div class="transactions__field transactions__field--edit">
+                        <label class="transactions__label">Paid With</label>
+                        <select [(ngModel)]="editPaymentMethod" class="transactions__select transactions__select--inline">
+                          <option value="bank">Bank Account</option>
+                          <option value="cash">Cash</option>
+                        </select>
+                      </div>
+
+                      <div class="transactions__field transactions__field--edit">
+                        <label class="transactions__label">Amount</label>
+                        <input type="number" [(ngModel)]="editAmount" min="0.01" step="0.01" class="transactions__input transactions__input--inline transactions__input--amount-inline" />
+                      </div>
+                    </div>
+
+                    <div class="transactions__edit-actions">
+                      <button class="transactions__btn-save" (click)="saveEdit()" title="Save"
+                        [disabled]="!editDate || !editDescription.trim() || !editCategoryId || editAmount <= 0">✓ Save</button>
+                      <button class="transactions__btn-cancel" (click)="cancelEdit()" title="Cancel">✕ Cancel</button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            } @else {
+            <tr class="transactions__row">
+              <td class="table__cell transactions__text-center transactions__text-muted">{{ i + 1 }}</td>
+                <td class="table__cell">{{ tx.createdAt | date:'d MMM' }}</td>
+              <td class="table__cell">{{ tx.description }}</td>
+              <td class="table__cell">
+                <span class="transactions__cat-badge">
+                  <span class="transactions__color-dot" [style.background]="getCategoryColor(tx.categoryId)"></span>
+                  {{ getCategoryName(tx.categoryId) }}
+                </span>
+              </td>
+              <td class="table__cell">
+                <span class="transactions__payment-badge" [class.transactions__payment-badge--cash]="tx.paymentMethod === 'cash'" [class.transactions__payment-badge--bank]="tx.paymentMethod === 'bank'">
+                  {{ tx.paymentMethod === 'cash' ? 'Cash' : 'Bank Account' }}
+                </span>
+              </td>
+              <td class="table__cell transactions__text-right">
+                <span class="dual-currency">
+                  <span class="dual-currency__rsd">{{ tx.amount | number:'1.2-2' }} RSD</span>
+                  <span class="dual-currency__eur">{{ tx.amount | toEur }} €</span>
+                </span>
+              </td>
+              <td class="table__cell transactions__actions-cell">
+                <button class="transactions__btn-edit" (click)="startEdit(tx)" title="Edit">✎</button>
+                <button class="transactions__btn-delete" (click)="deleteTransaction(tx.id)" title="Delete">✕</button>
+              </td>
+            </tr>
+            }
+          }
+        } @empty {
+          <tr><td colspan="7" class="table__cell transactions__empty">No transactions for this month.</td></tr>
+        }
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- QR Scanner Modal -->
+  @if (showScanner()) {
+    <app-qr-scanner (scanned)="onQrScanned($event)" (closed)="closeScanner()" />
+  }
+
+  } <!-- end outcome tab -->
+
+  @if (activeTab() === 'income') {
+
+  <!-- Income Form -->
+  <div class="transactions__card">
+    <div class="transactions__income-form">
+      <div class="transactions__income-form-title">Add Income</div>
+      <div class="transactions__income-row">
+        <div class="transactions__income-col">
+          <label class="transactions__income-label" for="income-amount">Amount</label>
+          <div class="transactions__income-input-group">
+            <input
+              id="income-amount"
+              type="number"
+              [(ngModel)]="newIncomeAmount"
+              (keydown.enter)="addIncome()"
+              min="0"
+              step="1"
+              placeholder="Amount"
+              class="transactions__income-input"
+            />
+            <span class="transactions__income-currency">RSD</span>
+          </div>
+        </div>
+        <div class="transactions__income-col">
+          <label class="transactions__income-label" for="income-method">Type</label>
+          <select id="income-method" [(ngModel)]="newIncomeMethod" class="transactions__income-select">
+            <option value="bank">Bank Account</option>
+            <option value="cash">Cash</option>
+            <option value="withdrawal">Withdrawal</option>
+          </select>
+        </div>
+      </div>
+      <div class="transactions__income-desc-row">
+        <input type="text" [(ngModel)]="newIncomeDescription" placeholder="Income description" class="transactions__income-input transactions__income-input--full" />
+      </div>
+      <div class="transactions__income-actions">
+          <button class="btn btn--primary" (click)="addIncome()" [disabled]="newIncomeAmount <= 0 || !newIncomeDescription.trim()">+ Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Income Table -->
+  <div class="transactions__card">
+    <h2 class="transactions__card-title">Income Table</h2>
+    @if (incomeRecords().length > 0) {
+      <div #incomeTableWrap class="transactions__income-table-wrap" (scroll)="updateIncomeScrollState()">
+        <table class="table transactions__income-table">
+          <thead>
+            <tr>
+              <th class="table__header">Description</th>
+              <th class="table__header">Type</th>
+              <th class="table__header">Amount (RSD)</th>
+              <th class="table__header">Date &amp; Time</th>
+              <th class="table__header"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (rec of incomeRecords(); track rec.id) {
+              <tr>
+                <td class="table__cell transactions__income-desc-cell">
+                  @if (editingIncomeId === rec.id) {
+                    <input type="text" [(ngModel)]="editingIncomeDescription" class="transactions__input transactions__input--inline" (keydown.enter)="saveIncomeEdit()" (keydown.escape)="cancelIncomeEdit()" />
+                  } @else {
+                    {{ rec.description || 'Income' }}
+                  }
+                </td>
+                <td class="table__cell transactions__income-type-cell">
+                  @if (editingIncomeId === rec.id) {
+                    <select [(ngModel)]="editingIncomeMethod" class="transactions__select transactions__select--inline">
+                      <option value="bank">Bank Account</option>
+                      <option value="cash">Cash</option>
+                      <option value="withdrawal">Withdrawal</option>
+                    </select>
+                  } @else {
+                    <span class="transactions__income-badge"
+                      [class.transactions__income-badge--bank]="rec.paymentMethod === 'bank'"
+                      [class.transactions__income-badge--cash]="rec.paymentMethod === 'cash'"
+                      [class.transactions__income-badge--withdrawal]="rec.paymentMethod === 'withdrawal'">
+                      {{ rec.paymentMethod === 'cash' ? 'Cash' : rec.paymentMethod === 'withdrawal' ? 'Withdrawal' : 'Bank Account' }}
+                    </span>
+                  }
+                </td>
+                <td class="table__cell transactions__income-amount-cell">
+                  @if (editingIncomeId === rec.id) {
+                    <input
+                      type="number"
+                      [(ngModel)]="editingIncomeAmount"
+                      min="0"
+                      step="1"
+                      class="transactions__input transactions__input--inline"
+                      (keydown.enter)="saveIncomeEdit()"
+                      (keydown.escape)="cancelIncomeEdit()"
+                    />
+                  } @else {
+                    {{ rec.amount | number:'1.0-0' }}
+                  }
+                </td>
+                <td class="table__cell transactions__income-date-cell">{{ rec.createdAt | date:'dd.MM.yyyy HH:mm' }}</td>
+                <td class="table__cell transactions__income-actions-cell">
+                  @if (editingIncomeId === rec.id) {
+                    <button class="transactions__btn-save" (click)="saveIncomeEdit()" title="Save"
+                      [disabled]="editingIncomeAmount <= 0">✓</button>
+                    <button class="transactions__btn-cancel" (click)="cancelIncomeEdit()" title="Cancel">✕</button>
+                  } @else {
+                    <button class="transactions__btn-edit" (click)="startEditIncome(rec)" title="Edit">✎</button>
+                    <button class="transactions__btn-delete" (click)="deleteIncome(rec.id)" title="Delete">✕</button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr class="transactions__income-total-row">
+              <td class="table__cell" colspan="2"><strong>Total Income</strong></td>
+              <td class="table__cell"><strong>{{ income() | number:'1.0-0' }} RSD</strong></td>
+              <td class="table__cell transactions__income-eur-cell" colspan="2">≈ {{ income() | toEur }} €</td>
+            </tr>
+            <tr class="transactions__income-total-row transactions__income-total-row--bank">
+              <td class="table__cell" colspan="2"><strong>Bank Account Balance</strong></td>
+              <td class="table__cell"><strong>{{ bankBalance() | number:'1.0-0' }} RSD</strong></td>
+              <td class="table__cell transactions__income-eur-cell" colspan="2">≈ {{ bankBalance() | toEur }} €</td>
+            </tr>
+            <tr class="transactions__income-total-row transactions__income-total-row--cash">
+              <td class="table__cell" colspan="2"><strong>Cash Balance</strong></td>
+              <td class="table__cell"><strong>{{ cashBalance() | number:'1.0-0' }} RSD</strong></td>
+              <td class="table__cell transactions__income-eur-cell" colspan="2">≈ {{ cashBalance() | toEur }} €</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      @if (incomeScrollbarVisible) {
+        <div class="transactions__income-scrollbar" aria-hidden="true">
+          <div
+            class="transactions__income-scrollbar-thumb"
+            [style.width.%]="incomeScrollbarThumbWidth"
+            [style.left.%]="incomeScrollbarThumbLeft"
+          ></div>
+        </div>
+      }
+    } @else {
+      <p class="transactions__empty">No income records yet.</p>
+    }
+  </div>
+
+  } <!-- end income tab -->
+
+</div>

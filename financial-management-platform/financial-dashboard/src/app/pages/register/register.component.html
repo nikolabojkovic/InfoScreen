@@ -1,0 +1,24 @@
+<div class="register-container">
+  <h2>Register</h2>
+  <form (ngSubmit)="register()">
+    <div>
+      <label>Username</label>
+      <input type="text" [(ngModel)]="username" name="username" required autocomplete="username" />
+    </div>
+    <div>
+      <label>Full Name</label>
+      <input type="text" [(ngModel)]="fullName" name="fullName" autocomplete="name" />
+    </div>
+    <div>
+      <label>Password</label>
+      <input type="password" [(ngModel)]="password" name="password" required autocomplete="new-password" />
+    </div>
+    <div>
+      <label>Confirm Password</label>
+      <input type="password" [(ngModel)]="confirmPassword" name="confirmPassword" required autocomplete="new-password" />
+    </div>
+    <div *ngIf="error()" class="error">{{ error() }}</div>
+    <button type="submit" [disabled]="loading()">{{ loading() ? 'Registering…' : 'Register' }}</button>
+    <p>Already have an account? <a routerLink="/login">Login</a></p>
+  </form>
+</div>
