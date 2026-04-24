@@ -65,7 +65,7 @@
             <select [(ngModel)]="scannedCategoryId" class="transactions__select">
               <option value="" disabled>Choose category</option>
               @for (cat of categories(); track cat.id) {
-                <option [value]="cat.id">{{ cat.name }}</option>
+                <option [value]="cat.id">{{ cat.icon }} {{ cat.name }}</option>
               }
             </select>
           </div>
@@ -96,7 +96,7 @@
         <select [(ngModel)]="categoryId" name="category" required class="transactions__select">
           <option value="" disabled>Select category</option>
           @for (cat of categories(); track cat.id) {
-            <option [value]="cat.id">{{ cat.name }}</option>
+            <option [value]="cat.id">{{ cat.icon }} {{ cat.name }}</option>
           }
         </select>
       </div>
@@ -130,33 +130,56 @@
     <table class="table">
       <thead>
         <tr>
-          <th class="table__header" style="width: 50px">#</th>
-          <th class="table__header">Date</th>
-          <th class="table__header">Description</th>
-          <th class="table__header">Category</th>
-          <th class="table__header">Paid With</th>
-          <th class="table__header transactions__text-right">Amount</th>
           <th class="table__header" style="width: 80px"></th>
+          <th class="table__header">
+            <div class="transactions__th-filter" (click)="showCategoryFilter.set(!showCategoryFilter())" style="cursor:pointer">
+              <span>Category</span>
+              <span
+                class="transactions__filter-icon-btn"
+                [class.transactions__filter-icon-btn--active]="filterCategoryId()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="14" height="14" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M2 4.75A.75.75 0 0 1 2.75 4h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 4.75ZM4 9.75A.75.75 0 0 1 4.75 9h10.5a.75.75 0 0 1 0 1.5H4.75A.75.75 0 0 1 4 9.75ZM7 14.75a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd"/>
+                </svg>
+              </span>
+              @if (showCategoryFilter()) {
+                <div class="transactions__filter-popup" (click)="$event.stopPropagation()">
+                  <select
+                    class="transactions__filter-select"
+                    [ngModel]="filterCategoryId()"
+                    (ngModelChange)="filterCategoryId.set($event); showCategoryFilter.set(false)"
+                    name="filterCategory">
+                    <option value="">All categories</option>
+                    @for (cat of categories(); track cat.id) {
+                      <option [value]="cat.id">{{ cat.icon }} {{ cat.name }}</option>
+                    }
+                  </select>
+                </div>
+              }
+            </div>
+          </th>
+          <th class="table__header transactions__text-right">Amount</th>
+          <th class="table__header">Description</th>
+          <th class="table__header">Paid With</th>
+          <th class="table__header" style="width: 50px">#</th>
         </tr>
       </thead>
       <tbody>
         @for (group of transactionGroups(); track group.createdAt) {
           <tr class="transactions__group-header">
-            <td class="table__cell" colspan="5">
+            <td class="table__cell" colspan="4">
               <strong>{{ group.createdAt | date:'d MMM yyyy' }}</strong>
             </td>
-            <td class="table__cell transactions__text-right transactions__group-total">
+            <td class="table__cell transactions__text-right transactions__group-total" colspan="2">
               <span class="dual-currency">
                 <span class="dual-currency__rsd">{{ group.total | number:'1.2-2' }} RSD</span>
                 <span class="dual-currency__eur">{{ group.total | toEur }} €</span>
               </span>
             </td>
-            <td class="table__cell"></td>
           </tr>
           @for (tx of group.transactions; track tx.id; let i = $index) {
             @if (editingTxId === tx.id) {
               <tr class="transactions__row transactions__row--editing">
-                <td class="table__cell transactions__edit-cell" colspan="7">
+                <td class="table__cell transactions__edit-cell" colspan="6">
                   <div class="transactions__edit-form">
                     <div class="transactions__edit-meta">
                       <span class="transactions__text-muted">Editing transaction {{ i + 1 }}</span>
@@ -177,7 +200,7 @@
                         <label class="transactions__label">Category</label>
                         <select [(ngModel)]="editCategoryId" class="transactions__select transactions__select--inline">
                           @for (cat of categories(); track cat.id) {
-                            <option [value]="cat.id">{{ cat.name }}</option>
+                            <option [value]="cat.id">{{ cat.icon }} {{ cat.name }}</option>
                           }
                         </select>
                       </div>
@@ -206,18 +229,14 @@
               </tr>
             } @else {
             <tr class="transactions__row">
-              <td class="table__cell transactions__text-center transactions__text-muted">{{ i + 1 }}</td>
-                <td class="table__cell">{{ tx.createdAt | date:'d MMM' }}</td>
-              <td class="table__cell">{{ tx.description }}</td>
+              <td class="table__cell transactions__actions-cell">
+                <button class="transactions__btn-edit" (click)="startEdit(tx)" title="Edit">✎</button>
+                <button class="transactions__btn-delete" (click)="deleteTransaction(tx.id)" title="Delete">✕</button>
+              </td>
               <td class="table__cell">
                 <span class="transactions__cat-badge">
                   <span class="transactions__cat-icon">{{ getCategoryIcon(tx.categoryId) }}</span>
                   {{ getCategoryName(tx.categoryId) }}
-                </span>
-              </td>
-              <td class="table__cell">
-                <span class="transactions__payment-badge" [class.transactions__payment-badge--cash]="tx.paymentMethod === 'cash'" [class.transactions__payment-badge--bank]="tx.paymentMethod === 'bank'">
-                  {{ tx.paymentMethod === 'cash' ? 'Cash' : 'Bank Account' }}
                 </span>
               </td>
               <td class="table__cell transactions__text-right">
@@ -226,15 +245,18 @@
                   <span class="dual-currency__eur">{{ tx.amount | toEur }} €</span>
                 </span>
               </td>
-              <td class="table__cell transactions__actions-cell">
-                <button class="transactions__btn-edit" (click)="startEdit(tx)" title="Edit">✎</button>
-                <button class="transactions__btn-delete" (click)="deleteTransaction(tx.id)" title="Delete">✕</button>
+              <td class="table__cell">{{ tx.description }}</td>
+              <td class="table__cell">
+                <span class="transactions__payment-badge" [class.transactions__payment-badge--cash]="tx.paymentMethod === 'cash'" [class.transactions__payment-badge--bank]="tx.paymentMethod === 'bank'">
+                  {{ tx.paymentMethod === 'cash' ? 'Cash' : 'Bank Account' }}
+                </span>
               </td>
+              <td class="table__cell transactions__text-center transactions__text-muted">{{ i + 1 }}</td>
             </tr>
             }
           }
         } @empty {
-          <tr><td colspan="7" class="table__cell transactions__empty">No transactions for this month.</td></tr>
+          <tr><td colspan="6" class="table__cell transactions__empty">No transactions for this month.</td></tr>
         }
       </tbody>
     </table>

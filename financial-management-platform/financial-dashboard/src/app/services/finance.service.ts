@@ -345,15 +345,20 @@ export class FinanceService {
   restoreFromTemplate(): void {
     const template = this.categoryTemplate();
     if (!template) return;
-    for (const cat of template) {
+
+    // Offset sort indices so restored categories are appended after existing ones in template order
+    const baseIndex = this.categories().length;
+
+    for (let i = 0; i < template.length; i++) {
       this.store.dispatch(addCategoryAction({
-        category: { ...cat, id: this.genId() },
+        category: { ...template[i], id: this.genId(), sortIndex: baseIndex + i },
       }));
     }
+
     if (this.settingsService.dataSource() === 'local') {
       this.persistState();
     } else {
-      // For remote mode, add each category via API
+      // For remote mode, create each category via API then reorder to match template order
       const month = this.selectedMonth();
       const year = this.selectedYear();
       const date = `${year}-${String(month + 1).padStart(2, '0')}-01`;
@@ -364,7 +369,13 @@ export class FinanceService {
           date,
         }))
       );
-      Promise.all(dispatched).then(() => this.loadFromApi());
+      Promise.all(dispatched)
+        .then(created => {
+          // Assign correct sort indices in template order
+          const reorderItems = created.map((c, i) => ({ id: c.id, sortIndex: baseIndex + i }));
+          return firstValueFrom(this.apiService.reorderCategories(reorderItems));
+        })
+        .then(() => this.loadFromApi());
     }
   }
 

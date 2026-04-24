@@ -22,6 +22,10 @@ export class Transactions implements AfterViewInit {
   // Tab
   activeTab = signal<'income' | 'outcome'>('outcome');
 
+  // Category filter
+  filterCategoryId = signal<string>('');
+  showCategoryFilter = signal(false);
+
   // Outcome form
   date = signal(this.defaultDate());
   description = '';
@@ -71,7 +75,9 @@ export class Transactions implements AfterViewInit {
   });
 
   readonly transactionGroups = computed<TransactionGroup[]>(() => {
-    const txns = this.finance.getFilteredTransactions(this.selectedMonth(), this.selectedYear());
+    const catFilter = this.filterCategoryId();
+    let txns = this.finance.getFilteredTransactions(this.selectedMonth(), this.selectedYear());
+    if (catFilter) txns = txns.filter(tx => tx.categoryId === catFilter);
     const sorted = [...txns].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
     const groups: Map<string, TransactionGroup> = new Map();

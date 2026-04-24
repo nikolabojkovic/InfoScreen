@@ -236,7 +236,16 @@ export class Categories {
     }
   }
 
-  saveAsTemplate(): void {
+  async saveAsTemplate(): Promise<void> {
+    if (this.categoryTemplate()) {
+      const confirmed = await this.confirmation.confirm({
+        title: 'Overwrite template?',
+        message: 'You are about to overwrite the existing template. Are you sure?',
+        confirmLabel: 'Overwrite',
+        cancelLabel: 'Cancel',
+      });
+      if (!confirmed) return;
+    }
     this.finance.saveAsTemplate();
   }
 
