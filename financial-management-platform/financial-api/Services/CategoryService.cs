@@ -21,22 +21,67 @@ public class CategoryService : ICategoryService
         c.Name,
         c.Color,
         c.BudgetAmount,
-        c.Items.Select(i => new CategoryItemDto(i.Id, i.Description, i.Amount)).ToList()
+        c.Items.Select(i => new CategoryItemDto(i.Id, i.Description, i.Amount)).ToList(),
+        c.CategoryType,
+        c.SortIndex
     );
 
     public async Task<List<CategoryDto>> GetAllAsync(int userId, int? month, int? year)
     {
         IQueryable<Category> query = _context.Categories
             .Include(c => c.Items)
-            .Where(c => c.UserId == userId);
+            .Where(c => c.UserId == userId && c.CategoryType == "unit");
 
         if (month.HasValue && year.HasValue)
             query = query.Where(c => c.Date.Month == month.Value && c.Date.Year == year.Value);
         else if (year.HasValue)
             query = query.Where(c => c.Date.Year == year.Value);
 
-        var categories = await query.OrderBy(c => c.Name).ToListAsync();
+        var categories = await query.OrderBy(c => c.SortIndex).ThenBy(c => c.Name).ToListAsync();
         return categories.Select(ToDto).ToList();
+    }
+
+    public async Task<List<CategoryDto>> GetTemplatesAsync(int userId)
+    {
+        var templates = await _context.Categories
+            .Include(c => c.Items)
+            .Where(c => c.UserId == userId && c.CategoryType == "template")
+            .OrderBy(c => c.SortIndex).ThenBy(c => c.Name)
+            .ToListAsync();
+        return templates.Select(ToDto).ToList();
+    }
+
+    public async Task<List<CategoryDto>> SaveTemplatesAsync(int userId, List<SaveTemplateItemRequest> items)
+    {
+        // Delete existing templates for this user
+        var existing = await _context.Categories
+            .Where(c => c.UserId == userId && c.CategoryType == "template")
+            .ToListAsync();
+        _context.Categories.RemoveRange(existing);
+
+        // Create new templates
+        var templates = items.Select((item, index) => new Category
+        {
+            Name = item.Name.Trim(),
+            Color = item.Color,
+            BudgetAmount = item.BudgetAmount,
+            SortIndex = item.SortIndex,
+            UserId = userId,
+            CategoryType = "template",
+            Date = DateOnly.MinValue,
+            CreatedAt = DateTime.UtcNow,
+            Items = item.Items.Select(i => new CategoryItem
+            {
+                Description = i.Description.Trim(),
+                Amount = i.Amount,
+                UserId = userId,
+                CreatedAt = DateTime.UtcNow,
+            }).ToList(),
+        }).ToList();
+
+        _context.Categories.AddRange(templates);
+        await _context.SaveChangesAsync();
+        return templates.Select(ToDto).ToList();
     }
 
     public async Task<CategoryDto?> GetByIdAsync(int id, int userId)
@@ -63,7 +108,11 @@ public class CategoryService : ICategoryService
             Color = request.Color,
             BudgetAmount = request.BudgetAmount,
             UserId = userId,
+            CategoryType = (request.CategoryType ?? "unit") == "template" ? "template" : "unit",
             Date = date,
+            SortIndex = await _context.Categories
+                .Where(c => c.UserId == userId && c.CategoryType == ((request.CategoryType ?? "unit") == "template" ? "template" : "unit"))
+                .CountAsync(),
             CreatedAt = DateTime.UtcNow,
             Items = request.Items.Select(i => new CategoryItem
             {
@@ -137,6 +186,29 @@ public class CategoryService : ICategoryService
         if (category == null) return false;
 
         _context.Categories.Remove(category);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> ReorderAsync(int userId, List<ReorderCategoryRequest> requests)
+    {
+        var ids = requests.Select(r => r.Id).ToList();
+        var categories = await _context.Categories
+            .Where(c => c.UserId == userId && ids.Contains(c.Id))
+            .ToListAsync();
+
+        if (categories.Count == 0) return false;
+
+        foreach (var req in requests)
+        {
+            var cat = categories.FirstOrDefault(c => c.Id == req.Id);
+            if (cat != null)
+            {
+                cat.SortIndex = req.SortIndex;
+                cat.ModifiedAt = DateTime.UtcNow;
+            }
+        }
+
         await _context.SaveChangesAsync();
         return true;
     }

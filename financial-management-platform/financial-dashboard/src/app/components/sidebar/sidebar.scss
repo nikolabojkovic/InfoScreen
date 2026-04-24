@@ -1,4 +1,4 @@
-$sidebar-expanded: 240px;
+$sidebar-expanded: 270px;
 $sidebar-collapsed: 64px;
 $navbar-height: 72px;
 $transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -70,6 +70,23 @@ $transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     width: 22px;
     height: 22px;
     flex-shrink: 0;
+  }
+
+  &__brand {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-navbar-brand);
+    white-space: nowrap;
+    overflow: hidden;
+    letter-spacing: 0.3px;
+    transition: opacity $transition, width $transition;
+    opacity: 1;
+
+    .sidebar--collapsed & {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+    }
   }
 
   /* Nav */

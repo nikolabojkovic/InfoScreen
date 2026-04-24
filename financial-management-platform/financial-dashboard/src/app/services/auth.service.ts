@@ -48,16 +48,25 @@ export class AuthService {
 
   /** Returns the username from the stored JWT, or 'guest' if not logged in / token invalid. */
   getUsername(): string {
+    return this.getJwtClaim('sub') ?? 'guest';
+  }
+
+  /** Returns the full name from the stored JWT, or empty string if not available. */
+  getFullName(): string {
+    return this.getJwtClaim('fullname') ?? '';
+  }
+
+  private getJwtClaim(claim: string): string | null {
     try {
       const token = localStorage.getItem(JWT_KEY);
-      if (!token) return 'guest';
+      if (!token) return null;
       const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
       const padded = base64 + '==='.slice((base64.length + 3) % 4);
       const payload = JSON.parse(atob(padded)) as Record<string, unknown>;
-      return typeof payload['sub'] === 'string' && payload['sub'] ? payload['sub'] : 'guest';
+      const val = payload[claim];
+      return typeof val === 'string' && val ? val : null;
     } catch {
-      return 'guest';
+      return null;
     }
   }
 }
-

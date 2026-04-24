@@ -132,6 +132,16 @@ export class Budget {
     this.summaries().reduce((sum, category) => sum + Math.max(category.budgetAmount - category.actualAmount, 0), 0)
   );
 
+  readonly CHART_COLORS = [
+    '#4CAF50','#2196F3','#FF9800','#F44336','#9C27B0',
+    '#00BCD4','#E91E63','#607D8B','#8BC34A','#FF5722',
+    '#3F51B5','#009688','#FFC107','#795548','#CDDC39',
+  ];
+
+  chartColor(index: number): string {
+    return this.CHART_COLORS[index % this.CHART_COLORS.length];
+  }
+
   barWidth(value: number): number {
     return (value / this.barMax()) * 100;
   }

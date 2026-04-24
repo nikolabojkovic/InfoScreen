@@ -756,11 +756,10 @@
   }
 
   // Summary table
-  &__color-dot {
+  &__cat-icon {
+    font-size: 1.2rem;
+    line-height: 1;
     display: inline-block;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
     vertical-align: middle;
   }
 

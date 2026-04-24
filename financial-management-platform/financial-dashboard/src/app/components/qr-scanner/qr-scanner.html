@@ -16,13 +16,35 @@
 
       @if (!parsedBill()) {
         @if (nativeMode()) {
-          <video
-            #cameraVideo
-            class="qr-scanner__camera"
-            autoplay
-            muted
-            playsinline
-          ></video>
+          <div class="qr-scanner__video-wrap">
+            <video
+              #cameraVideo
+              class="qr-scanner__camera"
+              autoplay
+              muted
+              playsinline
+            ></video>
+            <div class="qr-scanner__viewfinder">
+              <div class="qr-scanner__viewfinder-box">
+                <span class="qr-scanner__vf-corner qr-scanner__vf-corner--tl"></span>
+                <span class="qr-scanner__vf-corner qr-scanner__vf-corner--tr"></span>
+                <span class="qr-scanner__vf-corner qr-scanner__vf-corner--bl"></span>
+                <span class="qr-scanner__vf-corner qr-scanner__vf-corner--br"></span>
+              </div>
+            </div>
+          </div>
+          <button
+            class="btn btn--primary qr-scanner__capture-btn"
+            (click)="captureFrame()"
+            [disabled]="captureDecoding()"
+          >
+            @if (captureDecoding()) {
+              <span class="qr-scanner__spinner" aria-hidden="true"></span>
+              Decoding...
+            } @else {
+              📸 Freeze &amp; Decode
+            }
+          </button>
         } @else {
           <div id="qr-reader" #readerEl class="qr-scanner__reader"></div>
         }
@@ -35,7 +57,11 @@
         }
 
         @if (scanning()) {
-          <p class="qr-scanner__hint">Point the camera at the QR code on your bill</p>
+          @if (nativeMode()) {
+            <p class="qr-scanner__hint">Aim the QR code within the box, then tap <strong>Freeze &amp; Decode</strong></p>
+          } @else {
+            <p class="qr-scanner__hint">Point the camera at the QR code on your bill</p>
+          }
         }
 
         <div class="qr-scanner__upload-divider">

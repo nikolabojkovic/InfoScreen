@@ -8,7 +8,9 @@ public record CategoryDto(
     string Name,
     string Color,
     decimal BudgetAmount,
-    List<CategoryItemDto> Items
+    List<CategoryItemDto> Items,
+    string CategoryType,
+    int SortIndex
 );
 
 public record CreateCategoryItemRequest(string Description, decimal Amount);
@@ -18,8 +20,11 @@ public record CreateCategoryRequest(
     string Color,
     decimal BudgetAmount,
     List<CreateCategoryItemRequest> Items,
-    string? Date
+    string? Date,
+    string? CategoryType = "unit"
 );
+
+public record SaveTemplateItemRequest(string Name, string Color, decimal BudgetAmount, List<CreateCategoryItemRequest> Items, int SortIndex = 0);
 
 public record UpdateCategoryItemRequest(int? Id, string Description, decimal Amount);
 
@@ -29,3 +34,5 @@ public record UpdateCategoryRequest(
     decimal BudgetAmount,
     List<UpdateCategoryItemRequest> Items
 );
+
+public record ReorderCategoryRequest(int Id, int SortIndex);

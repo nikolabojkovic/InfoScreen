@@ -8,6 +8,7 @@ import {
   deleteCategory as deleteCategoryAction,
   deleteIncomeRecord as deleteIncomeRecordAction,
   deleteTransaction as deleteTransactionAction,
+  reorderCategories as reorderCategoriesAction,
   replaceFinanceData as replaceFinanceDataAction,
   setEurRate as setEurRateAction,
   setSelectedMonth as setSelectedMonthAction,
@@ -62,19 +63,21 @@ export class FinanceService {
   readonly balance = this.store.selectSignal(selectBalance);
 
   // Category CRUD
-  async addCategory(cat: Omit<Category, 'id'>): Promise<void> {
+  async addCategory(cat: Omit<Category, 'id' | 'sortIndex'>): Promise<void> {
+    const nextIndex = this.categories().length;
+    const newCat: Omit<Category, 'id'> = { ...cat, sortIndex: nextIndex };
     if (this.settingsService.dataSource() === 'remote') {
       const month = this.selectedMonth();
       const year = this.selectedYear();
       const date = `${year}-${String(month + 1).padStart(2, '0')}-01`;
       const created = await firstValueFrom(this.apiService.createCategory({
-        name: cat.name, color: cat.color, budgetAmount: cat.budgetAmount,
-        items: cat.items.map(i => ({ description: i.description, amount: i.amount })),
+        name: newCat.name, color: newCat.icon, budgetAmount: newCat.budgetAmount,
+        items: newCat.items.map(i => ({ description: i.description, amount: i.amount })),
         date,
       }));
-      this.store.dispatch(addCategoryAction({ category: { ...cat, id: String(created.id) } }));
+      this.store.dispatch(addCategoryAction({ category: { ...newCat, id: String(created.id) } }));
     } else {
-      this.store.dispatch(addCategoryAction({ category: { ...cat, id: this.genId() } }));
+      this.store.dispatch(addCategoryAction({ category: { ...newCat, id: this.genId() } }));
       this.persistState();
     }
   }
@@ -82,7 +85,7 @@ export class FinanceService {
   async updateCategory(cat: Category): Promise<void> {
     if (this.settingsService.dataSource() === 'remote') {
       await firstValueFrom(this.apiService.updateCategory(Number(cat.id), {
-        name: cat.name, color: cat.color, budgetAmount: cat.budgetAmount,
+        name: cat.name, color: cat.icon, budgetAmount: cat.budgetAmount,
         items: cat.items.map(i => ({ description: i.description, amount: i.amount })),
       }));
     }
@@ -96,6 +99,16 @@ export class FinanceService {
     }
     this.store.dispatch(deleteCategoryAction({ id }));
     if (this.settingsService.dataSource() === 'local') this.persistState();
+  }
+
+  async reorderCategories(orderedIds: string[]): Promise<void> {
+    this.store.dispatch(reorderCategoriesAction({ orderedIds }));
+    if (this.settingsService.dataSource() === 'remote') {
+      const payload = orderedIds.map((id, index) => ({ id: Number(id), sortIndex: index }));
+      await firstValueFrom(this.apiService.reorderCategories(payload));
+    } else {
+      this.persistState();
+    }
   }
 
   // Transaction CRUD
@@ -214,18 +227,20 @@ export class FinanceService {
     const year = this.selectedYear();
     const key = monthKey(month, year);
 
-    const [apiCategories, apiTransactions, apiIncomes] = await Promise.all([
+    const [apiCategories, apiTransactions, apiIncomes, apiTemplates] = await Promise.all([
       firstValueFrom(this.apiService.getCategories(month + 1, year)),
       firstValueFrom(this.apiService.getTransactions(month + 1, year, 'expense')),
       firstValueFrom(this.apiService.getIncomes(month + 1, year)),
+      firstValueFrom(this.apiService.getCategoryTemplate()),
     ]);
 
     const categoriesByMonth: Record<string, Category[]> = {
       [key]: apiCategories.map(c => ({
         id: String(c.id),
         name: c.name,
-        color: c.color,
+        icon: c.color || '📦',
         budgetAmount: c.budgetAmount,
+        sortIndex: c.sortIndex ?? 0,
         items: c.items.map(i => ({ description: i.description, amount: i.amount })),
       })),
     };
@@ -248,6 +263,16 @@ export class FinanceService {
     }));
 
     this.store.dispatch(replaceFinanceDataAction({ categoriesByMonth, transactions, incomeRecords }));
+
+    // Update the template signal from the API response
+    const mappedTemplates = apiTemplates.map(c => ({
+      name: c.name,
+      icon: c.color || '📦',
+      budgetAmount: c.budgetAmount,
+      sortIndex: c.sortIndex ?? 0,
+      items: c.items.map(i => ({ description: i.description, amount: i.amount })),
+    }));
+    this.categoryTemplate.set(mappedTemplates.length > 0 ? mappedTemplates : null);
   }
 
   getCategorySummaries(month: number, year: number): CategorySummary[] {
@@ -285,11 +310,11 @@ export class FinanceService {
   private readonly TEMPLATE_KEY = 'fin_category_template';
 
   /** Signal that holds the saved template categories (null = no template saved yet). */
-  readonly categoryTemplate = signal<Pick<Category, 'name' | 'color' | 'budgetAmount' | 'items'>[] | null>(
+  readonly categoryTemplate = signal<Pick<Category, 'name' | 'icon' | 'budgetAmount' | 'sortIndex' | 'items'>[] | null>(
     this.loadTemplateFromStorage()
   );
 
-  private loadTemplateFromStorage(): Pick<Category, 'name' | 'color' | 'budgetAmount' | 'items'>[] | null {
+  private loadTemplateFromStorage(): Pick<Category, 'name' | 'icon' | 'budgetAmount' | 'sortIndex' | 'items'>[] | null {
     try {
       const raw = localStorage.getItem(this.storageKey(this.TEMPLATE_KEY));
       return raw ? JSON.parse(raw) : null;
@@ -301,12 +326,20 @@ export class FinanceService {
   saveAsTemplate(): void {
     const template = this.categories().map(c => ({
       name: c.name,
-      color: c.color,
+      icon: c.icon,
       budgetAmount: c.budgetAmount,
+      sortIndex: c.sortIndex,
       items: c.items.map(i => ({ description: i.description, amount: i.amount })),
     }));
-    localStorage.setItem(this.storageKey(this.TEMPLATE_KEY), JSON.stringify(template));
-    this.categoryTemplate.set(template);
+
+    if (this.settingsService.dataSource() === 'remote') {
+      firstValueFrom(this.apiService.saveCategoryTemplate(template.map(t => ({ ...t, color: t.icon })))).then(saved => {
+        this.categoryTemplate.set(template);
+      });
+    } else {
+      localStorage.setItem(this.storageKey(this.TEMPLATE_KEY), JSON.stringify(template));
+      this.categoryTemplate.set(template);
+    }
   }
 
   restoreFromTemplate(): void {
@@ -317,7 +350,34 @@ export class FinanceService {
         category: { ...cat, id: this.genId() },
       }));
     }
-    this.persistState();
+    if (this.settingsService.dataSource() === 'local') {
+      this.persistState();
+    } else {
+      // For remote mode, add each category via API
+      const month = this.selectedMonth();
+      const year = this.selectedYear();
+      const date = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+      const dispatched = template.map(cat =>
+        firstValueFrom(this.apiService.createCategory({
+          name: cat.name, color: cat.icon, budgetAmount: cat.budgetAmount,
+          items: cat.items.map(i => ({ description: i.description, amount: i.amount })),
+          date,
+        }))
+      );
+      Promise.all(dispatched).then(() => this.loadFromApi());
+    }
+  }
+
+  async loadTemplateFromApi(): Promise<void> {
+    const templates = await firstValueFrom(this.apiService.getCategoryTemplate());
+    const mapped = templates.map(c => ({
+      name: c.name,
+      icon: c.color || '📦',
+      budgetAmount: c.budgetAmount,
+      sortIndex: c.sortIndex ?? 0,
+      items: c.items.map(i => ({ description: i.description, amount: i.amount })),
+    }));
+    this.categoryTemplate.set(mapped.length > 0 ? mapped : null);
   }
 
   private genId(): string {
@@ -350,9 +410,8 @@ export class FinanceService {
     }
 
     this.store.dispatch(replaceFinanceDataAction({ categoriesByMonth, transactions, incomeRecords }));
+    this.categoryTemplate.set(this.loadTemplateFromStorage());
   }
-
-  /** Persists only the currently selected month/year (always safe to store). */
   private persistMonthYear(): void {
     const state = this.financeState();
     localStorage.setItem(this.storageKey('budget_selected_month'), JSON.stringify(state.selectedMonth));

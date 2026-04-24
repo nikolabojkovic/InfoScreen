@@ -7,11 +7,11 @@
         @if (chartSegments().length > 0) {
           <svg viewBox="0 0 42 42" class="budget__donut-chart">
             <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#eee" stroke-width="3" />
-            @for (seg of chartSegments(); track seg.category.id) {
+            @for (seg of chartSegments(); track seg.category.id; let idx = $index) {
               <circle
                 cx="21" cy="21" r="15.915"
                 fill="transparent"
-                [attr.stroke]="seg.category.color"
+                [attr.stroke]="chartColor(idx)"
                 stroke-width="3"
                 [attr.stroke-dasharray]="seg.dashArray"
                 [attr.stroke-dashoffset]="seg.dashOffset"
@@ -29,9 +29,9 @@
         }
       </div>
       <div class="budget__legend">
-        @for (seg of chartSegments(); track seg.category.id) {
+        @for (seg of chartSegments(); track seg.category.id; let idx = $index) {
           <div class="budget__legend-item">
-            <span class="budget__legend-dot" [style.background]="seg.category.color"></span>
+            <span class="budget__legend-dot" [style.background]="chartColor(idx)"></span>
             <span class="budget__legend-name">{{ seg.category.name }}</span>
             <span class="budget__legend-pct">{{ seg.percentage | number:'1.1-1' }}%</span>
           </div>
@@ -42,19 +42,19 @@
     <div class="budget__card budget__card--chart">
       <h2 class="budget__card-title">Budget vs Actual</h2>
       <div class="budget__bar-chart">
-        @for (s of summaries(); track s.category.id) {
+        @for (s of summaries(); track s.category.id; let idx = $index) {
           @if (s.budgetAmount > 0 || s.actualAmount > 0) {
             <div class="budget__bar-group" [attr.title]="s.category.name">
               <div class="budget__bars" [attr.title]="s.category.name">
                 <div class="budget__bar budget__bar--budget" [style.height.%]="barWidth(s.budgetAmount)" [attr.title]="s.category.name + ': Budget'">
                   <span class="budget__bar-value">{{ s.budgetAmount | number:'1.0-0' }}</span>
                 </div>
-                <div class="budget__bar budget__bar--actual" [style.height.%]="barWidth(s.actualAmount)" [style.background]="s.category.color" [attr.title]="s.category.name + ': Actual'">
+                <div class="budget__bar budget__bar--actual" [style.height.%]="barWidth(s.actualAmount)" [style.background]="chartColor(idx)" [attr.title]="s.category.name + ': Actual'">
                   <span class="budget__bar-value">{{ s.actualAmount | number:'1.0-0' }}</span>
                 </div>
               </div>
               <div class="budget__bar-label">
-                <span class="budget__legend-dot" [style.background]="s.category.color"></span>
+                <span class="budget__legend-dot" [style.background]="chartColor(idx)"></span>
                 {{ s.category.name }}
               </div>
             </div>
@@ -140,35 +140,17 @@
         <tr>
           <th class="table__header"></th>
           <th class="table__header">Category</th>
-          <th class="table__header budget__text-right">Budget Limit</th>
-          <th class="table__header budget__text-right">Outcome</th>
+          <th class="table__header budget__text-right">Completed</th>
           <th class="table__header budget__text-right">Remaining</th>
-          <th class="table__header budget__text-right">Outcome %</th>
+          <th class="table__header budget__text-right">Outcome</th>
+          <th class="table__header budget__text-right">Budget Limit</th>
         </tr>
       </thead>
       <tbody>
         @for (s of summaries(); track s.category.id) {
           <tr>
-            <td class="table__cell"><span class="budget__color-dot" [style.background]="s.category.color"></span></td>
+            <td class="table__cell"><span class="budget__cat-icon">{{ s.category.icon }}</span></td>
             <td class="table__cell">{{ s.category.name }}</td>
-            <td class="table__cell budget__text-right">
-              <span class="dual-currency">
-                <span class="dual-currency__rsd">{{ s.budgetAmount | number:'1.2-2' }} RSD</span>
-                <span class="dual-currency__eur">{{ s.budgetAmount | toEur }} €</span>
-              </span>
-            </td>
-            <td class="table__cell budget__text-right">
-              <span class="dual-currency">
-                <span class="dual-currency__rsd">{{ s.actualAmount | number:'1.2-2' }} RSD</span>
-                <span class="dual-currency__eur">{{ s.actualAmount | toEur }} €</span>
-              </span>
-            </td>
-            <td class="table__cell budget__text-right" [class.budget__negative]="s.difference < 0" [class.budget__positive]="s.difference >= 0">
-              <span class="dual-currency">
-                <span class="dual-currency__rsd">{{ s.difference | number:'1.2-2' }} RSD</span>
-                <span class="dual-currency__eur">{{ s.difference | toEur }} €</span>
-              </span>
-            </td>
             <td class="table__cell budget__text-right">
               @if (s.budgetAmount > 0) {
                 <div class="budget__spent-bar-container">
@@ -179,16 +161,39 @@
                 —
               }
             </td>
+            <td class="table__cell budget__text-right" [class.budget__negative]="s.difference < 0" [class.budget__positive]="s.difference >= 0">
+              <span class="dual-currency">
+                <span class="dual-currency__rsd">{{ s.difference | number:'1.2-2' }} RSD</span>
+                <span class="dual-currency__eur">{{ s.difference | toEur }} €</span>
+              </span>
+            </td>
+            <td class="table__cell budget__text-right">
+              <span class="dual-currency">
+                <span class="dual-currency__rsd">{{ s.actualAmount | number:'1.2-2' }} RSD</span>
+                <span class="dual-currency__eur">{{ s.actualAmount | toEur }} €</span>
+              </span>
+            </td>
+            <td class="table__cell budget__text-right">
+              <span class="dual-currency">
+                <span class="dual-currency__rsd">{{ s.budgetAmount | number:'1.2-2' }} RSD</span>
+                <span class="dual-currency__eur">{{ s.budgetAmount | toEur }} €</span>
+              </span>
+            </td>
           </tr>
         }
       </tbody>
       <tfoot>
         <tr class="budget__total-row">
           <td class="table__cell" colspan="2"><strong>TOTAL</strong></td>
-          <td class="table__cell budget__text-right">
+          <td class="table__cell budget__text-right" [class.budget__negative]="totalDiffPercent() < 0">
+            @if (totalBudget() > 0) {
+              <strong>{{ (totalActual() / totalBudget()) * 100 | number:'1.0-0' }}%</strong>
+            }
+          </td>
+          <td class="table__cell budget__text-right" [class.budget__negative]="totalDifference() < 0" [class.budget__positive]="totalDifference() >= 0">
             <span class="dual-currency">
-              <strong>{{ totalBudget() | number:'1.2-2' }} RSD</strong>
-              <span class="dual-currency__eur">{{ totalBudget() | toEur }} €</span>
+              <strong>{{ totalDifference() | number:'1.2-2' }} RSD</strong>
+              <span class="dual-currency__eur">{{ totalDifference() | toEur }} €</span>
             </span>
           </td>
           <td class="table__cell budget__text-right">
@@ -197,16 +202,11 @@
               <span class="dual-currency__eur">{{ totalActual() | toEur }} €</span>
             </span>
           </td>
-          <td class="table__cell budget__text-right" [class.budget__negative]="totalDifference() < 0" [class.budget__positive]="totalDifference() >= 0">
+          <td class="table__cell budget__text-right">
             <span class="dual-currency">
-              <strong>{{ totalDifference() | number:'1.2-2' }} RSD</strong>
-              <span class="dual-currency__eur">{{ totalDifference() | toEur }} €</span>
+              <strong>{{ totalBudget() | number:'1.2-2' }} RSD</strong>
+              <span class="dual-currency__eur">{{ totalBudget() | toEur }} €</span>
             </span>
-          </td>
-          <td class="table__cell budget__text-right" [class.budget__negative]="totalDiffPercent() < 0">
-            @if (totalBudget() > 0) {
-              <strong>{{ (totalActual() / totalBudget()) * 100 | number:'1.0-0' }}%</strong>
-            }
           </td>
         </tr>
       </tfoot>

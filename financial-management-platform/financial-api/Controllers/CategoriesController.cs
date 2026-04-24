@@ -69,4 +69,35 @@ public class CategoriesController : ControllerBase
 
         return await _categoryService.DeleteAsync(id, userId.Value) ? NoContent() : NotFound();
     }
+
+    [HttpPost("reorder")]
+    public async Task<IActionResult> Reorder([FromBody] List<ReorderCategoryRequest> requests)
+    {
+        var userId = await _currentUser.GetUserIdAsync();
+        if (userId == null) return Unauthorized();
+
+        await _categoryService.ReorderAsync(userId.Value, requests);
+        return NoContent();
+    }
+
+    // ── Template endpoints ─────────────────────────────────────────────────────
+
+    [HttpGet("template")]
+    public async Task<ActionResult<List<CategoryDto>>> GetTemplate()
+    {
+        var userId = await _currentUser.GetUserIdAsync();
+        if (userId == null) return Unauthorized();
+
+        return Ok(await _categoryService.GetTemplatesAsync(userId.Value));
+    }
+
+    [HttpPost("template")]
+    public async Task<ActionResult<List<CategoryDto>>> SaveTemplate([FromBody] List<SaveTemplateItemRequest> items)
+    {
+        var userId = await _currentUser.GetUserIdAsync();
+        if (userId == null) return Unauthorized();
+
+        var result = await _categoryService.SaveTemplatesAsync(userId.Value, items);
+        return Ok(result);
+    }
 }

@@ -9,9 +9,22 @@
           <label class="categories__label">Name</label>
           <input type="text" [(ngModel)]="name" name="name" placeholder="Category name" required class="categories__input" />
         </div>
-        <div class="categories__field categories__field--color">
-          <label class="categories__label">Color</label>
-          <input type="color" [(ngModel)]="color" name="color" class="categories__input categories__input--color" />
+        <div class="categories__field categories__field--icon">
+          <label class="categories__label">Icon</label>
+          <div class="categories__icon-picker">
+            <button type="button" class="categories__icon-btn" (click)="showIconPicker = !showIconPicker; iconSearch = ''" title="Choose icon">
+              <span class="categories__icon-preview">{{ icon }}</span>
+              <span class="categories__icon-chevron">&#x25BE;</span>
+            </button>
+            <div class="categories__icon-grid" *ngIf="showIconPicker">
+              <input type="search" class="categories__icon-search" [(ngModel)]="iconSearch" name="icon-search" placeholder="Search icons..." autocomplete="off" />
+              <button type="button" class="categories__icon-option"
+                *ngFor="let ic of filteredIcons"
+                [class.categories__icon-option--selected]="ic.emoji === icon"
+                (click)="icon = ic.emoji; showIconPicker = false; iconSearch = ''">{{ ic.emoji }}</button>
+              <span class="categories__icon-empty" *ngIf="filteredIcons.length === 0">No icons found</span>
+            </div>
+          </div>
         </div>
       </div>
       <div class="categories__items-section">
@@ -19,19 +32,19 @@
         <div class="categories__items-list">
           <div *ngFor="let item of items; let i = index" class="categories__item-row categories__item-add-row">
             <input type="text" [(ngModel)]="items[i].description" name="item-desc-{{i}}" placeholder="Description" required class="categories__input categories__input--item" />
-            <input type="number" [(ngModel)]="items[i].amount" name="item-amount-{{i}}" placeholder="Amount" min="0.01" step="0.01" required class="categories__input categories__input--item" />
+            <input type="text" inputmode="decimal" [(ngModel)]="items[i].amount" name="item-amount-{{i}}" placeholder="Please enter amount here..." required class="categories__input categories__input--item" />
             <button type="button" class="categories__btn-cancel" (click)="removeItem(i)" title="Remove">&#x2715;</button>
           </div>
         </div>
         <div class="categories__item-add-row">
           <input type="text" [(ngModel)]="newItem.description" name="new-item-desc" placeholder="Description" required class="categories__input categories__input--item" />
-          <input type="number" [(ngModel)]="newItem.amount" name="new-item-amount" placeholder="Amount" min="0.01" step="0.01" required class="categories__input categories__input--item" />
-          <button type="button" class="categories__btn-save" (click)="addItem()" [disabled]="!newItem.description || newItem.amount <= 0" title="Save item">&#x2713;</button>
+          <input type="text" inputmode="decimal" [(ngModel)]="newItem.amount" name="new-item-amount" placeholder="Please enter amount here..." required class="categories__input categories__input--item" />
+          <button type="button" class="categories__btn-save" (click)="addItem()" [disabled]="!newItem.description || !(+newItem.amount > 0)" title="Save item">&#x2713;</button>
         </div>
       </div>
       <div class="categories__submit-row">
         <button type="submit" class="btn btn--primary" 
-          [disabled]="!name.trim() || items.length === 0 || items.some(item => !item.description || item.amount <= 0)">
+          [disabled]="!name.trim() || items.length === 0 || items.some(item => !item.description || !(+item.amount > 0))">
           + Add
         </button>
       </div>
@@ -40,7 +53,7 @@
 
   <div class="categories__card">
     <div class="categories__table-toolbar">
-      <div class="categories__table-actions" *ngIf="settingsService.dataSource() === 'local'">
+      <div class="categories__table-actions">
         <button class="btn btn--sm btn--secondary" (click)="saveAsTemplate()" [disabled]="categories().length === 0" title="Save current categories as a reusable template">
           Save as Template
         </button>
@@ -53,6 +66,7 @@
     <table class="table">
       <thead>
         <tr>
+          <th class="table__header" style="width:32px"></th>
           <th class="table__header" style="width: 40px"></th>
           <th class="table__header">Category Name</th>
           <th class="table__header">Monthly Budget</th>
@@ -60,29 +74,65 @@
         </tr>
       </thead>
       <tbody>
-        @for (cat of categories(); track cat.id) {
+        @for (cat of categories(); track cat.id; let idx = $index) {
           @if (editingId() === cat.id) {
             <tr class="categories__row--editing">
-              <td class="table__cell"><input type="color" [(ngModel)]="editColor" class="categories__input--color-small" /></td>
-              <td class="table__cell" colspan="2">
-                <input type="text" [(ngModel)]="editName" class="categories__input--inline" style="margin-bottom: 8px;" />
-                <div style="margin-bottom: 8px;"><strong>Category Items</strong></div>
-                <div *ngFor="let item of editItems; let i = index" class="categories__item-row">
-                  <input type="text" [(ngModel)]="editItems[i].description" name="edit-item-desc-{{i}}" placeholder="Description" required class="categories__input categories__input--item" style="margin-right: 12px;" />
-                  <input type="number" [(ngModel)]="editItems[i].amount" name="edit-item-amount-{{i}}" placeholder="Amount" min="0.01" step="0.01" required class="categories__input categories__input--item" style="margin-right: 12px;" />
-                  <button type="button" class="categories__btn-cancel" (click)="removeEditItem(i)" title="Remove">&#x2715;</button>
+              <td class="table__cell categories__edit-cell" colspan="5">
+                <div class="categories__edit-form">
+                  <!-- Row 1: icon + name -->
+                  <div class="categories__edit-header">
+                    <div class="categories__icon-picker">
+                      <button type="button" class="categories__icon-btn" (click)="showEditIconPicker = !showEditIconPicker; editIconSearch = ''" title="Choose icon">
+                        <span class="categories__icon-preview">{{ editIcon }}</span>
+                        <span class="categories__icon-chevron">&#x25BE;</span>
+                      </button>
+                      <div class="categories__icon-grid" *ngIf="showEditIconPicker">
+                        <input type="search" class="categories__icon-search" [(ngModel)]="editIconSearch" name="edit-icon-search" placeholder="Search icons..." autocomplete="off" />
+                        <button type="button" class="categories__icon-option"
+                          *ngFor="let ic of filteredEditIcons"
+                          [class.categories__icon-option--selected]="ic.emoji === editIcon"
+                          (click)="editIcon = ic.emoji; showEditIconPicker = false; editIconSearch = ''">{{ ic.emoji }}</button>
+                        <span class="categories__icon-empty" *ngIf="filteredEditIcons.length === 0">No icons found</span>
+                      </div>
+                    </div>
+                    <input type="text" [(ngModel)]="editName" class="categories__input--inline categories__edit-name" />
+                  </div>
+                  <!-- Row 2: items -->
+                  <div class="categories__edit-items">
+                    <div style="margin-bottom: 8px;"><strong>Category Items</strong></div>
+                    <div *ngFor="let item of editItems; let i = index" class="categories__item-row">
+                      <input type="text" [(ngModel)]="editItems[i].description" name="edit-item-desc-{{i}}" placeholder="Description" required class="categories__input categories__input--item" />
+                      <input type="text" inputmode="decimal" [(ngModel)]="editItems[i].amount" name="edit-item-amount-{{i}}" placeholder="Amount" required class="categories__input categories__input--item" />
+                      <button type="button" class="categories__btn-cancel" (click)="removeEditItem(i)" title="Remove">&#x2715;</button>
+                    </div>
+                    <button type="button" class="categories__btn-save" (click)="addEditItem()" style="margin-top: 8px;" title="Add item">&#x2b;</button>
+                  </div>
+                  <!-- Row 3: save / cancel -->
+                  <div class="categories__edit-actions">
+                    <button class="categories__btn-save" (click)="saveEdit(cat)"
+                      [disabled]="!editName.trim() || editItems.some(item => !item.description || !(+item.amount > 0))">&#x2713; Save</button>
+                    <button class="categories__btn-cancel" (click)="cancelEdit()">&#x2715; Cancel</button>
+                  </div>
                 </div>
-                <button type="button" class="categories__btn-save" (click)="addEditItem()" style="margin-top: 8px;" title="Add item">&#x2b;</button>
-              </td>
-              <td class="table__cell categories__actions">
-                <button class="categories__btn-save" (click)="saveEdit(cat)"
-                  [disabled]="!editName.trim() || editItems.some(item => !item.description || item.amount <= 0)">&#x2713; Save</button>
-                <button class="categories__btn-cancel" (click)="cancelEdit()">&#x2715; Cancel</button>
               </td>
             </tr>
           } @else {
-            <tr>
-              <td class="table__cell"><span class="categories__color-dot" [style.background]="cat.color"></span></td>
+            <tr
+              draggable="true"
+              [attr.data-drag-idx]="idx"
+              (dragstart)="onDragStart(idx)"
+              (dragover)="onDragOver($event, idx)"
+              (drop)="onDrop(idx)"
+              (dragend)="onDragEnd()"
+              [class.categories__row--drag-over]="dragOverIndex === idx">
+              <td class="table__cell">
+                <span
+                  class="categories__drag-handle"
+                  (touchstart)="onTouchStart($event, idx)"
+                  (touchmove)="onTouchMove($event)"
+                  (touchend)="onTouchEnd()">&#x2261;</span>
+              </td>
+              <td class="table__cell"><span class="categories__icon-display">{{ cat.icon }}</span></td>
               <td class="table__cell">{{ cat.name }}</td>
               <td class="table__cell">
                 <span class="dual-currency">
@@ -97,7 +147,7 @@
             </tr>
           }
         } @empty {
-          <tr><td colspan="4" class="table__cell categories__empty">No categories defined yet.</td></tr>
+          <tr><td colspan="5" class="table__cell categories__empty">No categories defined yet.</td></tr>
         }
       </tbody>
     </table>

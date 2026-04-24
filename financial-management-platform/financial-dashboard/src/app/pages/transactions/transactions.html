@@ -51,7 +51,7 @@
           } @else {
             <div class="transactions__field">
               <label class="transactions__label">Amount (RSD)</label>
-              <input type="number" [(ngModel)]="scannedAmount" class="transactions__input transactions__input--amount" placeholder="Enter total from receipt" min="0" step="0.01" />
+              <input type="text" inputmode="decimal" [(ngModel)]="scannedAmount" class="transactions__input transactions__input--amount" placeholder="Please enter amount here..." />
             </div>
           }
 
@@ -109,14 +109,14 @@
       </div>
       <div class="transactions__field">
         <label class="transactions__label">Amount</label>
-        <input type="number" [(ngModel)]="amount" name="amount" min="0.01" step="0.01" required class="transactions__input" />
+        <input type="text" inputmode="decimal" [(ngModel)]="amount" name="amount" required class="transactions__input" placeholder="Please enter amount here..." />
       </div>
       <div class="transactions__field transactions__field--desc">
         <label class="transactions__label">Description</label>
         <input type="text" [(ngModel)]="description" name="desc" placeholder="Transaction description" required class="transactions__input" />
       </div>
       <div class="transactions__form-actions">
-        <button type="submit" class="btn btn--primary" [disabled]="!date() || !categoryId || amount <= 0 || !description.trim()">+ Add</button>
+        <button type="submit" class="btn btn--primary" [disabled]="!date() || !categoryId || !(+amount > 0) || !description.trim()">+ Add</button>
       </div>
     </form>
   </div>
@@ -192,13 +192,13 @@
 
                       <div class="transactions__field transactions__field--edit">
                         <label class="transactions__label">Amount</label>
-                        <input type="number" [(ngModel)]="editAmount" min="0.01" step="0.01" class="transactions__input transactions__input--inline transactions__input--amount-inline" />
+                        <input type="text" inputmode="decimal" [(ngModel)]="editAmount" class="transactions__input transactions__input--inline transactions__input--amount-inline" placeholder="Please enter amount here..." />
                       </div>
                     </div>
 
                     <div class="transactions__edit-actions">
                       <button class="transactions__btn-save" (click)="saveEdit()" title="Save"
-                        [disabled]="!editDate || !editDescription.trim() || !editCategoryId || editAmount <= 0">✓ Save</button>
+                        [disabled]="!editDate || !editDescription.trim() || !editCategoryId || !(+editAmount > 0)">✓ Save</button>
                       <button class="transactions__btn-cancel" (click)="cancelEdit()" title="Cancel">✕ Cancel</button>
                     </div>
                   </div>
@@ -211,7 +211,7 @@
               <td class="table__cell">{{ tx.description }}</td>
               <td class="table__cell">
                 <span class="transactions__cat-badge">
-                  <span class="transactions__color-dot" [style.background]="getCategoryColor(tx.categoryId)"></span>
+                  <span class="transactions__cat-icon">{{ getCategoryIcon(tx.categoryId) }}</span>
                   {{ getCategoryName(tx.categoryId) }}
                 </span>
               </td>
@@ -260,12 +260,11 @@
           <div class="transactions__income-input-group">
             <input
               id="income-amount"
-              type="number"
+              type="text"
+              inputmode="decimal"
               [(ngModel)]="newIncomeAmount"
               (keydown.enter)="addIncome()"
-              min="0"
-              step="1"
-              placeholder="Amount"
+              placeholder="Please enter amount here..."
               class="transactions__income-input"
             />
             <span class="transactions__income-currency">RSD</span>
@@ -284,7 +283,7 @@
         <input type="text" [(ngModel)]="newIncomeDescription" placeholder="Income description" class="transactions__income-input transactions__income-input--full" />
       </div>
       <div class="transactions__income-actions">
-          <button class="btn btn--primary" (click)="addIncome()" [disabled]="newIncomeAmount <= 0 || !newIncomeDescription.trim()">+ Add</button>
+          <button class="btn btn--primary" (click)="addIncome()" [disabled]="!(+newIncomeAmount > 0) || !newIncomeDescription.trim()">+ Add</button>
       </div>
     </div>
   </div>
@@ -333,11 +332,11 @@
                 <td class="table__cell transactions__income-amount-cell">
                   @if (editingIncomeId === rec.id) {
                     <input
-                      type="number"
+                      type="text"
+                      inputmode="decimal"
                       [(ngModel)]="editingIncomeAmount"
-                      min="0"
-                      step="1"
                       class="transactions__input transactions__input--inline"
+                      placeholder="Please enter amount here..."
                       (keydown.enter)="saveIncomeEdit()"
                       (keydown.escape)="cancelIncomeEdit()"
                     />
@@ -349,7 +348,7 @@
                 <td class="table__cell transactions__income-actions-cell">
                   @if (editingIncomeId === rec.id) {
                     <button class="transactions__btn-save" (click)="saveIncomeEdit()" title="Save"
-                      [disabled]="editingIncomeAmount <= 0">✓</button>
+                      [disabled]="!(+editingIncomeAmount > 0)">✓</button>
                     <button class="transactions__btn-cancel" (click)="cancelIncomeEdit()" title="Cancel">✕</button>
                   } @else {
                     <button class="transactions__btn-edit" (click)="startEditIncome(rec)" title="Edit">✎</button>

@@ -6,8 +6,9 @@ export interface CategoryItem {
 export interface Category {
   id: string;
   name: string;
-  color: string;
+  icon: string;
   budgetAmount: number;
+  sortIndex: number;
   items: CategoryItem[];
 }
 

@@ -114,8 +114,8 @@
     form.categories__form-col .categories__form-row .categories__field:not(.categories__field--color) {
       flex: 1 1 0%;
     }
-    form.categories__form-col .categories__form-row .categories__field--color {
-      flex: 0 0 70px;
+    form.categories__form-col .categories__form-row .categories__field--icon {
+      flex: 0 0 auto;
     }
 
     /* Items section: subtle card look */
@@ -217,9 +217,9 @@
     flex: 1;
     min-width: 140px;
 
-    &--color {
-      flex: 0 0 70px;
-      min-width: 70px;
+    &--icon {
+      flex: 0 0 auto;
+      min-width: 0;
     }
   }
 
@@ -236,23 +236,6 @@
     border-radius: 8px;
     font-size: 0.95rem;
 
-    &--color {
-      width: 48px;
-      height: 36px;
-      border: 1px solid var(--color-border);
-      border-radius: 8px;
-      cursor: pointer;
-      padding: 2px;
-    }
-
-    &--color-small {
-      width: 32px;
-      height: 28px;
-      border: none;
-      cursor: pointer;
-      padding: 0;
-    }
-
     &--inline {
       padding: 4px 8px;
       border: 1px solid var(--color-border);
@@ -263,18 +246,181 @@
     }
   }
 
-  &__color-dot {
+  // ── Icon picker ────────────────────────────────────────────────────────────
+  &__icon-picker {
+    position: relative;
     display: inline-block;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
+  }
+
+  &__icon-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-bg-elevated);
+    cursor: pointer;
+    font-size: 1rem;
+    white-space: nowrap;
+
+    &:hover {
+      border-color: var(--color-accent);
+      background: var(--color-accent-soft);
+    }
+  }
+
+  &__icon-preview {
+    font-size: 1.3rem;
+    line-height: 1;
+  }
+
+  &__icon-chevron {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    margin-left: 2px;
+  }
+
+  &__icon-grid {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 200;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 2px;
+    padding: 8px;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    box-shadow: 0 4px 16px var(--color-shadow);
+    min-width: 296px;
+    max-height: 280px;
+    overflow-y: auto;
+
+    .categories__icon-search {
+      grid-column: 1 / -1;
+      width: 100%;
+      margin-bottom: 6px;
+      padding: 5px 8px;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      background: var(--color-bg);
+      color: var(--color-text);
+      font-size: 0.85rem;
+      box-sizing: border-box;
+      outline: none;
+
+      &:focus {
+        border-color: var(--color-accent);
+      }
+    }
+  }
+
+  &__icon-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    padding: 8px 0;
+  }
+
+  &__icon-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    background: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s;
+
+    &:hover {
+      background: var(--color-accent-soft);
+      border-color: var(--color-accent);
+    }
+
+    &--selected {
+      border-color: var(--color-accent);
+      background: var(--color-accent-soft);
+    }
+  }
+
+  &__icon-display {
+    font-size: 1.3rem;
+    line-height: 1;
+    display: inline-block;
     vertical-align: middle;
+  }
+
+  &__drag-handle {
+    cursor: grab;
+    color: var(--color-text-muted);
+    font-size: 1.2rem;
+    padding: 4px 8px;
+    user-select: none;
+    display: inline-block;
+    opacity: 0.6;
+    touch-action: none;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 
   &__row {
     &--editing {
       background: var(--color-bg-soft) !important;
     }
+
+    &--drag-over td {
+      background: var(--color-accent-soft) !important;
+      outline: 2px dashed var(--color-accent);
+    }
+  }
+
+  // ── Edit-in-place form (colspan=5 single cell) ─────────────────────────────
+  &__edit-cell {
+    padding: 12px 8px !important;
+  }
+
+  &__edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  &__edit-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+  }
+
+  &__edit-name {
+    flex: 1 1 0%;
+    min-width: 0;
+    margin-bottom: 0 !important;
+  }
+
+  &__edit-items {
+    width: 100%;
+  }
+
+  &__edit-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+  }
+
+  tr[draggable='true'] {
+    cursor: grab;
   }
 
   &__actions {
@@ -381,7 +527,7 @@
       min-width: 0;
       width: 100%;
 
-      &--color {
+      &--icon {
         flex: 0 0 auto;
         flex-direction: row;
         align-items: center;
@@ -401,6 +547,25 @@
         width: 100%;
         text-align: center;
       }
+    }
+
+    // On mobile, icon + name stack vertically
+    &__edit-header {
+      flex-wrap: wrap;
+    }
+
+    &__edit-name {
+      flex: 1 1 100%;
+      width: 100%;
+    }
+
+    // Constrain the icon picker dropdown to the viewport
+    &__icon-grid {
+      left: 0;
+      min-width: 0;
+      width: calc(100vw - 56px);
+      max-width: 340px;
+      box-sizing: border-box;
     }
   }
 }
