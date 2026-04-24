@@ -23,16 +23,16 @@ function initializeData(
 
     try {
       await settingsService.loadFromApi();
-    } catch {
-      apiErrorService.setUnavailable();
+    } catch (err: any) {
+      if (err?.status !== 401) apiErrorService.setUnavailable();
       return; // Don't attempt finance load if settings already failed
     }
 
     if (settingsService.dataSource() === 'remote') {
       try {
         await financeService.loadFromApi();
-      } catch {
-        apiErrorService.setUnavailable();
+      } catch (err: any) {
+        if (err?.status !== 401) apiErrorService.setUnavailable();
       }
     }
   };

@@ -7,6 +7,7 @@ import {
   deleteCategory,
   deleteIncomeRecord,
   deleteTransaction,
+  reorderCategories,
   replaceFinanceData,
   setEurRate,
   setSelectedMonth,
@@ -58,14 +59,14 @@ export function monthKey(month: number, year: number): string {
 
 export function defaultCategories(): Category[] {
   return [
-    { id: 'cat1', name: 'Home', color: '#4CAF50', budgetAmount: 0, items: [] },
-    { id: 'cat2', name: 'Utilities', color: '#FF9800', budgetAmount: 0, items: [] },
-    { id: 'cat3', name: 'Car', color: '#2196F3', budgetAmount: 0, items: [] },
-    { id: 'cat4', name: 'Food', color: '#F44336', budgetAmount: 0, items: [] },
-    { id: 'cat5', name: 'Personal Items', color: '#9C27B0', budgetAmount: 0, items: [] },
-    { id: 'cat6', name: 'Medical', color: '#00BCD4', budgetAmount: 0, items: [] },
-    { id: 'cat7', name: 'Entertainment', color: '#E91E63', budgetAmount: 0, items: [] },
-    { id: 'cat8', name: 'Investment', color: '#607D8B', budgetAmount: 0, items: [] },
+    { id: 'cat1', name: 'Home', icon: '🏠', budgetAmount: 0, sortIndex: 0, items: [] },
+    { id: 'cat2', name: 'Utilities', icon: '⚡', budgetAmount: 0, sortIndex: 1, items: [] },
+    { id: 'cat3', name: 'Car', icon: '🚗', budgetAmount: 0, sortIndex: 2, items: [] },
+    { id: 'cat4', name: 'Food', icon: '🍔', budgetAmount: 0, sortIndex: 3, items: [] },
+    { id: 'cat5', name: 'Personal Items', icon: '👗', budgetAmount: 0, sortIndex: 4, items: [] },
+    { id: 'cat6', name: 'Medical', icon: '💊', budgetAmount: 0, sortIndex: 5, items: [] },
+    { id: 'cat7', name: 'Entertainment', icon: '🎮', budgetAmount: 0, sortIndex: 6, items: [] },
+    { id: 'cat8', name: 'Investment', icon: '💰', budgetAmount: 0, sortIndex: 7, items: [] },
   ];
 }
 
@@ -196,6 +197,14 @@ export const financeReducer = createReducer(
       return !(isCurrentMonth && transaction.categoryId === id);
     }),
   })),
+  on(reorderCategories, (state, { orderedIds }) => {
+    const current = getActiveCategories(state);
+    const reordered = current.map(cat => {
+      const idx = orderedIds.indexOf(cat.id);
+      return idx >= 0 ? { ...cat, sortIndex: idx } : cat;
+    });
+    return setActiveCategories(state, reordered);
+  }),
   on(addTransaction, (state, { transaction }) => ({ ...state, transactions: [...state.transactions, transaction] })),
   on(updateTransaction, (state, { transaction }) => ({
     ...state,

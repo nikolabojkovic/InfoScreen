@@ -22,8 +22,10 @@ export interface ApiCategory {
   color: string;
   budgetAmount: number;
   userId: number;
-  date: string;    // yyyy-MM-dd (first day of selected month)
+  date: string;
   items: ApiCategoryItem[];
+  categoryType: string;
+  sortIndex?: number;
 }
 
 export interface ApiTransaction {
@@ -51,16 +53,28 @@ export class ApiService {
     return this.http.get<ApiCategory[]>(`${this.base}/api/categories`, { params });
   }
 
-  createCategory(data: Omit<ApiCategory, 'id' | 'userId'> & { date?: string }): Observable<ApiCategory> {
+  createCategory(data: Omit<ApiCategory, 'id' | 'userId' | 'categoryType'> & { date?: string; categoryType?: string }): Observable<ApiCategory> {
     return this.http.post<ApiCategory>(`${this.base}/api/categories`, data);
   }
 
-  updateCategory(id: number, data: Omit<ApiCategory, 'id' | 'userId' | 'date'>): Observable<ApiCategory> {
+  updateCategory(id: number, data: Omit<ApiCategory, 'id' | 'userId' | 'date' | 'categoryType'>): Observable<ApiCategory> {
     return this.http.put<ApiCategory>(`${this.base}/api/categories/${id}`, data);
   }
 
   deleteCategory(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/api/categories/${id}`);
+  }
+
+  reorderCategories(items: Array<{ id: number; sortIndex: number }>): Observable<void> {
+    return this.http.post<void>(`${this.base}/api/categories/reorder`, items);
+  }
+
+  getCategoryTemplate(): Observable<ApiCategory[]> {
+    return this.http.get<ApiCategory[]>(`${this.base}/api/categories/template`);
+  }
+
+  saveCategoryTemplate(items: Array<{ name: string; color: string; budgetAmount: number; sortIndex: number; items: ApiCategoryItem[] }>): Observable<ApiCategory[]> {
+    return this.http.post<ApiCategory[]>(`${this.base}/api/categories/template`, items);
   }
 
   // ── Transactions (expenses) ───────────────────────────────────────────────

@@ -10,6 +10,9 @@ public class Category
     public User User { get; set; } = null!;
     public ICollection<CategoryItem> Items { get; set; } = new List<CategoryItem>();
     public DateOnly Date { get; set; }  // first day of the selected month
+    /// <summary>"unit" = regular category; "template" = saved template category</summary>
+    public string CategoryType { get; set; } = "unit";
+    public int SortIndex { get; set; } = 0;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? ModifiedAt { get; set; }
 }

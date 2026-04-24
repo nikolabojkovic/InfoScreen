@@ -1,16 +1,19 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, inject, computed, signal, ViewChild, ElementRef } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NgIf } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { filter, map, startWith } from 'rxjs';
 import { FinanceService } from '../../services/finance.service';
 import { SidebarService } from '../../services/sidebar.service';
 import { AuthService } from '../../services/auth.service';
 import { SettingsService } from '../../services/settings.service';
+import { UserMenu } from '../user-menu/user-menu';
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink, RouterLinkActive, NgIf],
+  imports: [RouterLink, RouterLinkActive, NgIf, UserMenu],
   templateUrl: './navbar.html',
   styleUrl: './navbar.scss',
 })
@@ -25,10 +28,21 @@ export class Navbar {
   readonly selectedYear = this.finance.selectedYear;
   private auth = inject(AuthService);
   readonly isLoggedIn = this.auth.isLoggedIn;
+
+  private readonly currentUrl = toSignal(
+    this.router.events.pipe(
+      filter(e => e instanceof NavigationEnd),
+      map(e => (e as NavigationEnd).urlAfterRedirects),
+      startWith(this.router.url),
+    ),
+    { initialValue: this.router.url },
+  );
+
   readonly isLoginOrRegister = computed(() => {
-    const url = this.router.url;
+    const url = this.currentUrl();
     return url === '/login' || url === '/register';
   });
+  readonly isSettingsPage = computed(() => this.currentUrl() === '/settings');
 
   @ViewChild('monthPicker') monthPickerRef!: ElementRef<HTMLInputElement>;
 

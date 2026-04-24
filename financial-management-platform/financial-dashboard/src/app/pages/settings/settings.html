@@ -46,13 +46,12 @@
       <label class="settings__label">EUR Rate <span class="settings__label-sub">(1 EUR = ? RSD)</span></label>
       <div class="settings__row">
         <input
-          type="number"
+          type="text"
+          inputmode="decimal"
           class="settings__input"
           [value]="eurRateEditing ? eurRateEdit : eurRateInput"
-          (input)="eurRateEditing ? eurRateEdit = $any($event.target).valueAsNumber : null"
+          (input)="eurRateEditing ? eurRateEdit = +$any($event.target).value : null"
           [readonly]="!eurRateEditing"
-          min="0.01"
-          step="0.01"
         />
         <span class="settings__currency">RSD</span>
         <ng-container *ngIf="!eurRateEditing">
@@ -66,7 +65,7 @@
     </div>
   </section>
 
-  <section class="settings__section" *ngIf="settingsService.dataSource() === 'local'">
+  <section class="settings__section">
     <h2 class="settings__section-title">Categories Template</h2>
     <div class="settings__card">
       <ng-container *ngIf="categoryTemplate() && categoryTemplate()!.length > 0; else noTemplate">
@@ -81,7 +80,7 @@
             </thead>
             <tbody>
               <tr *ngFor="let cat of categoryTemplate()">
-                <td class="table__cell"><span class="categories__color-dot" [style.background]="cat.color"></span></td>
+                <td class="table__cell"><span class="categories__icon-display">{{ cat.icon }}</span></td>
                 <td class="table__cell">{{ cat.name }}</td>
                 <td class="table__cell">
                   <span class="dual-currency">

@@ -101,6 +101,55 @@
     object-fit: contain;
   }
 
+  &__video-wrap {
+    position: relative;
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #000;
+    line-height: 0; // removes gap under video element
+  }
+
+  &__viewfinder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  &__viewfinder-box {
+    position: relative;
+    width: 62%;
+    aspect-ratio: 1 / 1;
+    max-width: 240px;
+  }
+
+  &__vf-corner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-color: #fff;
+    border-style: solid;
+    opacity: 0.9;
+
+    &--tl { top: 0; left: 0;  border-width: 3px 0 0 3px; border-radius: 3px 0 0 0; }
+    &--tr { top: 0; right: 0; border-width: 3px 3px 0 0; border-radius: 0 3px 0 0; }
+    &--bl { bottom: 0; left: 0;  border-width: 0 0 3px 3px; border-radius: 0 0 0 3px; }
+    &--br { bottom: 0; right: 0; border-width: 0 3px 3px 0; border-radius: 0 0 3px 0; }
+  }
+
+  &__capture-btn {
+    width: 100%;
+    margin-top: 10px;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
   &__hint {
     text-align: center;
     color: var(--color-text-muted);

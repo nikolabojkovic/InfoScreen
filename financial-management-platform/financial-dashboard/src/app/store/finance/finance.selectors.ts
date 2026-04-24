@@ -5,7 +5,8 @@ import { financeFeatureKey, FinanceState, monthKey } from './finance.reducer';
 export const selectFinanceState = createFeatureSelector<FinanceState>(financeFeatureKey);
 export const selectCategories = createSelector(
   selectFinanceState,
-  state => state.categoriesByMonth[monthKey(state.selectedMonth, state.selectedYear)] ?? []
+  state => [...(state.categoriesByMonth[monthKey(state.selectedMonth, state.selectedYear)] ?? [])]
+    .sort((a, b) => a.sortIndex - b.sortIndex)
 );
 export const selectTransactions = createSelector(selectFinanceState, state => state.transactions);
 export const selectAllIncomeRecords = createSelector(selectFinanceState, state => state.incomeRecords);

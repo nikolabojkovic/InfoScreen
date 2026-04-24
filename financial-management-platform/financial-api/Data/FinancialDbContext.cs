@@ -40,6 +40,8 @@ public class FinancialDbContext : DbContext
             entity.Property(c => c.Color).HasMaxLength(20).IsRequired().HasDefaultValue("#2196f3");
             entity.Property(c => c.BudgetAmount).HasColumnType("decimal(18,2)");
             entity.Property(c => c.Date).IsRequired();
+            entity.Property(c => c.CategoryType).HasMaxLength(10).IsRequired().HasDefaultValue("unit");
+            entity.Property(c => c.SortIndex).IsRequired().HasDefaultValue(0);
             entity.Property(c => c.CreatedAt).IsRequired();
             entity.Property(c => c.ModifiedAt).IsRequired(false);
             entity.HasOne(c => c.User)

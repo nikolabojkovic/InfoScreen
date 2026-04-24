@@ -13,7 +13,7 @@
       <a routerLink="/login" routerLinkActive="navbar__tab--active" class="navbar__tab">Login</a>
       <a routerLink="/register" routerLinkActive="navbar__tab--active" class="navbar__tab">Register</a>
     </div>
-    <div *ngIf="isLoggedIn()" class="navbar__month-nav" aria-label="Selected month">
+    <div *ngIf="isLoggedIn() && !isSettingsPage()" class="navbar__month-nav" aria-label="Selected month">
       <button class="navbar__month-btn" type="button" (click)="prevMonth()" aria-label="Previous month">◀</button>
       <span class="navbar__month-label" (click)="openPicker()" title="Pick month">{{ monthLabel() }}</span>
       <input
@@ -34,4 +34,5 @@
       </span>
     </button>
   </div>
+  <app-user-menu *ngIf="isLoggedIn()"></app-user-menu>
 </nav>

@@ -4,7 +4,7 @@ import { NgFor, DecimalPipe } from '@angular/common';
 
 interface CategoryItem {
   description: string;
-  amount: number;
+  amount: string;
 }
 
 @Component({
@@ -16,16 +16,16 @@ interface CategoryItem {
 })
 export class CategoryDetailComponent {
   items: CategoryItem[] = [];
-  newItem: CategoryItem = { description: '', amount: 0 };
+  newItem: CategoryItem = { description: '', amount: '' };
 
   get total(): number {
-    return this.items.reduce((sum, item) => sum + (item.amount || 0), 0);
+    return this.items.reduce((sum, item) => sum + (parseFloat(String(item.amount)) || 0), 0);
   }
 
   addItem() {
-    if (!this.newItem.description || this.newItem.amount <= 0) return;
-    this.items.push({ ...this.newItem });
-    this.newItem = { description: '', amount: 0 };
+    if (!this.newItem.description || !(parseFloat(String(this.newItem.amount)) > 0)) return;
+    this.items.push({ description: this.newItem.description, amount: this.newItem.amount });
+    this.newItem = { description: '', amount: '' };
   }
 
   removeItem(index: number) {

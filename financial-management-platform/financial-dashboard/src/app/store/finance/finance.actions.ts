@@ -4,6 +4,7 @@ import { Category, IncomeRecord, Transaction } from '../../models/finance.model'
 export const addCategory = createAction('[Finance] Add Category', props<{ category: Category }>());
 export const updateCategory = createAction('[Finance] Update Category', props<{ category: Category }>());
 export const deleteCategory = createAction('[Finance] Delete Category', props<{ id: string }>());
+export const reorderCategories = createAction('[Finance] Reorder Categories', props<{ orderedIds: string[] }>());
 
 export const addTransaction = createAction('[Finance] Add Transaction', props<{ transaction: Transaction }>());
 export const updateTransaction = createAction('[Finance] Update Transaction', props<{ transaction: Transaction }>());

@@ -26,13 +26,13 @@ export class Transactions implements AfterViewInit {
   date = signal(this.defaultDate());
   description = '';
   categoryId = '';
-  amount: number = 0;
+  amount: string = '';
   paymentMethod: 'cash' | 'bank' = 'bank';
 
   showScanner = signal(false);
   scannedBill = signal<ParsedQrBill | null>(null);
   scannedCategoryId = '';
-  scannedAmount: number = 0;
+  scannedAmount: string = '';
   scannedDescription = '';
   scannedPaymentMethod: 'cash' | 'bank' = 'bank';
 
@@ -98,12 +98,12 @@ export class Transactions implements AfterViewInit {
   // Income
   readonly incomeRecords = this.finance.incomeRecords;
   readonly income = this.finance.income;
-  newIncomeAmount = 0;
+  newIncomeAmount: string = '';
   newIncomeDescription = '';
   newIncomeMethod: 'cash' | 'bank' | 'withdrawal' = 'bank';
 
   editingIncomeId: string | null = null;
-  editingIncomeAmount = 0;
+  editingIncomeAmount: string = '';
   editingIncomeDescription = '';
   editingIncomeMethod: 'cash' | 'bank' | 'withdrawal' = 'bank';
 
@@ -142,21 +142,22 @@ export class Transactions implements AfterViewInit {
     return this.finance.getCategoryById(id)?.name ?? 'Unknown';
   }
 
-  getCategoryColor(id: string): string {
-    return this.finance.getCategoryById(id)?.color ?? '#ccc';
+  getCategoryIcon(id: string): string {
+    return this.finance.getCategoryById(id)?.icon ?? '📦';
   }
 
   addTransaction(): void {
-    if (!this.description.trim() || !this.categoryId || this.amount <= 0) return;
+    const amt = parseFloat(this.amount);
+    if (!this.description.trim() || !this.categoryId || !(amt > 0)) return;
     this.finance.addTransaction({
       createdAt: this.date(),
       description: this.description.trim(),
       categoryId: this.categoryId,
-      amount: this.amount,
+      amount: amt,
       paymentMethod: this.paymentMethod,
     });
     this.description = '';
-    this.amount = 0;
+    this.amount = '';
     this.paymentMethod = 'bank';
   }
 
@@ -178,7 +179,7 @@ export class Transactions implements AfterViewInit {
   editDate = '';
   editDescription = '';
   editCategoryId = '';
-  editAmount = 0;
+  editAmount: string = '';
   editPaymentMethod: 'cash' | 'bank' = 'bank';
 
   startEdit(tx: Transaction): void {
@@ -186,18 +187,19 @@ export class Transactions implements AfterViewInit {
     this.editDate = tx.createdAt;
     this.editDescription = tx.description;
     this.editCategoryId = tx.categoryId;
-    this.editAmount = tx.amount;
+    this.editAmount = String(tx.amount);
     this.editPaymentMethod = tx.paymentMethod ?? 'bank';
   }
 
   saveEdit(): void {
-    if (!this.editingTxId || !this.editDescription.trim() || !this.editCategoryId || this.editAmount <= 0) return;
+    const amt = parseFloat(this.editAmount);
+    if (!this.editingTxId || !this.editDescription.trim() || !this.editCategoryId || !(amt > 0)) return;
     this.finance.updateTransaction({
       id: this.editingTxId,
       createdAt: this.editDate,
       description: this.editDescription.trim(),
       categoryId: this.editCategoryId,
-      amount: this.editAmount,
+      amount: amt,
       paymentMethod: this.editPaymentMethod,
     });
     this.cancelEdit();
@@ -242,7 +244,7 @@ export class Transactions implements AfterViewInit {
     this.showScanner.set(false);
     this.scannedBill.set(bill);
     this.scannedCategoryId = '';
-    this.scannedAmount = 0;
+    this.scannedAmount = '';
     this.scannedDescription = bill.recipient || '';
     this.scannedPaymentMethod = 'bank';
   }
@@ -251,7 +253,7 @@ export class Transactions implements AfterViewInit {
     const bill = this.scannedBill();
     if (!bill || !this.scannedCategoryId) return;
 
-    const amount = bill.amount > 0 ? bill.amount : this.scannedAmount;
+    const amount = bill.amount > 0 ? bill.amount : parseFloat(this.scannedAmount);
     if (!amount || amount <= 0) return;
 
     this.finance.addTransaction({
@@ -264,7 +266,7 @@ export class Transactions implements AfterViewInit {
 
     this.scannedBill.set(null);
     this.scannedCategoryId = '';
-    this.scannedAmount = 0;
+    this.scannedAmount = '';
     this.scannedDescription = '';
     this.scannedPaymentMethod = 'bank';
   }
@@ -272,7 +274,7 @@ export class Transactions implements AfterViewInit {
   cancelScannedBill(): void {
     this.scannedBill.set(null);
     this.scannedCategoryId = '';
-    this.scannedAmount = 0;
+    this.scannedAmount = '';
     this.scannedDescription = '';
     this.scannedPaymentMethod = 'bank';
   }
@@ -314,26 +316,28 @@ export class Transactions implements AfterViewInit {
   }
 
   addIncome(): void {
-    if (!this.newIncomeAmount || this.newIncomeAmount <= 0) return;
-    this.finance.addIncomeRecord(this.newIncomeAmount, this.newIncomeDescription.trim(), this.newIncomeMethod);
-    this.newIncomeAmount = 0;
+    const amt = parseFloat(this.newIncomeAmount);
+    if (!(amt > 0)) return;
+    this.finance.addIncomeRecord(amt, this.newIncomeDescription.trim(), this.newIncomeMethod);
+    this.newIncomeAmount = '';
     this.newIncomeDescription = '';
     this.newIncomeMethod = 'bank';
   }
 
   startEditIncome(record: IncomeRecord): void {
     this.editingIncomeId = record.id;
-    this.editingIncomeAmount = record.amount;
+    this.editingIncomeAmount = String(record.amount);
     this.editingIncomeDescription = record.description ?? '';
     this.editingIncomeMethod = record.paymentMethod ?? 'bank';
   }
 
   saveIncomeEdit(): void {
+    const amt = parseFloat(this.editingIncomeAmount);
     const record = this.finance.incomeRecords().find(item => item.id === this.editingIncomeId);
-    if (record && this.editingIncomeAmount > 0) {
+    if (record && amt > 0) {
       this.finance.updateIncomeRecord({
         ...record,
-        amount: this.editingIncomeAmount,
+        amount: amt,
         description: this.editingIncomeDescription.trim(),
         paymentMethod: this.editingIncomeMethod,
       });
