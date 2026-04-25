@@ -51,7 +51,7 @@
           } @else {
             <div class="transactions__field">
               <label class="transactions__label">Amount (RSD)</label>
-              <input type="text" inputmode="decimal" [(ngModel)]="scannedAmount" class="transactions__input transactions__input--amount" placeholder="Please enter amount here..." />
+              <input type="text" [(ngModel)]="scannedAmount" class="transactions__input transactions__input--amount" placeholder="Please enter amount here..." />
             </div>
           }
 
@@ -109,7 +109,7 @@
       </div>
       <div class="transactions__field">
         <label class="transactions__label">Amount</label>
-        <input type="text" inputmode="decimal" [(ngModel)]="amount" name="amount" required class="transactions__input" placeholder="Please enter amount here..." />
+        <input type="text" [(ngModel)]="amount" name="amount" required class="transactions__input" placeholder="Please enter amount here..." />
       </div>
       <div class="transactions__field transactions__field--desc">
         <label class="transactions__label">Description</label>
@@ -210,12 +210,12 @@
                         <select [(ngModel)]="editPaymentMethod" class="transactions__select transactions__select--inline">
                           <option value="bank">Bank Account</option>
                           <option value="cash">Cash</option>
-                        </select>
+                        </select>fv
                       </div>
 
                       <div class="transactions__field transactions__field--edit">
                         <label class="transactions__label">Amount</label>
-                        <input type="text" inputmode="decimal" [(ngModel)]="editAmount" class="transactions__input transactions__input--inline transactions__input--amount-inline" placeholder="Please enter amount here..." />
+                        <input type="text" [(ngModel)]="editAmount" class="transactions__input transactions__input--inline transactions__input--amount-inline" placeholder="Please enter amount here..." />
                       </div>
                     </div>
 
@@ -283,7 +283,6 @@
             <input
               id="income-amount"
               type="text"
-              inputmode="decimal"
               [(ngModel)]="newIncomeAmount"
               (keydown.enter)="addIncome()"
               placeholder="Please enter amount here..."
@@ -355,7 +354,6 @@
                   @if (editingIncomeId === rec.id) {
                     <input
                       type="text"
-                      inputmode="decimal"
                       [(ngModel)]="editingIncomeAmount"
                       class="transactions__input transactions__input--inline"
                       placeholder="Please enter amount here..."
