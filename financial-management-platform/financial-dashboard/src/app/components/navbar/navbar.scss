@@ -24,6 +24,15 @@
     font-size: 1.2rem;
     font-weight: 700;
     letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__brand-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
   }
 
   &__start {

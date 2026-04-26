@@ -11,6 +11,24 @@
 		B100000000010000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000020000000000002 /* ContentView.swift */; };
 		B100000000010000000000003 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B100000000020000000000003 /* Assets.xcassets */; };
 		B100000000010000000000004 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B100000000020000000000004 /* Preview Assets.xcassets */; };
+		B100000000010000000000010 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000020000000000010 /* APIClient.swift */; };
+		B100000000010000000000011 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000020000000000011 /* AuthService.swift */; };
+		B100000000010000000000012 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000020000000000012 /* LoginView.swift */; };
+		B100000000010000000000013 /* RegisterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000020000000000013 /* RegisterView.swift */; };
+		B100000000010000000000014 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000020000000000014 /* MainTabView.swift */; };
+		B100000000010000000000020 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000020000000000020 /* Category.swift */; };
+		B100000000010000000000021 /* FinanceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000020000000000021 /* FinanceService.swift */; };
+		B100000000010000000000022 /* CategoriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000020000000000022 /* CategoriesView.swift */; };
+		B100000000010000000000023 /* CategoryFormSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000020000000000023 /* CategoryFormSheet.swift */; };
+		B100000000010000000000024 /* IconPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000020000000000024 /* IconPickerView.swift */; };
+		B100000000010000000000025 /* Transaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000020000000000025 /* Transaction.swift */; };
+		B100000000010000000000026 /* TransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000020000000000026 /* TransactionsView.swift */; };
+		B100000000010000000000027 /* TransactionFormSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000020000000000027 /* TransactionFormSheet.swift */; };
+		B100000000010000000000028 /* IncomeFormSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000020000000000028 /* IncomeFormSheet.swift */; };
+		B100000000010000000000030 /* BudgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000020000000000030 /* BudgetView.swift */; };
+		B100000000010000000000031 /* ParsedQrBill.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000020000000000031 /* ParsedQrBill.swift */; };
+		B100000000010000000000032 /* QrScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000020000000000032 /* QrScannerView.swift */; };
+		B100000000010000000000033 /* QrBillFormSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000020000000000033 /* QrBillFormSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -19,6 +37,25 @@
 		B100000000020000000000003 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B100000000020000000000004 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		B100000000020000000000005 /* FinancialDashboard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FinancialDashboard.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B100000000020000000000010 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+		B100000000020000000000011 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
+		B100000000020000000000012 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		B100000000020000000000013 /* RegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterView.swift; sourceTree = "<group>"; };
+		B100000000020000000000014 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		B100000000020000000000015 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B100000000020000000000020 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
+		B100000000020000000000021 /* FinanceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinanceService.swift; sourceTree = "<group>"; };
+		B100000000020000000000022 /* CategoriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoriesView.swift; sourceTree = "<group>"; };
+		B100000000020000000000023 /* CategoryFormSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryFormSheet.swift; sourceTree = "<group>"; };
+		B100000000020000000000024 /* IconPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconPickerView.swift; sourceTree = "<group>"; };
+		B100000000020000000000025 /* Transaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transaction.swift; sourceTree = "<group>"; };
+		B100000000020000000000026 /* TransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsView.swift; sourceTree = "<group>"; };
+		B100000000020000000000027 /* TransactionFormSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionFormSheet.swift; sourceTree = "<group>"; };
+		B100000000020000000000028 /* IncomeFormSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeFormSheet.swift; sourceTree = "<group>"; };
+		B100000000020000000000030 /* BudgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetView.swift; sourceTree = "<group>"; };
+		B100000000020000000000031 /* ParsedQrBill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParsedQrBill.swift; sourceTree = "<group>"; };
+		B100000000020000000000032 /* QrScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QrScannerView.swift; sourceTree = "<group>"; };
+		B100000000020000000000033 /* QrBillFormSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QrBillFormSheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -37,10 +74,93 @@
 			children = (
 				B100000000020000000000001 /* FinancialDashboardApp.swift */,
 				B100000000020000000000002 /* ContentView.swift */,
+				B100000000020000000000015 /* Info.plist */,
 				B100000000020000000000003 /* Assets.xcassets */,
 				B100000000040000000000003 /* Preview Content */,
+				B100000000040000000000021 /* Models */,
+				B100000000040000000000010 /* Networking */,
+				B100000000040000000000011 /* Services */,
+				B100000000040000000000012 /* Views */,
 			);
 			path = FinancialDashboard;
+			sourceTree = "<group>";
+		};
+		B100000000040000000000021 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				B100000000020000000000020 /* Category.swift */,
+				B100000000020000000000025 /* Transaction.swift */,
+				B100000000020000000000031 /* ParsedQrBill.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		B100000000040000000000010 /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				B100000000020000000000010 /* APIClient.swift */,
+			);
+			path = Networking;
+			sourceTree = "<group>";
+		};
+		B100000000040000000000011 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				B100000000020000000000011 /* AuthService.swift */,
+				B100000000020000000000021 /* FinanceService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		B100000000040000000000012 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				B100000000020000000000014 /* MainTabView.swift */,
+				B100000000040000000000013 /* Auth */,
+				B100000000040000000000020 /* Categories */,
+				B100000000040000000000022 /* Transactions */,
+				B100000000040000000000023 /* Budget */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		B100000000040000000000023 /* Budget */ = {
+			isa = PBXGroup;
+			children = (
+				B100000000020000000000030 /* BudgetView.swift */,
+			);
+			path = Budget;
+			sourceTree = "<group>";
+		};
+		B100000000040000000000022 /* Transactions */ = {
+			isa = PBXGroup;
+			children = (
+				B100000000020000000000026 /* TransactionsView.swift */,
+				B100000000020000000000027 /* TransactionFormSheet.swift */,
+				B100000000020000000000028 /* IncomeFormSheet.swift */,
+				B100000000020000000000032 /* QrScannerView.swift */,
+				B100000000020000000000033 /* QrBillFormSheet.swift */,
+			);
+			path = Transactions;
+			sourceTree = "<group>";
+		};
+		B100000000040000000000020 /* Categories */ = {
+			isa = PBXGroup;
+			children = (
+				B100000000020000000000022 /* CategoriesView.swift */,
+				B100000000020000000000023 /* CategoryFormSheet.swift */,
+				B100000000020000000000024 /* IconPickerView.swift */,
+			);
+			path = Categories;
+			sourceTree = "<group>";
+		};
+		B100000000040000000000013 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				B100000000020000000000012 /* LoginView.swift */,
+				B100000000020000000000013 /* RegisterView.swift */,
+			);
+			path = Auth;
 			sourceTree = "<group>";
 		};
 		B100000000040000000000002 /* Products */ = {
@@ -139,6 +259,24 @@
 			files = (
 				B100000000010000000000002 /* ContentView.swift in Sources */,
 				B100000000010000000000001 /* FinancialDashboardApp.swift in Sources */,
+				B100000000010000000000010 /* APIClient.swift in Sources */,
+				B100000000010000000000011 /* AuthService.swift in Sources */,
+				B100000000010000000000012 /* LoginView.swift in Sources */,
+				B100000000010000000000013 /* RegisterView.swift in Sources */,
+				B100000000010000000000014 /* MainTabView.swift in Sources */,
+				B100000000010000000000020 /* Category.swift in Sources */,
+				B100000000010000000000021 /* FinanceService.swift in Sources */,
+				B100000000010000000000022 /* CategoriesView.swift in Sources */,
+				B100000000010000000000023 /* CategoryFormSheet.swift in Sources */,
+				B100000000010000000000024 /* IconPickerView.swift in Sources */,
+				B100000000010000000000025 /* Transaction.swift in Sources */,
+				B100000000010000000000026 /* TransactionsView.swift in Sources */,
+				B100000000010000000000027 /* TransactionFormSheet.swift in Sources */,
+				B100000000010000000000028 /* IncomeFormSheet.swift in Sources */,
+				B100000000010000000000030 /* BudgetView.swift in Sources */,
+				B100000000010000000000031 /* ParsedQrBill.swift in Sources */,
+				B100000000010000000000032 /* QrScannerView.swift in Sources */,
+				B100000000010000000000033 /* QrBillFormSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -273,12 +411,8 @@
 				DEVELOPMENT_ASSET_PATHS = "\"FinancialDashboard/Preview Content\"";
 				DEVELOPMENT_TEAM = 9VV46YYJ9Q;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = FinancialDashboard/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -303,12 +437,8 @@
 				DEVELOPMENT_ASSET_PATHS = "\"FinancialDashboard/Preview Content\"";
 				DEVELOPMENT_TEAM = 9VV46YYJ9Q;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = FinancialDashboard/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
